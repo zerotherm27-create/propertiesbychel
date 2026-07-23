@@ -43,13 +43,14 @@
   if (gallery) {
     api("listings?select=*&published=eq.true&order=sort_order.asc").then(function (rows) {
       if (!rows.length) return;
-      gallery.innerHTML = rows.map(function (l) {
+      gallery.innerHTML = rows.map(function (l, i) {
+        var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
         return (
           '<a class="plisting is-in" href="property.html?slug=' + encodeURIComponent(l.slug) + '"' +
           ' data-status="' + esc(l.status) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
             '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
               (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
-              '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.image_alt || l.title) + '" loading="lazy">' +
+              '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.image_alt || l.title) + '" ' + imgAttrs + '>' +
             "</div>" +
             '<div class="plisting__head"><span class="plisting__title">' + esc(l.title) + "</span>" +
               '<span class="plisting__rule"></span><span class="plisting__price">' + esc(l.price_display || "Price on application") + "</span></div>" +

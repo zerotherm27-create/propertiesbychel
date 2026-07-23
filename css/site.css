@@ -327,6 +327,7 @@ a.index-row:hover .index-row__no { transform: translateX(2px); }
 .field input::placeholder, .field textarea::placeholder { color: var(--ink-faint); font-style: italic; }
 .field input:hover, .field select:hover, .field textarea:hover { border-bottom-color: var(--ink-soft); }
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-bottom-color: var(--brass-deep); }
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .field select { cursor: pointer; }
 .field textarea { resize: vertical; min-height: 7rem; }
 .field--error input, .field--error textarea { border-bottom-color: var(--brass-deep); }
@@ -486,7 +487,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .col-start-2 { grid-column-start: 2; } .col-start-3 { grid-column-start: 3; } .col-start-6 { grid-column-start: 6; }
 .col-start-7 { grid-column-start: 7; } .col-start-8 { grid-column-start: 8; } .col-start-9 { grid-column-start: 9; }
 @media (max-width: 63.99rem) { [class*="col-"] { grid-column: auto; } }
-.mt-4 { margin-top: var(--space-4); } .mt-8 { margin-top: var(--space-8); } .mt-12 { margin-top: var(--space-12); }
+.mt-2 { margin-top: var(--space-2); } .mt-4 { margin-top: var(--space-4); } .mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); } .mt-12 { margin-top: var(--space-12); }
 .mt-16 { margin-top: var(--space-16); } .mt-20 { margin-top: var(--space-20); }
 .mb-8 { margin-bottom: var(--space-8); } .mb-12 { margin-bottom: var(--space-12); } .mb-16 { margin-bottom: var(--space-16); }
 .text-center { text-align: center; }

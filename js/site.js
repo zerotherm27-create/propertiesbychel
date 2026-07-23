@@ -41,16 +41,22 @@
   }
 
   /* — Reveal on scroll — */
-  if (!reduceMotion && "IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); }
-      });
-    }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" });
-    document.querySelectorAll("[data-reveal]").forEach(function (el) { io.observe(el); });
-  } else {
-    document.querySelectorAll("[data-reveal]").forEach(function (el) { el.classList.add("is-in"); });
+  var io = (!reduceMotion && "IntersectionObserver" in window)
+    ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -5% 0px" })
+    : null;
+  function observeReveals() {
+    document.querySelectorAll("[data-reveal]:not(.is-in)").forEach(function (el) {
+      if (io) io.observe(el); else el.classList.add("is-in");
+    });
   }
+  observeReveals();
+  // Dynamically-injected content (listings, articles) may add new [data-reveal]
+  // elements after this initial scan — re-observe them so they aren't stuck at opacity:0.
+  document.addEventListener("listings:rendered", observeReveals);
 
   /* — Cinematic hero scrub (home) — */
   var cine = document.querySelector(".cine");
