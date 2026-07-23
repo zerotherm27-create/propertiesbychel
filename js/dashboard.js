@@ -66,6 +66,25 @@ async function init(supabase) {
     show("auth");
   });
 
+  $("#auth-reset").addEventListener("click", async () => {
+    const email = $("#a-email").value.trim() || SB.ownerEmail;
+    if (!email) { authError.textContent = "Enter your email above first."; return; }
+    const btn = $("#auth-reset");
+    btn.disabled = true;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("?")[0] });
+    authError.textContent = error ? error.message : "If that address has an account, a reset link is on its way.";
+    btn.disabled = false;
+  });
+
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event !== "PASSWORD_RECOVERY") return;
+    const next = prompt("Set a new password for the dashboard (min 8 characters):");
+    if (!next) return;
+    const { error } = await supabase.auth.updateUser({ password: next });
+    alert(error ? "Could not set password: " + error.message : "Password updated. You're signed in.");
+    if (!error) enter();
+  });
+
   const { data: { session } } = await supabase.auth.getSession();
   if (session) enter(); else show("auth");
 
