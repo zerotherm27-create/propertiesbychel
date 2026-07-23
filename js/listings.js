@@ -82,6 +82,16 @@
       var hero = document.querySelector("[data-l-img]");
       if (hero && l.hero_image_url) { hero.src = l.hero_image_url; hero.alt = l.image_alt || l.title; }
 
+      var galleryMount = document.getElementById("dyn-gallery");
+      var galleryGrid = document.getElementById("dyn-gallery-grid");
+      if (galleryMount && galleryGrid && Array.isArray(l.gallery_images) && l.gallery_images.length) {
+        galleryGrid.innerHTML = l.gallery_images.map(function (g) {
+          return '<figure><div class="frame frame--hover" style="aspect-ratio:4/3">' +
+            '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || l.title) + '" loading="lazy"></div></figure>';
+        }).join("");
+        galleryMount.hidden = false;
+      }
+
       var overview = document.querySelector("[data-l-overview]");
       if (overview) {
         overview.innerHTML = "<p>" + esc(l.overview ||

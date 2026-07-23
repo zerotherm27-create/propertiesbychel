@@ -26,6 +26,7 @@ create table if not exists public.listings (
   overview       text,
   hero_image_url text,
   image_alt      text,
+  gallery_images jsonb not null default '[]'::jsonb,
   aspect         text not null default '4/3',
   featured       boolean not null default false,
   published      boolean not null default true,

@@ -354,9 +354,18 @@ async function init(supabase) {
 
   const editor = $("#listing-editor");
   const form = $("#listing-form");
+  let galleryImages = [];
 
   $("#listing-new-btn").addEventListener("click", () => openEditor(null));
   $("#editor-close").addEventListener("click", () => { editor.hidden = true; });
+
+  function renderGalleryGrid() {
+    $("#listing-gallery-grid").innerHTML = galleryImages.map((g, i) => `
+      <div class="dash-gallery-item">
+        <img src="${esc(g.url)}" alt="">
+        <button type="button" class="dash-linkbtn" data-remove-gallery="${i}">Remove</button>
+      </div>`).join("");
+  }
 
   function openEditor(l) {
     editor.hidden = false;
@@ -375,6 +384,8 @@ async function init(supabase) {
     const prev = $("#listing-photo-preview");
     prev.hidden = !(l && l.hero_image_url);
     if (l && l.hero_image_url) prev.src = l.hero_image_url;
+    galleryImages = l && Array.isArray(l.gallery_images) ? l.gallery_images.slice() : [];
+    renderGalleryGrid();
     editor.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -384,6 +395,28 @@ async function init(supabase) {
     const prev = $("#listing-photo-preview");
     prev.src = URL.createObjectURL(f);
     prev.hidden = false;
+  });
+
+  $("#listing-gallery-input").addEventListener("change", async () => {
+    const files = Array.from($("#listing-gallery-input").files);
+    if (!files.length) return;
+    for (const f of files) {
+      try {
+        const url = await uploadPhoto(f, "listings-gallery");
+        galleryImages.push({ url, alt: "" });
+      } catch (ex) {
+        alert("Could not upload one of the photos: " + (ex.message || ex));
+      }
+    }
+    $("#listing-gallery-input").value = "";
+    renderGalleryGrid();
+  });
+
+  $("#listing-gallery-grid").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-gallery]");
+    if (!btn) return;
+    galleryImages.splice(Number(btn.dataset.removeGallery), 1);
+    renderGalleryGrid();
   });
 
   async function uploadPhoto(file, prefix) {
@@ -416,6 +449,7 @@ async function init(supabase) {
         price_display: form.elements.price_display.value.trim() || null,
         overview: form.elements.overview.value.trim() || null,
         hero_image_url: form.elements.hero_image_url.value || null,
+        gallery_images: galleryImages,
         aspect: form.elements.aspect.value,
         sort_order: Number(form.elements.sort_order.value) || 100,
         published: form.elements.published.checked,
