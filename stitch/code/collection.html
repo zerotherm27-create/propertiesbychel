@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Exclusive Portfolio | PROPERTIES BY CHEL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;family=Work+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+        }
+        .property-image {
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .property-card:hover .property-image {
+            transform: scale(1.04);
+        }
+        .masthead-line {
+            height: 1px;
+            background: currentColor;
+            transform-origin: left;
+            transition: transform 0.6s ease;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #00113a;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#574500",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae7e7",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container": "#f0eded",
+                        "surface-bright": "#fcf9f8",
+                        "secondary-fixed-dim": "#e9c349",
+                        "on-secondary-container": "#745c00",
+                        "tertiary-fixed": "#e0e3e6",
+                        "surface-container-low": "#f6f3f2",
+                        "on-surface": "#1c1b1b",
+                        "surface-tint": "#435b9f",
+                        "on-surface-variant": "#444650",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-container": "#002366",
+                        "secondary-container": "#fed65b",
+                        "surface-variant": "#e5e2e1",
+                        "background": "#fcf9f8",
+                        "tertiary-fixed-dim": "#c4c7ca",
+                        "primary": "#00113a",
+                        "secondary": "#735c00",
+                        "on-primary-fixed": "#00174a",
+                        "inverse-on-surface": "#f3f0ef",
+                        "tertiary-container": "#26292b",
+                        "outline": "#757682",
+                        "on-tertiary-container": "#8d9093",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-secondary-fixed": "#241a00",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#758dd5",
+                        "surface-dim": "#dcd9d9",
+                        "surface": "#fcf9f8",
+                        "inverse-surface": "#313030",
+                        "outline-variant": "#c5c6d2",
+                        "on-primary-fixed-variant": "#2a4386",
+                        "inverse-primary": "#b3c5ff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#44474a",
+                        "on-background": "#1c1b1b",
+                        "tertiary": "#111517",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "section-gap": "140px",
+                        "margin-desktop": "80px",
+                        "margin-mobile": "24px",
+                        "gutter": "48px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Work Sans"],
+                        "body-lg": ["Work Sans"],
+                        "headline-md": ["Playfair Display"],
+                        "body-md": ["Work Sans"],
+                        "display-lg": ["Playfair Display"],
+                        "headline-lg": ["Playfair Display"],
+                        "display-lg-mobile": ["Playfair Display"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", { "lineHeight": "1.0", "letterSpacing": "0.15em", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["22px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-md": ["15px", { "lineHeight": "1.7", "fontWeight": "400" }],
+                        "display-lg": ["84px", { "lineHeight": "1.0", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "headline-lg": ["36px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "display-lg-mobile": ["48px", { "lineHeight": "1.1", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10">
+<div class="flex justify-between items-center w-full px-margin-desktop py-5 max-w-container-max mx-auto">
+<a class="font-headline-md text-headline-md font-bold text-primary tracking-tight" href="#">PROPERTIES BY CHEL</a>
+<div class="hidden md:flex items-center space-x-12">
+<a class="font-label-caps text-label-caps text-primary border-b border-primary pb-1" href="#">The Collections</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors duration-300" href="#">Advisory</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors duration-300" href="#">All Abode PH</a>
+</div>
+<div class="flex items-center gap-8">
+<button class="material-symbols-outlined text-primary text-xl">search</button>
+<button class="bg-primary text-on-primary px-8 py-2.5 font-label-caps text-[10px] uppercase tracking-[0.2em] hover:bg-primary/90 transition-all">Inquire</button>
+</div>
+</div>
+</nav>
+<main class="pt-48 pb-section-gap">
+<!-- Masthead Section -->
+<header class="px-margin-desktop max-w-container-max mx-auto mb-24">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
+<div class="lg:col-span-8">
+<div class="flex items-center gap-4 mb-6">
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-[0.3em]">Volume IV</span>
+<div class="h-[1px] w-12 bg-outline-variant/30"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.3em]">Curated Real Estate</span>
+</div>
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary italic mb-8">Exclusive Portfolio</h1>
+<div class="max-w-xl">
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed italic opacity-80">
+                        An editorial selection of the Philippines' most prestigious architectural achievements.
+                    </p>
+</div>
+</div>
+<!-- Refined Advisory Filters -->
+<div class="lg:col-span-4 lg:justify-self-end w-full">
+<div class="flex flex-col gap-6 p-6 border border-outline-variant/20 bg-surface-container-lowest/50 backdrop-blur-sm">
+<span class="font-label-caps text-[10px] text-outline uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">filter_list</span> Filter Advisory
+                    </span>
+<div class="flex flex-wrap gap-x-6 gap-y-4">
+<button class="flex items-center gap-2 font-label-caps text-[11px] text-primary group">
+<span class="material-symbols-outlined text-[18px] opacity-40 group-hover:opacity-100 transition-opacity">grid_view</span> ALL ESTATES
+                        </button>
+<button class="flex items-center gap-2 font-label-caps text-[11px] text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[18px] opacity-40 group-hover:opacity-100 transition-opacity">waves</span> BEACHFRONT
+                        </button>
+<button class="flex items-center gap-2 font-label-caps text-[11px] text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[18px] opacity-40 group-hover:opacity-100 transition-opacity">location_city</span> SKYLINE
+                        </button>
+<button class="flex items-center gap-2 font-label-caps text-[11px] text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[18px] opacity-40 group-hover:opacity-100 transition-opacity">castle</span> HERITAGE
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Asymmetrical Curated Gallery Grid -->
+<section class="px-margin-desktop max-w-container-max mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-y-24 md:gap-x-gutter">
+<!-- 01: Featured Wide -->
+<div class="md:col-span-8 property-card cursor-pointer group">
+<div class="relative aspect-[16/9] overflow-hidden bg-surface-container-low mb-8">
+<img class="property-image w-full h-full object-cover" data-alt="Beachfront villa" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH5TUhcf0HqB9nVoDDdYXPsgvK1IClZ_QDCU0EOrgxdeA2Uv1Q2sFRBNcUilGAPUh1RPmZsoCzT_MVTqWeIiwper6zQUf95Hg3RvSMdOX5gKGlyHo53TQTjEgPoRgzddhs7hUVqmB8gxYM-AjsPRIRnJOmnybGMwP2h-rkKPg96I50PMcQ_xtdht4w9SA-IGjVUa9pWHrrIYYy7BIRF23Aj6sF11wHXl_PFeMvS2HPaPxf8GW7d1VE0Q"/>
+<div class="absolute bottom-0 left-0 bg-secondary/90 text-on-secondary px-4 py-1.5 font-label-caps text-[9px] tracking-[0.2em] transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                        AVAILABLE IMMEDIATELY
+                    </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 items-start">
+<div>
+<p class="font-label-caps text-[10px] text-secondary mb-2 uppercase tracking-widest">El Nido, Palawan</p>
+<h3 class="font-headline-lg text-headline-lg text-primary tracking-tight">The Azure Sanctuary</h3>
+</div>
+<div class="md:text-right mt-4 md:mt-0">
+<p class="font-headline-md text-headline-md text-primary font-light mb-2">₱245,000,000</p>
+<div class="flex md:justify-end gap-6 text-on-surface-variant/60 font-label-caps text-[9px]">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">bed</span> 6 BEDS</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[14px]">square_foot</span> 1,200 SQM</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 02: Vertical Inset -->
+<div class="md:col-span-4 property-card cursor-pointer group md:mt-24">
+<div class="relative aspect-[3/4] overflow-hidden bg-surface-container-low mb-8">
+<img class="property-image w-full h-full object-cover" data-alt="Penthouse interior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAs9zrVue-WG6BZaB9ubtvXbL5I9WEnpcxUNFAXigObPer-mKEFpDNr5LOxr8nz-ZaUb-dXIUZylhkKpEa5zYK7QC-k2kiMCnLrDYkjHPjSPiiur3htS49dXDWm9ONhjLql9i49qFVq-HrIbVHRFmEOkuDyTxYE1fyfMcwfftppkgQqLA26egR60PQWbVeTfM9N0d93AblmzDcjjo8tQ1krUfe8IjMczMif0yPhLYrcBCyObZ0xGywsg"/>
+</div>
+<div class="px-2">
+<p class="font-label-caps text-[10px] text-secondary mb-2 uppercase tracking-widest">BGC, Taguig</p>
+<h3 class="font-headline-md text-headline-md text-primary mb-3">Horizon Penthouse</h3>
+<p class="font-headline-md text-xl text-primary/70 font-light italic">₱115,000,000</p>
+</div>
+</div>
+<!-- 03: Square Heritage -->
+<div class="md:col-span-5 property-card cursor-pointer group">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low mb-8">
+<img class="property-image w-full h-full object-cover" data-alt="Heritage mansion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKy9sOONkVSwdqp9yGYetZQrV0Vr-1tJlMJM4hdT09ycLT1g9EhY7JTU21Udd5ZYzLOvJ7fHx2c7vuOVZnBUURassQbzl3MQprHU8Imcy9Lpri_t64YwrB0iFhiIxL6YMFpjkrSXBgOjfYI8vOQodVQC1SMZjpB0Wa7yGyNYc-nZOgBJ3MtLD3CNhzaODkY4ocl0NpcVJbuzB4EN7CK6wJROmiHfv7ZAh1Q2cQ8AmOCZgu2vj53n7_hQ"/>
+</div>
+<div>
+<p class="font-label-caps text-[10px] text-secondary mb-2 uppercase tracking-widest">Vigan, Ilocos Sur</p>
+<h3 class="font-headline-md text-headline-md text-primary mb-3">Casa de Legaspi</h3>
+<p class="font-headline-md text-xl text-primary/70 font-light italic">₱88,000,000</p>
+</div>
+</div>
+<!-- 04: Offset Middle -->
+<div class="md:col-span-7 property-card cursor-pointer group md:-mt-12">
+<div class="relative aspect-[16/10] overflow-hidden bg-surface-container-low mb-8">
+<img class="property-image w-full h-full object-cover" data-alt="Tagaytay villa" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAObLS2PW04M4kkGSqy_HjhwSGkyKGFTrhxMgeWxBahoWhclCmHi5BUr1Jlg3HkG_7YaOYOpTX2casdm2elDfPk0On2y2xbD3ieHqgFnRMGzv-S8zYgP-hkWIfkNilvv_u6g0bOehtkGhR2fk3GBTHx9YSiOX9QmVepjlHhQxoaWhzQxLIGN5xx2h7nT2xreD-j9wwjRuOtrjtafvUlhKiF1E8cWMWFUlSDfr-7NXT_fkj5CzO60ltLmA"/>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<p class="font-label-caps text-[10px] text-secondary mb-2 uppercase tracking-widest">Tagaytay, Cavite</p>
+<h3 class="font-headline-md text-headline-md text-primary">Ridgeview Estate</h3>
+</div>
+<div class="text-right">
+<p class="font-headline-md text-xl text-primary font-light">₱150,000,000</p>
+</div>
+</div>
+</div>
+<!-- 05: Modernist Large -->
+<div class="md:col-start-3 md:col-span-8 property-card cursor-pointer group pt-12">
+<div class="relative aspect-[21/9] overflow-hidden bg-surface-container-low mb-8">
+<img class="property-image w-full h-full object-cover" data-alt="Makati house" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDWNZfFVE1UocKJ3D1D8bJPQ8ZjnRIl38qG1bcquhd3CIiGI3ByjZGDjUqEj6NdhpOOYgSgFj97DXzeI60NcG9NF4031vu_0eS_5qL2vR5KUueVq-xFUfa2VSVgGZy141r7xPj4WYVR3Gp9xQCU152GoaMmiKt3ixDfp65hPV5Ukb11eRK0SRru-lAWvmBShU5rJ3ONoGg21HwakDerc2dWHxv4Qu2WQm95_JVaVrnZiZtESi6wJiC1g"/>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-end gap-6 max-w-4xl mx-auto">
+<div class="w-full md:w-auto">
+<p class="font-label-caps text-[10px] text-secondary mb-2 uppercase tracking-widest">Forbes Park, Makati</p>
+<h3 class="font-headline-lg text-headline-lg text-primary tracking-tight">The Forbes Modern</h3>
+</div>
+<div class="w-full md:w-auto md:text-right">
+<p class="font-headline-md text-3xl text-primary font-light mb-3">₱420,000,000</p>
+<button class="font-label-caps text-[10px] border border-primary/20 px-6 py-2 hover:bg-primary hover:text-white transition-all tracking-[0.2em]">VIEW CASE STUDY</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Cross-Link Banner -->
+<section class="mt-section-gap px-margin-desktop max-w-container-max mx-auto">
+<div class="bg-surface-container-low p-12 md:p-24 flex flex-col md:flex-row items-center gap-16 overflow-hidden border border-outline-variant/10">
+<div class="flex-1 space-y-8">
+<span class="font-label-caps text-[10px] text-secondary tracking-[0.4em] uppercase">Sister Brand</span>
+<h2 class="font-display-lg text-4xl md:text-5xl text-primary leading-tight italic">Elevate Your Lifestyle with All Abode PH</h2>
+<p class="font-body-md text-on-surface-variant max-w-md opacity-80">
+                    Boutique property management and luxury short-term stays. Experience the "Chel" standard of hospitality in our most exclusive rental listings.
+                </p>
+<a class="inline-flex items-center gap-6 font-label-caps text-[11px] text-primary group border-b border-primary/20 pb-2" href="#">
+                    EXPLORE RENTALS
+                    <span class="material-symbols-outlined group-hover:translate-x-3 transition-transform text-lg">arrow_right_alt</span>
+</a>
+</div>
+<div class="flex-1 w-full relative">
+<div class="aspect-[4/5] bg-white p-4 shadow-2xl rotate-2">
+<img class="w-full h-full object-cover" data-alt="Luxury bedroom" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDToFmSeUCj62O2Pha7BzMPR74F6wsaLdsZe4D3DzwPOo2ynSpaIQClP4vg4Y2n7upYrXto4rTXSoU3E9Is3LsFDiGx25i11uoZiJnxC7M41XHokgB3wjHdoume5Xkqzgzw4LFtytdRm7Djyjxsa1auhbTb1CBkEsSQUqtdP74fhylPeD1yrphJnAD__F0ca-REEp9DQwQndFGxN83JohWlTFVQkvq5rbtPLZKGiV1HOhvVbCbtb3kfHw"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Newsletter Subscription -->
+<section class="mt-section-gap px-margin-desktop max-w-2xl mx-auto text-center">
+<h2 class="font-headline-lg text-3xl text-primary mb-6 italic">The Exclusive List</h2>
+<p class="font-body-md text-on-surface-variant mb-12 opacity-70">Sign up for off-market opportunities and first access to new architectural gems.</p>
+<form class="relative group">
+<input class="w-full bg-transparent border-0 border-b border-outline-variant py-4 px-0 focus:ring-0 focus:border-primary font-label-caps text-xs placeholder:text-outline/50 transition-all" placeholder="YOUR EMAIL ADDRESS" type="email"/>
+<button class="absolute right-0 top-1/2 -translate-y-1/2 font-label-caps text-[10px] text-primary tracking-widest hover:translate-x-1 transition-transform" type="submit">SUBSCRIBE</button>
+</form>
+</section>
+</main>
+<footer class="w-full py-24 bg-surface-container-low border-t border-outline-variant/10">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-desktop max-w-container-max mx-auto">
+<div class="md:col-span-2 space-y-8">
+<h2 class="font-headline-lg text-2xl font-bold text-primary tracking-tight">PROPERTIES BY CHEL</h2>
+<p class="font-body-md text-on-surface-variant max-w-sm opacity-70">
+                Defining the future of luxury real estate in the Philippines with integrity, architectural passion, and unparalleled local expertise.
+            </p>
+<div class="flex gap-8">
+<a class="text-primary/60 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-xl">language</span></a>
+<a class="text-primary/60 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-xl">alternate_email</span></a>
+<a class="text-primary/60 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-xl">phone_iphone</span></a>
+</div>
+</div>
+<div>
+<h4 class="font-label-caps text-[10px] text-primary mb-8 uppercase tracking-[0.2em]">Navigation</h4>
+<ul class="space-y-4">
+<li><a class="font-body-md text-[14px] text-on-surface-variant hover:text-primary transition-colors" href="#">The Collections</a></li>
+<li><a class="font-body-md text-[14px] text-on-surface-variant hover:text-primary transition-colors" href="#">Advisory</a></li>
+<li><a class="font-body-md text-[14px] text-on-surface-variant hover:text-primary transition-colors" href="#">All Abode PH</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-caps text-[10px] text-primary mb-8 uppercase tracking-[0.2em]">Legal</h4>
+<ul class="space-y-4">
+<li><a class="font-body-md text-[14px] text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="font-body-md text-[14px] text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a></li>
+<li class="pt-8 text-[9px] text-outline/60 font-label-caps tracking-widest">© 2024 PROPERTIES BY CHEL</li>
+</ul>
+</div>
+</div>
+</footer>
+<script>
+    // Scroll effect for navbar
+    window.addEventListener('scroll', () => {
+        const nav = document.querySelector('nav');
+        if (window.scrollY > 100) {
+            nav.classList.add('py-3', 'shadow-sm', 'bg-surface/95');
+            nav.classList.remove('py-5', 'bg-surface/80');
+        } else {
+            nav.classList.remove('py-3', 'shadow-sm', 'bg-surface/95');
+            nav.classList.add('py-5', 'bg-surface/80');
+        }
+    });
+
+    // Lazy parallax/reveal effect placeholder
+    const observerOptions = {
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.property-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+        observer.observe(card);
+    });
+</script>
+</body></html>

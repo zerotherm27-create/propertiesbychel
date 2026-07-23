@@ -1,0 +1,72 @@
+/* Hallmark · macrostructure: Marquee Cinematic Hero · tone: luxury-editorial, restrained
+ * theme: studied-DNA (source: Stitch project 17034367803714970664 + client brief), client hex palette applied 2026-07-22, cream paper dropped 2026-07-22
+ * palette: #0B1D3A deep navy (espresso) · #142B5A ink navy (ink) · #D4AF37 gold (brass) · #2B2B2B charcoal (ink-soft/faint) · warm off-white (paper)
+ * fonts: Playfair Display (display) + Work Sans (body) · studied: yes
+ * axes: light paper / roman-serif display / warm-neutral accent (navy ink, gold accent)
+ */
+
+:root {
+  /* — Colour · client hex palette (navy/gold/charcoal), warm off-white ground — */
+  --paper:        oklch(97.5% 0.006 85);    /* warm off-white ground */
+  --paper-2:      oklch(95.5% 0.010 85);    /* parchment panel */
+  --stone:        oklch(90%   0.010 80);    /* stone divider / placeholder ground */
+  --ink:          oklch(30.0% 0.089 262.9); /* #142B5A ink navy — headings + body text */
+  --ink-soft:     oklch(44%   0.008 260);   /* #2B2B2B charcoal — secondary text */
+  --ink-faint:    oklch(58%   0.006 260);   /* #2B2B2B charcoal — captions, meta */
+  --espresso:     oklch(23.4% 0.061 259.7); /* #0B1D3A deep navy sections */
+  --espresso-2:   oklch(26%   0.075 261);   /* deep navy panels / hover state */
+  --on-espresso:  oklch(94%   0.008 85);    /* text on navy */
+  --on-espresso-soft: oklch(78% 0.010 85);
+  --brass:        oklch(76.7% 0.139 91.9);  /* #D4AF37 gold — hairlines, dark-bg accents */
+  --brass-deep:   oklch(52%   0.135 88);    /* darkened gold — legible as text on light paper */
+  --line:         color-mix(in oklch, var(--ink) 14%, transparent);
+  --line-strong:  color-mix(in oklch, var(--ink) 32%, transparent);
+  --line-on-dark: color-mix(in oklch, var(--on-espresso) 18%, transparent);
+  --focus:        oklch(50% 0.10 250);
+
+  /* — Type — */
+  --font-display: "Playfair Display", "Georgia", serif;
+  --font-body:    "Work Sans", "Helvetica Neue", sans-serif;
+
+  --text-caps:    0.6875rem;                              /* 11px tracked labels */
+  --text-sm:      0.8125rem;
+  --text-body:    1rem;
+  --text-lede:    clamp(1.125rem, 1.4vw, 1.3125rem);
+  --text-h3:      clamp(1.375rem, 2vw, 1.75rem);
+  --text-h2:      clamp(1.875rem, 3.2vw, 2.75rem);
+  --text-h1:      clamp(2.5rem, 5vw, 4.25rem);
+  --text-display: clamp(2.75rem, 7vw, 5.5rem);
+
+  --track-caps:   0.22em;
+  --track-caps-wide: 0.32em;
+
+  /* — Space · 4pt scale — */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --section:  clamp(5.5rem, 11vw, 10rem);   /* vertical section rhythm */
+  --margin:   clamp(1.25rem, 5.5vw, 5rem);  /* page gutters */
+  --shell:    90rem;                        /* 1440px container */
+  --measure:  38rem;                        /* editorial column */
+  --measure-wide: 46rem;
+
+  /* — Rules & radius — */
+  --rule: 1px;
+  --radius: 0;                              /* squared, plate-like frames */
+
+  /* — Motion — */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:    200ms;
+  --dur:         500ms;
+  --dur-slow:    1100ms;
+}

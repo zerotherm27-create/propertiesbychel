@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Owner Dashboard — Properties by Chel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=15">
+<link rel="icon" href="images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
+</head>
+<body class="dash-body">
+
+<header class="dash-top">
+  <img src="images/logo-navy.png" alt="Properties by Chel" style="height:36px;width:auto">
+  <span class="meta">Owner Dashboard</span>
+  <button class="funnel-back" id="signout-btn" hidden>Sign out</button>
+</header>
+
+<!-- Backend not configured -->
+<main class="dash-shell" id="view-unconfigured" hidden>
+  <div class="dash-panel" style="max-width:36rem;margin-inline:auto">
+    <p class="eyebrow">Setup Required</p>
+    <h1 class="h3 mt-4">The backend isn't connected yet.</h1>
+    <p class="prose mt-6">To bring the dashboard online:</p>
+    <ol class="prose" style="padding-left:1.2em;line-height:2">
+      <li>Create a free project at <strong>supabase.com</strong></li>
+      <li>Open its SQL Editor and run <code>supabase/schema.sql</code> from this site's files</li>
+      <li>Copy the project URL and anon key into <code>js/supabase-config.js</code></li>
+    </ol>
+    <p class="field__note">Until then the public site works normally — inquiry forms simulate success and listings show the built-in samples.</p>
+  </div>
+</main>
+
+<!-- Auth -->
+<main class="dash-shell" id="view-auth" hidden>
+  <div class="dash-panel" style="max-width:26rem;margin-inline:auto">
+    <p class="eyebrow">Private Access</p>
+    <h1 class="h3 mt-4" id="auth-title">Sign in</h1>
+    <form id="auth-form" class="mt-8">
+      <div class="field">
+        <label for="a-email">Email</label>
+        <input id="a-email" type="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="a-pass">Password</label>
+        <input id="a-pass" type="password" autocomplete="current-password" required minlength="8">
+      </div>
+      <button class="btn btn--solid" type="submit" style="width:100%" id="auth-submit">Sign in</button>
+      <p class="field__error mt-4" id="auth-error" role="alert"></p>
+      <p class="field__note mt-6">First time here? <button type="button" class="dash-linkbtn" id="auth-toggle">Create the owner account</button></p>
+    </form>
+  </div>
+</main>
+
+<!-- App -->
+<main class="dash-shell" id="view-app" hidden>
+  <nav class="dash-tabs" aria-label="Dashboard sections">
+    <button class="chip" data-tab="leads" aria-pressed="true">Leads</button>
+    <button class="chip" data-tab="listings" aria-pressed="false">Listings</button>
+    <button class="chip" data-tab="photos" aria-pressed="false">Site Photos</button>
+    <button class="chip" data-tab="automation" aria-pressed="false">Automation</button>
+  </nav>
+
+  <!-- Leads / CRM -->
+  <section id="tab-leads" class="dash-tab">
+    <div class="dash-panel">
+      <div class="dash-panel__head">
+        <h2 class="h3">Leads</h2>
+        <div class="dash-viewtoggle" role="group" aria-label="Lead view">
+          <button class="chip" id="view-board-btn" aria-pressed="true">Board</button>
+          <button class="chip" id="view-list-btn" aria-pressed="false">List</button>
+        </div>
+        <div class="filterbar" style="border:0;padding:0" id="lead-filters" hidden>
+          <button class="chip" aria-pressed="true" data-lstatus="active">Active</button>
+          <button class="chip" aria-pressed="false" data-lstatus="new">New</button>
+          <button class="chip" aria-pressed="false" data-lstatus="contacted">Contacted</button>
+          <button class="chip" aria-pressed="false" data-lstatus="viewing">Viewing</button>
+          <button class="chip" aria-pressed="false" data-lstatus="negotiating">Negotiating</button>
+          <button class="chip" aria-pressed="false" data-lstatus="closed">Closed</button>
+          <button class="chip" aria-pressed="false" data-lstatus="all">All</button>
+        </div>
+      </div>
+      <div id="leads-board" class="kanban"></div>
+      <div id="leads-list" class="dash-list" hidden></div>
+    </div>
+
+    <!-- Selected lead detail (board view) -->
+    <div class="dash-panel" id="lead-detail" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="lead-detail-title">Lead</h2>
+        <button class="funnel-back" id="lead-detail-close">Close</button>
+      </div>
+      <div id="lead-detail-body"></div>
+    </div>
+  </section>
+
+  <!-- Listings -->
+  <section id="tab-listings" class="dash-tab" hidden>
+    <div class="dash-panel">
+      <div class="dash-panel__head">
+        <h2 class="h3">Listings</h2>
+        <button class="btn" id="listing-new-btn">+ Add listing</button>
+      </div>
+      <div id="listings-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel" id="listing-editor" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="editor-title">New listing</h2>
+        <button class="funnel-back" id="editor-close">Close</button>
+      </div>
+      <form id="listing-form" class="dash-form">
+        <input type="hidden" name="id">
+        <div class="field"><label>Title</label><input name="title" required placeholder="e.g. The Meridian Penthouse"></div>
+        <div class="dash-form__row">
+          <div class="field"><label>Availability</label>
+            <select name="status"><option value="sale">For sale</option><option value="lease">For lease</option><option value="investment">Investment</option></select>
+          </div>
+          <div class="field"><label>Corner tag (optional)</label><input name="tag" placeholder="Featured · Reserved · Allocation"></div>
+        </div>
+        <fieldset class="field" style="border:0;padding:0">
+          <label>Collections</label>
+          <div class="dash-checks">
+            <label><input type="checkbox" name="collections" value="skyline"> Skyline residences</label>
+            <label><input type="checkbox" name="collections" value="estate"> Estate lots &amp; villas</label>
+            <label><input type="checkbox" name="collections" value="branded"> Branded residences</label>
+            <label><input type="checkbox" name="collections" value="legacy"> Legacy family homes</label>
+            <label><input type="checkbox" name="collections" value="investment-grade"> Investment-grade units</label>
+          </div>
+        </fieldset>
+        <div class="dash-form__row">
+          <div class="field"><label>Location label</label><input name="location_label" placeholder="e.g. Salcedo Village, Makati"></div>
+          <div class="field"><label>Price display</label><input name="price_display" placeholder="e.g. ₱180M or ₱350K / mo"></div>
+        </div>
+        <div class="field"><label>Card meta line</label><input name="meta_line" placeholder="e.g. Salcedo Village, Makati · 210 sqm · 3 bedrooms"></div>
+        <div class="field"><label>Overview (shown on the property page)</label><textarea name="overview" rows="4" placeholder="Two or three considered sentences."></textarea></div>
+        <div class="dash-form__row">
+          <div class="field"><label>Card crop</label>
+            <select name="aspect"><option value="4/3">Wide 4:3</option><option value="4/5">Tall 4:5</option><option value="1/1">Square</option><option value="16/10">Cinematic 16:10</option></select>
+          </div>
+          <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="100"></div>
+        </div>
+        <div class="field">
+          <label>Photo</label>
+          <input type="file" id="listing-photo" accept="image/*">
+          <img id="listing-photo-preview" class="dash-preview" hidden alt="Listing photo preview">
+          <input type="hidden" name="hero_image_url">
+        </div>
+        <div class="dash-form__row">
+          <label class="dash-switch"><input type="checkbox" name="published" checked> Published on the site</label>
+          <label class="dash-switch"><input type="checkbox" name="featured"> Featured on the homepage</label>
+        </div>
+        <button class="btn btn--solid" type="submit" id="listing-save">Save listing</button>
+        <p class="field__error" id="listing-error" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Site photos -->
+  <section id="tab-photos" class="dash-tab" hidden>
+    <div class="dash-panel">
+      <div class="dash-panel__head"><h2 class="h3">Site Photos</h2></div>
+      <div class="dash-form__row">
+        <div class="dash-photocard">
+          <p class="meta">Home hero background</p>
+          <img id="photo-hero-preview" class="dash-preview" alt="Current hero background">
+          <input type="file" id="photo-hero-file" accept="image/*">
+          <button class="btn" data-photo-save="hero_image">Upload &amp; use</button>
+        </div>
+        <div class="dash-photocard">
+          <p class="meta">Portrait (About &amp; Home)</p>
+          <img id="photo-profile-preview" class="dash-preview" alt="Current portrait">
+          <input type="file" id="photo-profile-file" accept="image/*">
+          <button class="btn" data-photo-save="profile_image">Upload &amp; use</button>
+        </div>
+      </div>
+      <p class="field__note" id="photos-note"></p>
+    </div>
+  </section>
+</main>
+
+<script src="js/supabase-config.js?v=15"></script>
+<script type="module" src="js/dashboard.js?v=15"></script>
+</body>
+</html>
