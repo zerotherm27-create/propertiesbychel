@@ -267,6 +267,12 @@ a.index-row:hover { background-color: color-mix(in oklch, var(--ink) 4%, transpa
 a.index-row:hover .index-row__no { transform: translateX(2px); }
 .index-row__meta { font-size: var(--text-sm); color: var(--ink-faint); text-align: right; }
 
+/* — Intelligence: note strip & snapshots — */
+.masthead-note { font-size: var(--text-caps); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); display: flex; gap: var(--space-8); flex-wrap: wrap; border-block: var(--rule) solid var(--line); padding-block: var(--space-4); }
+.snapshot { border-top: var(--rule) solid var(--line); padding-top: var(--space-8); }
+.snapshots { display: grid; gap: var(--space-16); }
+@media (min-width: 48rem) { .snapshots { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-16) var(--space-20); } }
+
 /* — Property cards (gallery) — */
 .gallery { display: grid; gap: var(--space-16) var(--space-10); }
 .plisting { transition: transform var(--dur) var(--ease-out); }
