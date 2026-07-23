@@ -155,6 +155,48 @@ async function init(supabase) {
 
   function renderLeads() {
     if (leadView === "board") renderBoard(); else renderTable();
+    renderAnalytics();
+  }
+
+  function renderAnalytics() {
+    const total = leads.length;
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const newThisWeek = leads.filter((l) => new Date(l.created_at).getTime() >= weekAgo).length;
+    const closed = leads.filter((l) => l.status === "closed");
+    const eligible = leads.filter((l) => l.status !== "archived");
+    const conversionRate = eligible.length ? Math.round((closed.length / eligible.length) * 100) : 0;
+    const avgDays = closed.length
+      ? Math.round(closed.reduce((sum, l) => sum + (new Date(l.updated_at) - new Date(l.created_at)) / 86400000, 0) / closed.length)
+      : null;
+
+    $("#stat-total").textContent = total;
+    $("#stat-week").textContent = newThisWeek;
+    $("#stat-conversion").textContent = conversionRate + "%";
+    $("#stat-avgdays").textContent = avgDays == null ? "—" : avgDays + "d";
+
+    const statusCounts = STATUSES.map((s) => leads.filter((l) => l.status === s).length);
+    const maxCount = Math.max(1, ...statusCounts);
+    $("#leads-funnel").innerHTML = STATUSES.map((s, i) => `
+      <div class="dash-funnel__row">
+        <span class="dash-funnel__label">${STATUS_LABELS[s]}</span>
+        <div class="dash-funnel__bar-track"><div class="dash-funnel__bar" style="width:${Math.round((statusCounts[i] / maxCount) * 100)}%"></div></div>
+        <span class="dash-funnel__count">${statusCounts[i]}</span>
+      </div>`).join("");
+
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      days.push(d);
+    }
+    const dayCounts = days.map((d) => {
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      return leads.filter((l) => { const t = new Date(l.created_at); return t >= d && t < next; }).length;
+    });
+    const maxDay = Math.max(1, ...dayCounts);
+    $("#leads-trend").innerHTML = dayCounts.map((c, i) => {
+      const label = days[i].toLocaleDateString("en-PH", { month: "short", day: "numeric" });
+      return `<div class="dash-trend__bar" style="height:${Math.round((c / maxDay) * 100)}%" title="${label}: ${c}"></div>`;
+    }).join("");
   }
 
   function leadCardHTML(l) {

@@ -510,6 +510,18 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .dash-tabs { display: flex; gap: var(--space-6); margin-bottom: var(--space-8); border-bottom: var(--rule) solid var(--line); padding-bottom: var(--space-3); }
 .dash-panel { background: var(--paper); border: var(--rule) solid var(--line); padding: var(--space-8); margin-bottom: var(--space-8); }
 .dash-panel__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; margin-bottom: var(--space-8); }
+.dash-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+@media (min-width: 40rem) { .dash-stats { grid-template-columns: repeat(4, 1fr); } }
+.dash-stat { border-top: var(--rule) solid var(--line-strong); padding-top: var(--space-3); }
+.dash-stat__value { display: block; font-family: var(--font-display); font-size: var(--text-h2); color: var(--ink); line-height: 1; }
+.dash-stat__label { display: block; margin-top: var(--space-2); font-size: var(--text-caps); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); }
+.dash-funnel__row { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-3); }
+.dash-funnel__label { width: 6.5rem; flex-shrink: 0; font-size: var(--text-sm); color: var(--ink-soft); }
+.dash-funnel__bar-track { flex: 1; height: 0.6rem; background: var(--paper-2); }
+.dash-funnel__bar { height: 100%; background: var(--brass); min-width: 2px; transition: width var(--dur-slow) var(--ease-out); }
+.dash-funnel__count { width: 2rem; text-align: right; font-size: var(--text-sm); color: var(--ink-faint); }
+.dash-trend { display: flex; align-items: flex-end; gap: 3px; height: 6rem; border-bottom: var(--rule) solid var(--line-strong); }
+.dash-trend__bar { flex: 1; background: var(--brass); min-height: 2px; }
 .dash-list { display: grid; gap: 0; }
 .dash-row { border-top: var(--rule) solid var(--line); padding: var(--space-4) 0; }
 .dash-row__line { display: flex; align-items: baseline; gap: var(--space-4); flex-wrap: wrap; cursor: pointer; }

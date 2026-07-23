@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=23">
+<link rel="stylesheet" href="css/site.css?v=24">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -70,6 +70,26 @@
 
   <!-- Leads / CRM -->
   <section id="tab-leads" class="dash-tab">
+    <div class="dash-panel" id="leads-analytics">
+      <div class="dash-panel__head"><h2 class="h3">Analytics</h2></div>
+      <div class="dash-stats">
+        <div class="dash-stat"><span class="dash-stat__value" id="stat-total">0</span><span class="dash-stat__label">Total leads</span></div>
+        <div class="dash-stat"><span class="dash-stat__value" id="stat-week">0</span><span class="dash-stat__label">New this week</span></div>
+        <div class="dash-stat"><span class="dash-stat__value" id="stat-conversion">0%</span><span class="dash-stat__label">Closed rate</span></div>
+        <div class="dash-stat"><span class="dash-stat__value" id="stat-avgdays">—</span><span class="dash-stat__label">Avg. days to close</span></div>
+      </div>
+      <div class="dash-form__row" style="margin-top:var(--space-8)">
+        <div>
+          <p class="field__note" style="margin-bottom:var(--space-3)">Pipeline by stage</p>
+          <div id="leads-funnel"></div>
+        </div>
+        <div>
+          <p class="field__note" style="margin-bottom:var(--space-3)">Leads received, last 14 days</p>
+          <div class="dash-trend" id="leads-trend"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="dash-panel">
       <div class="dash-panel__head">
         <h2 class="h3">Leads</h2>
@@ -257,6 +277,6 @@
 
 <script src="js/supabase-config.js?v=16"></script>
 <script type="module" src="js/dashboard-content.js?v=2"></script>
-<script type="module" src="js/dashboard.js?v=19"></script>
+<script type="module" src="js/dashboard.js?v=20"></script>
 </body>
 </html>
