@@ -194,7 +194,7 @@
       btn.dataset.state = "loading";
       submitLead(leadFromForm(form)).then(function () {
         btn.dataset.state = "success";
-        btn.textContent = "Received — thank you";
+        btn.textContent = "Received, thank you";
         if (note) note.textContent = "Your request has been noted. Expect a personal reply within one business day.";
         form.querySelectorAll("input, select, textarea, button").forEach(function (f) { f.disabled = true; });
       }).catch(function () {

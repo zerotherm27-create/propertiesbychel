@@ -338,7 +338,7 @@ async function init(supabase) {
         <dt>Source</dt><dd>${when} · ${esc(l.source_page || "—")}${l.listing_slug ? " · " + esc(l.listing_slug) : ""}</dd>
         ${l.notes ? `<dt>Their note</dt><dd>${esc(l.notes)}</dd>` : ""}
         <dt>Your notes</dt>
-        <dd><textarea class="dash-note-field" data-note placeholder="Private notes — viewing feedback, next steps…">${esc(l.owner_notes || "")}</textarea>
+        <dd><textarea class="dash-note-field" data-note placeholder="Private notes: viewing feedback, next steps…">${esc(l.owner_notes || "")}</textarea>
         <button type="button" class="btn" data-save-note style="margin-top:var(--space-2)">Save note</button></dd>
       </dl>`;
     $("#lead-detail").hidden = false;
@@ -362,7 +362,7 @@ async function init(supabase) {
     const note = $("#lead-detail-body [data-note]").value;
     btn.textContent = "Saving…";
     const { error } = await supabase.from("leads").update({ owner_notes: note }).eq("id", id);
-    btn.textContent = error ? "Failed — retry" : "Saved";
+    btn.textContent = error ? "Failed, retry" : "Saved";
     setTimeout(() => { btn.textContent = "Save note"; }, 1800);
     const lead = leads.find((l) => l.id === id);
     if (lead && !error) lead.owner_notes = note;
@@ -379,7 +379,7 @@ async function init(supabase) {
   }
 
   function renderListings() {
-    if (!listings.length) { $("#listings-list").innerHTML = '<p class="dash-empty">No listings yet — add the first one.</p>'; return; }
+    if (!listings.length) { $("#listings-list").innerHTML = '<p class="dash-empty">No listings yet. Add the first one.</p>'; return; }
     $("#listings-list").innerHTML = listings.map((l) => `
       <div class="dash-row" data-id="${l.id}">
         <div class="dash-row__line">
@@ -411,7 +411,7 @@ async function init(supabase) {
 
   function openEditor(l) {
     editor.hidden = false;
-    $("#editor-title").textContent = l ? "Edit — " + l.title : "New listing";
+    $("#editor-title").textContent = l ? "Edit: " + l.title : "New listing";
     form.reset();
     form.elements.id.value = l ? l.id : "";
     if (l) {
@@ -557,7 +557,7 @@ async function init(supabase) {
         const { error } = await supabase.from("site_settings").upsert({ key, value: { url } });
         if (error) throw error;
         (key === "hero_image" ? $("#photo-hero-preview") : $("#photo-profile-preview")).src = url;
-        note.textContent = "Saved — the site now uses the new photo.";
+        note.textContent = "Saved. The site now uses the new photo.";
       } catch (ex) {
         note.textContent = "Upload failed: " + (ex.message || ex);
       } finally {

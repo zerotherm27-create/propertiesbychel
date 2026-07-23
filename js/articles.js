@@ -25,7 +25,7 @@ if (SB.url && SB.anonKey) {
     document.getElementById("article-loading").hidden = true;
     if (error || !article) { document.getElementById("article-notfound").hidden = false; return; }
 
-    document.getElementById("doc-title").textContent = article.title + " — Properties by Chel";
+    document.getElementById("doc-title").textContent = article.title + " · Properties by Chel";
     if (article.meta_description) document.getElementById("doc-description").setAttribute("content", article.meta_description);
 
     const isJournal = article.section === "journal";

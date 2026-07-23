@@ -124,7 +124,7 @@ values
    'BGC, Taguig', 'BGC, Taguig · 620 sqm · 4 bedrooms', '₱320M',
    'https://lh3.googleusercontent.com/aida-public/AB6AXuA2Y3OB18yzUWLh26FuflxT2pJwkb5WiojIOZ6R9kLOu_uxZPdWvE6_nO01b6Tkt0_ot4YnOFxk3zqpjmDZocU8-SOosMrrVInV64cMQ8UZnqS_wQnYncTFi-CuoSv_h3uBk1asqlx6CdpfHOYayc3vvk4AhvDumZDGks07RXP7VG_pb-3yhKHqx5funfi-6rMkfzyWk6wNFQFZd3nQ-aF1k5aMxGnv5cbYZkPfB5Kyt1_wlbbQ08-Jsw',
    'Evening skyline view from the Zenith Penthouse, Bonifacio Global City', '4/3', true, 10,
-   'A full-floor penthouse above the quietest stretch of Bonifacio Global City — five-metre ceilings in the great room, a west gallery built for art, and services managed to hotel standard. Shown by appointment only.'),
+   'A full-floor penthouse above the quietest stretch of Bonifacio Global City: five-metre ceilings in the great room, a west gallery built for art, and services managed to hotel standard. Shown by appointment only.'),
   ('Azure Sands Estate', 'azure-sands-estate', 'sale', null, '{estate}',
    'Station 1, Boracay', 'Station 1, Boracay · 850 sqm · 5 bedrooms', '₱185M',
    'https://lh3.googleusercontent.com/aida-public/AB6AXuBpXAwPUG-_SEHWLJKQBY9Q3-24Tan0jZrvhHpVbj3we60WlviFFto-lDyGSK0EzrxVST6Gb67nqIA8LFQrPeqk2x996I5evjXf7jU-IYVVtf5fNMUmvO5SSwNK-gCPFSe-WY8IqWkc7PeT0as4wgclr7Kej7baNoHu-psfn1tphttvHZPes-7OTWwr06fQ5an6Ebp4zkw-qrccj4zMmxwKYEFObYKIzB3ZZhkGkH6jrFQcc1X85MTHXA',

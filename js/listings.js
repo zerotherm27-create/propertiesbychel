@@ -69,7 +69,7 @@
     api("listings?select=*&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
       var l = rows[0];
       if (!l) return;
-      document.title = l.title + " — Private Presentation · Properties by Chel";
+      document.title = l.title + " · Private Presentation · Properties by Chel";
 
       var bind = function (name, text) {
         document.querySelectorAll('[data-l="' + name + '"]').forEach(function (el) { el.textContent = text; });

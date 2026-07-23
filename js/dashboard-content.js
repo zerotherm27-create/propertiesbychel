@@ -26,7 +26,7 @@ window.DashboardContent = {
     }
 
     function renderArticles() {
-      if (!articles.length) { $("#articles-list").innerHTML = '<p class="dash-empty">No articles yet — write one, or let the AI draft one from a topic.</p>'; return; }
+      if (!articles.length) { $("#articles-list").innerHTML = '<p class="dash-empty">No articles yet. Write one, or let the AI draft one from a topic.</p>'; return; }
       $("#articles-list").innerHTML = articles.map((a) => `
         <div class="dash-row" data-id="${a.id}">
           <div class="dash-row__line">
@@ -62,7 +62,7 @@ window.DashboardContent = {
 
     function openEditor(a) {
       editor.hidden = false;
-      $("#article-editor-title").textContent = a ? "Edit — " + a.title : "New article";
+      $("#article-editor-title").textContent = a ? "Edit: " + a.title : "New article";
       form.reset();
       resetAiPanel();
       form.elements.id.value = a ? a.id : "";
@@ -116,7 +116,7 @@ window.DashboardContent = {
       const section = form.elements.section.value;
       if (!topic) { $("#ai-status").textContent = "Enter a topic first."; return; }
       if (!AGENT_URL) { $("#ai-status").textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
-      $("#ai-status").textContent = "Researching and drafting — this can take a minute…";
+      $("#ai-status").textContent = "Researching and drafting: this can take a minute…";
       $("#ai-draft-btn").disabled = true;
       try {
         const headers = { "Content-Type": "application/json", ...(await authHeader()) };
@@ -131,7 +131,7 @@ window.DashboardContent = {
         form.elements.body.value = paragraphsToBody(data.body);
         form.elements.meta_description.value = data.meta_description || "";
         $("#article-seo-notes").textContent = data.seo_notes || "";
-        $("#ai-status").textContent = "Draft ready — review below, then generate a hero image or edit freely.";
+        $("#ai-status").textContent = "Draft ready. Review below, then generate a hero image or edit freely.";
         $("#ai-image-btn").disabled = false;
       } catch (ex) {
         $("#ai-status").textContent = "Could not draft: " + (ex.message || ex);
