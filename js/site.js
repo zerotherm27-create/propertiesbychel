@@ -58,6 +58,17 @@
   // elements after this initial scan — re-observe them so they aren't stuck at opacity:0.
   document.addEventListener("listings:rendered", observeReveals);
 
+  /* — Partners marquee pause toggle (touch users have no hover to pause with) — */
+  var marqueeToggle = document.getElementById("partners-toggle");
+  var marquee = document.getElementById("partners-marquee");
+  if (marqueeToggle && marquee) {
+    marqueeToggle.addEventListener("click", function () {
+      var paused = marquee.classList.toggle("is-paused");
+      marqueeToggle.textContent = paused ? "Play" : "Pause";
+      marqueeToggle.setAttribute("aria-pressed", String(paused));
+    });
+  }
+
   /* — Cinematic hero scrub (home) — */
   var cine = document.querySelector(".cine");
   if (cine && !reduceMotion) {
