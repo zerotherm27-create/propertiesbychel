@@ -391,24 +391,25 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .partners-section { border-block: var(--rule) solid var(--line); }
 .partners-head { display: flex; flex-direction: column; gap: var(--space-6); margin-bottom: var(--space-12); }
 @media (min-width: 48rem) { .partners-head { flex-direction: row; justify-content: space-between; align-items: baseline; gap: var(--space-10); } }
-.partners-grid {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-10) var(--space-8);
-  align-items: center; opacity: 0.55; filter: grayscale(1);
+.partners-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+.partners-track {
+  display: flex; align-items: center; gap: var(--space-16); width: max-content;
+  opacity: 0.55; filter: grayscale(1);
+  animation: partners-scroll 40s linear infinite;
   transition: opacity var(--dur-slow) var(--ease-out), filter var(--dur-slow) var(--ease-out);
 }
-.partners-grid:hover { opacity: 1; filter: grayscale(0); }
-@media (min-width: 48rem) { .partners-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.partner-mark {
-  display: flex; align-items: center; justify-content: center; text-align: center;
-  font-family: var(--font-display); font-size: 1.05rem; font-weight: 500;
-  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink);
+.partners-marquee:hover .partners-track { opacity: 1; filter: grayscale(0); animation-play-state: paused; }
+.partner-logo { flex: 0 0 auto; height: 2rem; width: auto; object-fit: contain; }
+@keyframes partners-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
-.partners-grid .partner-mark--placeholder,
-.partners-grid:hover .partner-mark--placeholder {
-  opacity: 1; filter: none;
-  font-family: var(--font-body); font-weight: 600; font-size: var(--text-caps);
-  letter-spacing: var(--track-caps); color: var(--ink-faint);
-  border: 1px dashed var(--line-strong); padding: var(--space-4) var(--space-6);
+@media (prefers-reduced-motion: reduce) {
+  .partners-track { animation: none; }
 }
 
 /* ————— Dark band sections ————— */

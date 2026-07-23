@@ -69,12 +69,12 @@ Structured content models for wiring this site to any headless CMS (Sanity, Cont
 | Field | Type | Notes |
 |---|---|---|
 | name | string | e.g. "Ayala Land" |
-| logo | image (optional) | SVG/PNG wordmark; the site renders a styled text mark (`.partner-mark`) when this is empty, so the strip never breaks while logos are pending |
+| logo | image | SVG/PNG/JPG wordmark, stored in `images/partners/`; rendered in the homepage's auto-sliding `.partners-marquee` strip |
 | url | string (optional) | developer's site, if linking out is wanted |
 | active | boolean | show/hide without deleting |
 | order | number | index sequence |
 
-Powers the "Accredited Broker" strip on the homepage (`index.html`) and the Developer Accreditation row on `about.html`. Launch entries: Ayala Land, Federal Land, Filinvest. Add rows here as new accreditations are confirmed — the trailing "+ More on request" tile in the markup is a placeholder, not a CMS entry, and should be removed once a 4th+ real logo is added.
+Powers the "Accredited Broker" strip on the homepage (`index.html`) and the Developer Accreditation row on `about.html`. Current entries (11): Ayala Land, Alveo, Avida, DMCI Homes, Filinvest, Megaworld, Rockwell Land, Shang Properties, Federal Land, FNG (Federal Land & Nomura Real Estate), Keen & Worth Property Developers (Ongpin Tower). Logos live in `images/partners/`; sourced from official developer sites and Wikimedia Commons where the developer's own site blocked automated fetching (Avida, Federal Land) — swap for higher-resolution official files if the client supplies them directly. Add rows here as new accreditations are confirmed.
 
 ## journal_entries
 | Field | Type | Notes |
