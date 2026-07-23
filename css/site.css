@@ -403,7 +403,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
   transition: opacity var(--dur-slow) var(--ease-out), filter var(--dur-slow) var(--ease-out);
 }
 .partners-marquee:hover .partners-track { opacity: 1; filter: grayscale(0); animation-play-state: paused; }
-.partner-logo { flex: 0 0 auto; height: 2rem; width: auto; object-fit: contain; }
+.partner-logo { flex: 0 0 auto; height: 2.75rem; width: auto; max-width: 9rem; object-fit: contain; }
 @keyframes partners-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
