@@ -49,6 +49,15 @@ window.DashboardContent = {
       $("#ai-status").textContent = "";
       $("#ai-image-btn").disabled = true;
       $("#article-seo-notes").textContent = "";
+      renderSources([]);
+    }
+
+    function renderSources(sources) {
+      const el = $("#ai-sources");
+      if (!sources || !sources.length) { el.hidden = true; el.innerHTML = ""; return; }
+      el.innerHTML = sources.map((s) => `
+        <li><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a></li>`).join("");
+      el.hidden = false;
     }
 
     function openEditor(a) {
@@ -115,6 +124,7 @@ window.DashboardContent = {
         const data = await r.json();
         if (!r.ok) throw new Error(data.error || "Draft failed");
         lastDraft = data;
+        renderSources(data.sources);
         form.elements.title.value = data.title || "";
         form.elements.slug.value = data.slug || slugify(data.title);
         form.elements.dek.value = data.dek || "";

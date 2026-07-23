@@ -12,6 +12,25 @@ function extractJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
+// Pulls the pages the model actually cited while researching, so the owner
+// can see what grounded the draft instead of only the polished prose.
+function extractSources(response) {
+  const sources = [];
+  const seen = new Set();
+  for (const item of response.output || []) {
+    if (item.type !== "message") continue;
+    for (const part of item.content || []) {
+      for (const ann of part.annotations || []) {
+        if (ann.type === "url_citation" && ann.url && !seen.has(ann.url)) {
+          seen.add(ann.url);
+          sources.push({ title: ann.title || ann.url, url: ann.url });
+        }
+      }
+    }
+  }
+  return sources;
+}
+
 async function draftArticle(openai, topic, section) {
   const prompt = `${STYLE_GUIDE}
 
@@ -35,7 +54,7 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
     input: prompt
   });
 
-  return extractJson(response.output_text);
+  return { ...extractJson(response.output_text), sources: extractSources(response) };
 }
 
 async function complianceCheck(openai, draft, topic, section) {
@@ -79,5 +98,5 @@ export async function generateArticle(openai, { topic, section }) {
     body: checked.body || draft.body,
     seo_notes: checked.seo_notes || ""
   });
-  return { ...clean, slug: slugify(clean.title), topic, section };
+  return { ...clean, slug: slugify(clean.title), topic, section, sources: draft.sources || [] };
 }
