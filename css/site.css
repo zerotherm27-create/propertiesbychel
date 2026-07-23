@@ -311,6 +311,8 @@ a.index-row:hover .index-row__no { transform: translateX(2px); }
 }
 .chip:hover { color: var(--ink); }
 .chip[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--brass); font-weight: 500; }
+.chip--external { color: var(--brass); margin-left: auto; }
+.chip--external:hover { color: var(--ink); }
 
 /* ————— Forms · single column, underline fields ————— */
 .field { display: grid; gap: var(--space-2); margin-bottom: var(--space-10); }

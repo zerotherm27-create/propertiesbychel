@@ -118,7 +118,7 @@
     }
     filterbars.forEach(function (bar) {
       var group = bar.dataset.filterGroup;
-      bar.querySelectorAll(".chip").forEach(function (chip) {
+      bar.querySelectorAll(".chip[data-value]").forEach(function (chip) {
         chip.addEventListener("click", function () {
           bar.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
           chip.setAttribute("aria-pressed", "true");
