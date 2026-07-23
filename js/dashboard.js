@@ -82,18 +82,20 @@ async function init(supabase) {
     chip.addEventListener("click", () => {
       $$(".dash-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       chip.setAttribute("aria-pressed", "true");
-      ["leads", "listings", "photos"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
+      ["leads", "listings", "photos", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
     });
   });
 
   /* ————— leads (CRM) ————— */
   const STATUSES = ["new", "contacted", "viewing", "negotiating", "closed", "archived"];
+  const STATUS_LABELS = { new: "New", contacted: "Contacted", viewing: "Viewing", negotiating: "Negotiating", closed: "Closed", archived: "Archived" };
   let leads = [];
   let leadFilter = "active";
+  let leadView = "board";
 
   async function loadLeads() {
     const { data, error } = await supabase.from("leads").select("*").order("created_at", { ascending: false });
-    if (error) { $("#leads-list").innerHTML = '<p class="dash-empty">Could not load leads: ' + esc(error.message) + "</p>"; return; }
+    if (error) { $("#leads-board").innerHTML = ""; $("#leads-list").innerHTML = '<p class="dash-empty">Could not load leads: ' + esc(error.message) + "</p>"; return; }
     leads = data;
     renderLeads();
   }
@@ -107,68 +109,201 @@ async function init(supabase) {
     renderLeads();
   });
 
-  function renderLeads() {
-    const rows = leads.filter((l) =>
+  function setLeadView(view) {
+    leadView = view;
+    $("#view-board-btn").setAttribute("aria-pressed", String(view === "board"));
+    $("#view-list-btn").setAttribute("aria-pressed", String(view === "list"));
+    $("#leads-board").hidden = view !== "board";
+    $("#leads-list").hidden = view !== "list";
+    renderLeads();
+  }
+  $("#view-board-btn").addEventListener("click", () => setLeadView("board"));
+  $("#view-list-btn").addEventListener("click", () => setLeadView("list"));
+
+  function visibleStatuses() {
+    if (leadFilter === "all") return STATUSES;
+    if (leadFilter === "active") return STATUSES.filter((s) => !["closed", "archived"].includes(s));
+    return [leadFilter];
+  }
+
+  function filteredLeads() {
+    return leads.filter((l) =>
       leadFilter === "all" ? true :
       leadFilter === "active" ? !["closed", "archived"].includes(l.status) :
       l.status === leadFilter);
-    if (!rows.length) { $("#leads-list").innerHTML = '<p class="dash-empty">No leads here yet. New inquiries from the site will appear automatically.</p>'; return; }
-    $("#leads-list").innerHTML = rows.map((l) => {
-      const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function renderLeads() {
+    if (leadView === "board") renderBoard(); else renderTable();
+  }
+
+  function leadCardHTML(l) {
+    const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" });
+    return `
+      <button type="button" class="kanban-card" draggable="true" data-id="${l.id}">
+        <span class="kanban-card__intent">${esc(l.intent || "Inquiry")}</span>
+        <span class="kanban-card__name">${esc(l.name || "(no name)")}</span>
+        <span class="kanban-card__meta">${when}${l.listing_slug ? " · " + esc(l.listing_slug) : ""}</span>
+      </button>`;
+  }
+
+  function renderBoard() {
+    const cols = visibleStatuses();
+    $("#leads-board").innerHTML = cols.map((s) => {
+      const rows = leads.filter((l) => l.status === s);
       return `
-      <div class="dash-row" data-id="${l.id}">
-        <div class="dash-row__line" data-toggle>
-          <span class="dash-row__name">${esc(l.name || "(no name)")}</span>
-          <span class="dash-row__meta">${esc(l.intent || "")}</span>
-          <span class="dash-row__spacer"></span>
-          <span class="dash-row__meta">${when} · ${esc(l.source_page || "")}${l.listing_slug ? " · " + esc(l.listing_slug) : ""}</span>
-          <select class="dash-status ${l.status === "new" ? "dash-status--new" : ""}" data-status>
-            ${STATUSES.map((s) => `<option value="${s}" ${s === l.status ? "selected" : ""}>${s}</option>`).join("")}
-          </select>
-        </div>
-        <div class="dash-row__detail" hidden>
-          <dl style="margin:0">
-            <dt>Contact</dt><dd>${esc(l.email || "—")}${l.phone ? " · " + esc(l.phone) : ""}
-              ${l.email ? ` · <a class="dash-linkbtn" href="mailto:${esc(l.email)}">write back</a>` : ""}</dd>
-            <dt>Brief</dt><dd>${esc([l.districts, l.budget_range, l.timeframe].filter(Boolean).join(" · ") || "—")}</dd>
-            ${l.notes ? `<dt>Their note</dt><dd>${esc(l.notes)}</dd>` : ""}
-            <dt>Your notes</dt>
-            <dd><textarea class="dash-note-field" data-note placeholder="Private notes — viewing feedback, next steps…">${esc(l.owner_notes || "")}</textarea>
-            <button class="btn" data-save-note style="margin-top:var(--space-2)">Save note</button></dd>
-          </dl>
-        </div>
+      <div class="kanban-col" data-status="${s}">
+        <div class="kanban-col__head"><span>${STATUS_LABELS[s]}</span><span class="kanban-col__count">${rows.length}</span></div>
+        <div class="kanban-col__body">${rows.length ? rows.map(leadCardHTML).join("") : '<p class="kanban-empty">No leads</p>'}</div>
       </div>`;
     }).join("");
   }
 
-  $("#leads-list").addEventListener("click", async (e) => {
-    const row = e.target.closest(".dash-row");
-    if (!row) return;
-    if (e.target.closest("[data-toggle]") && !e.target.closest("select")) {
-      const d = row.querySelector(".dash-row__detail");
-      d.hidden = !d.hidden;
-    }
-    if (e.target.closest("[data-save-note]")) {
-      const btn = e.target.closest("[data-save-note]");
-      const note = row.querySelector("[data-note]").value;
-      btn.textContent = "Saving…";
-      const { error } = await supabase.from("leads").update({ owner_notes: note }).eq("id", row.dataset.id);
-      btn.textContent = error ? "Failed — retry" : "Saved";
-      setTimeout(() => { btn.textContent = "Save note"; }, 1800);
-      const lead = leads.find((l) => l.id === row.dataset.id);
-      if (lead && !error) lead.owner_notes = note;
-    }
+  function renderTable() {
+    const rows = filteredLeads();
+    if (!rows.length) { $("#leads-list").innerHTML = '<p class="dash-empty">No leads here yet. New inquiries from the site will appear automatically.</p>'; return; }
+    $("#leads-list").innerHTML = `
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead><tr><th>Name</th><th>Intent</th><th>Contact</th><th>Brief</th><th>Source</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            ${rows.map((l) => {
+              const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+              return `
+              <tr data-id="${l.id}">
+                <td><button type="button" class="dash-linkbtn" data-view-lead>${esc(l.name || "(no name)")}</button></td>
+                <td>${esc(l.intent || "—")}</td>
+                <td>${esc(l.email || "—")}${l.phone ? "<br>" + esc(l.phone) : ""}</td>
+                <td>${esc([l.districts, l.budget_range, l.timeframe].filter(Boolean).join(" · ") || "—")}</td>
+                <td>${esc(l.source_page || "—")}${l.listing_slug ? "<br>" + esc(l.listing_slug) : ""}</td>
+                <td>
+                  <select class="dash-status ${l.status === "new" ? "dash-status--new" : ""}" data-status>
+                    ${STATUSES.map((s) => `<option value="${s}" ${s === l.status ? "selected" : ""}>${STATUS_LABELS[s]}</option>`).join("")}
+                  </select>
+                </td>
+                <td>${when}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  async function updateLeadStatus(id, status) {
+    const { error } = await supabase.from("leads").update({ status }).eq("id", id);
+    if (error) { alert("Could not update status: " + error.message); return false; }
+    const lead = leads.find((l) => l.id === id);
+    if (lead) lead.status = status;
+    return true;
+  }
+
+  /* board: click to open detail */
+  $("#leads-board").addEventListener("click", (e) => {
+    const card = e.target.closest(".kanban-card");
+    if (!card) return;
+    const lead = leads.find((l) => l.id === card.dataset.id);
+    if (lead) openLeadDetail(lead);
   });
 
+  /* board: drag and drop between columns */
+  $("#leads-board").addEventListener("dragstart", (e) => {
+    const card = e.target.closest(".kanban-card");
+    if (!card) return;
+    e.dataTransfer.setData("text/plain", card.dataset.id);
+    e.dataTransfer.effectAllowed = "move";
+    card.classList.add("is-dragging");
+  });
+  $("#leads-board").addEventListener("dragend", (e) => {
+    const card = e.target.closest(".kanban-card");
+    if (card) card.classList.remove("is-dragging");
+  });
+  $("#leads-board").addEventListener("dragover", (e) => {
+    const col = e.target.closest(".kanban-col");
+    if (!col) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    col.classList.add("is-dragover");
+  });
+  $("#leads-board").addEventListener("dragleave", (e) => {
+    const col = e.target.closest(".kanban-col");
+    if (col && !col.contains(e.relatedTarget)) col.classList.remove("is-dragover");
+  });
+  $("#leads-board").addEventListener("drop", async (e) => {
+    const col = e.target.closest(".kanban-col");
+    if (!col) return;
+    e.preventDefault();
+    col.classList.remove("is-dragover");
+    const id = e.dataTransfer.getData("text/plain");
+    const lead = leads.find((l) => l.id === id);
+    if (!lead || lead.status === col.dataset.status) return;
+    const ok = await updateLeadStatus(id, col.dataset.status);
+    if (ok) renderLeads();
+  });
+
+  /* table: click name to open detail, status select updates directly */
+  $("#leads-list").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-view-lead]");
+    if (!btn) return;
+    const row = btn.closest("tr");
+    const lead = leads.find((l) => l.id === row.dataset.id);
+    if (lead) openLeadDetail(lead);
+  });
   $("#leads-list").addEventListener("change", async (e) => {
     const sel = e.target.closest("[data-status]");
     if (!sel) return;
-    const row = e.target.closest(".dash-row");
-    const { error } = await supabase.from("leads").update({ status: sel.value }).eq("id", row.dataset.id);
-    if (error) { alert("Could not update status: " + error.message); return; }
-    const lead = leads.find((l) => l.id === row.dataset.id);
-    if (lead) lead.status = sel.value;
-    sel.classList.toggle("dash-status--new", sel.value === "new");
+    const row = e.target.closest("tr");
+    const ok = await updateLeadStatus(row.dataset.id, sel.value);
+    if (ok) renderLeads();
+  });
+
+  /* shared detail panel */
+  function openLeadDetail(l) {
+    $("#lead-detail-title").textContent = l.name || "(no name)";
+    $("#lead-detail").dataset.id = l.id;
+    const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+    $("#lead-detail-body").innerHTML = `
+      <dl style="margin:0">
+        <dt>Status</dt>
+        <dd>
+          <select class="dash-status ${l.status === "new" ? "dash-status--new" : ""}" data-detail-status>
+            ${STATUSES.map((s) => `<option value="${s}" ${s === l.status ? "selected" : ""}>${STATUS_LABELS[s]}</option>`).join("")}
+          </select>
+        </dd>
+        <dt>Contact</dt><dd>${esc(l.email || "—")}${l.phone ? " · " + esc(l.phone) : ""}
+          ${l.email ? ` · <a class="dash-linkbtn" href="mailto:${esc(l.email)}">write back</a>` : ""}</dd>
+        <dt>Intent</dt><dd>${esc(l.intent || "—")}</dd>
+        <dt>Brief</dt><dd>${esc([l.districts, l.budget_range, l.timeframe].filter(Boolean).join(" · ") || "—")}</dd>
+        <dt>Source</dt><dd>${when} · ${esc(l.source_page || "—")}${l.listing_slug ? " · " + esc(l.listing_slug) : ""}</dd>
+        ${l.notes ? `<dt>Their note</dt><dd>${esc(l.notes)}</dd>` : ""}
+        <dt>Your notes</dt>
+        <dd><textarea class="dash-note-field" data-note placeholder="Private notes — viewing feedback, next steps…">${esc(l.owner_notes || "")}</textarea>
+        <button type="button" class="btn" data-save-note style="margin-top:var(--space-2)">Save note</button></dd>
+      </dl>`;
+    $("#lead-detail").hidden = false;
+    $("#lead-detail").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  $("#lead-detail-close").addEventListener("click", () => { $("#lead-detail").hidden = true; });
+
+  $("#lead-detail-body").addEventListener("change", async (e) => {
+    const sel = e.target.closest("[data-detail-status]");
+    if (!sel) return;
+    const id = $("#lead-detail").dataset.id;
+    const ok = await updateLeadStatus(id, sel.value);
+    if (ok) { sel.classList.toggle("dash-status--new", sel.value === "new"); renderLeads(); }
+  });
+
+  $("#lead-detail-body").addEventListener("click", async (e) => {
+    if (!e.target.closest("[data-save-note]")) return;
+    const btn = e.target.closest("[data-save-note]");
+    const id = $("#lead-detail").dataset.id;
+    const note = $("#lead-detail-body [data-note]").value;
+    btn.textContent = "Saving…";
+    const { error } = await supabase.from("leads").update({ owner_notes: note }).eq("id", id);
+    btn.textContent = error ? "Failed — retry" : "Saved";
+    setTimeout(() => { btn.textContent = "Save note"; }, 1800);
+    const lead = leads.find((l) => l.id === id);
+    if (lead && !error) lead.owner_notes = note;
   });
 
   /* ————— listings ————— */

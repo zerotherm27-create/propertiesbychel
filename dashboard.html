@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=15">
+<link rel="stylesheet" href="css/site.css?v=16">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -75,13 +75,14 @@
           <button class="chip" id="view-board-btn" aria-pressed="true">Board</button>
           <button class="chip" id="view-list-btn" aria-pressed="false">List</button>
         </div>
-        <div class="filterbar" style="border:0;padding:0" id="lead-filters" hidden>
+        <div class="filterbar" style="border:0;padding:0" id="lead-filters">
           <button class="chip" aria-pressed="true" data-lstatus="active">Active</button>
           <button class="chip" aria-pressed="false" data-lstatus="new">New</button>
           <button class="chip" aria-pressed="false" data-lstatus="contacted">Contacted</button>
           <button class="chip" aria-pressed="false" data-lstatus="viewing">Viewing</button>
           <button class="chip" aria-pressed="false" data-lstatus="negotiating">Negotiating</button>
           <button class="chip" aria-pressed="false" data-lstatus="closed">Closed</button>
+          <button class="chip" aria-pressed="false" data-lstatus="archived">Archived</button>
           <button class="chip" aria-pressed="false" data-lstatus="all">All</button>
         </div>
       </div>
@@ -89,7 +90,7 @@
       <div id="leads-list" class="dash-list" hidden></div>
     </div>
 
-    <!-- Selected lead detail (board view) -->
+    <!-- Selected lead detail -->
     <div class="dash-panel" id="lead-detail" hidden>
       <div class="dash-panel__head">
         <h2 class="h3" id="lead-detail-title">Lead</h2>
@@ -182,9 +183,17 @@
       <p class="field__note" id="photos-note"></p>
     </div>
   </section>
+
+  <!-- Automation -->
+  <section id="tab-automation" class="dash-tab" hidden>
+    <div class="dash-panel">
+      <div class="dash-panel__head"><h2 class="h3">Automation</h2></div>
+      <p class="field__note">AI-powered email automation is not set up yet. Tell Claude when you're ready to configure it.</p>
+    </div>
+  </section>
 </main>
 
 <script src="js/supabase-config.js?v=15"></script>
-<script type="module" src="js/dashboard.js?v=15"></script>
+<script type="module" src="js/dashboard.js?v=16"></script>
 </body>
 </html>

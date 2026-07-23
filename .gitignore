@@ -3,3 +3,4 @@
 .hallmark/
 .claude/
 node_modules/
+.vercel
