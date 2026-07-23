@@ -14,5 +14,7 @@
 window.SUPABASE_CONFIG = {
   url: "https://ndoiommnmkeoukxbnobp.supabase.co",
   anonKey: "sb_publishable_u3EntIBoaYn83t3sDXaL2g_kzgnZMT8",
-  ownerEmail: "concierge@propertiesbychel.com"
+  ownerEmail: "concierge@propertiesbychel.com",
+  // AI research/draft/image server for the dashboard's Content tab (see server/).
+  contentAgentUrl: "https://propertiesbychel-content-agent-production.up.railway.app"
 };

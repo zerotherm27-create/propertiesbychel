@@ -63,6 +63,7 @@
     <button class="chip" data-tab="leads" aria-pressed="true">Leads</button>
     <button class="chip" data-tab="listings" aria-pressed="false">Listings</button>
     <button class="chip" data-tab="photos" aria-pressed="false">Site Photos</button>
+    <button class="chip" data-tab="content" aria-pressed="false">Content</button>
     <button class="chip" data-tab="automation" aria-pressed="false">Automation</button>
   </nav>
 
@@ -184,6 +185,60 @@
     </div>
   </section>
 
+  <!-- Content: Journal & Intelligence -->
+  <section id="tab-content" class="dash-tab" hidden>
+    <div class="dash-panel">
+      <div class="dash-panel__head">
+        <h2 class="h3">Content — Journal &amp; Intelligence</h2>
+        <button class="btn" id="article-new-btn">+ New article</button>
+      </div>
+      <div id="articles-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel" id="article-editor" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="article-editor-title">New article</h2>
+        <button class="funnel-back" id="article-editor-close">Close</button>
+      </div>
+
+      <div class="dash-panel" style="background:var(--paper-2, var(--paper))">
+        <p class="eyebrow">AI Research &amp; Draft</p>
+        <p class="field__note">Give a topic — the agent researches it, drafts the article and a hero image, and checks it against an SEO/UX checklist. Everything lands in the fields below, editable before you publish.</p>
+        <div class="dash-form__row">
+          <div class="field" style="flex:1"><label>Topic</label><input id="ai-topic" placeholder="e.g. Why village resale supply keeps tightening in Makati"></div>
+        </div>
+        <button class="btn" type="button" id="ai-draft-btn">Research &amp; draft</button>
+        <button class="btn" type="button" id="ai-image-btn" disabled>Generate hero image</button>
+        <p class="field__note" id="ai-status"></p>
+      </div>
+
+      <form id="article-form" class="dash-form">
+        <input type="hidden" name="id">
+        <div class="dash-form__row">
+          <div class="field"><label>Section</label>
+            <select name="section"><option value="journal">Journal</option><option value="intelligence">Intelligence</option></select>
+          </div>
+          <div class="field" style="flex:1"><label>Title</label><input name="title" required></div>
+        </div>
+        <div class="field"><label>Slug</label><input name="slug" required placeholder="auto-generated from title"></div>
+        <div class="field"><label>Dek (one or two sentences, shown on the index page)</label><textarea name="dek" rows="2"></textarea></div>
+        <div class="field"><label>Body (paragraphs, blank line between each)</label><textarea name="body" rows="10" required></textarea></div>
+        <div class="field"><label>Meta description (SEO)</label><textarea name="meta_description" rows="2"></textarea></div>
+        <div class="field">
+          <label>Hero image</label>
+          <input type="file" id="article-photo" accept="image/*">
+          <img id="article-photo-preview" class="dash-preview" hidden alt="Hero image preview">
+          <input type="hidden" name="hero_image_url">
+          <input type="hidden" name="hero_image_alt">
+        </div>
+        <p class="field__note" id="article-seo-notes"></p>
+        <label class="dash-switch"><input type="checkbox" name="published"> Published on the site</label>
+        <button class="btn btn--solid" type="submit" id="article-save">Save article</button>
+        <p class="field__error" id="article-error" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
   <!-- Automation -->
   <section id="tab-automation" class="dash-tab" hidden>
     <div class="dash-panel">
@@ -193,7 +248,8 @@
   </section>
 </main>
 
-<script src="js/supabase-config.js?v=15"></script>
-<script type="module" src="js/dashboard.js?v=16"></script>
+<script src="js/supabase-config.js?v=16"></script>
+<script type="module" src="js/dashboard-content.js?v=1"></script>
+<script type="module" src="js/dashboard.js?v=17"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Journal — Essays &amp; Briefings · Properties by Chel</title>
-<meta name="description" content="Long-form essays, neighbourhood studies, and market briefings on prime Philippine property — written to be read, not scrolled.">
+<title id="doc-title">Properties by Chel</title>
+<meta id="doc-description" name="description" content="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -26,8 +26,8 @@
     <nav class="masthead__nav" aria-label="Primary">
       <a href="properties.html">The Collection</a>
       <a href="districts.html">Districts</a>
-      <a href="intelligence.html">Intelligence</a>
-      <a href="journal.html" aria-current="page">Journal</a>
+      <a href="intelligence.html" id="nav-intelligence">Intelligence</a>
+      <a href="journal.html" id="nav-journal">Journal</a>
       <a href="about.html">About</a>
       <a class="masthead__cta" href="presentation.html">Private Presentation</a>
     </nav>
@@ -47,7 +47,7 @@
     <li><a href="intelligence.html">Market Intelligence</a></li>
     <li><a href="sellers.html">For Sellers</a></li>
     <li><a href="foreign-buyers.html">Foreign Buyer Guidance</a></li>
-    <li><a href="journal.html" aria-current="page">Journal</a></li>
+    <li><a href="journal.html">Journal</a></li>
     <li><a href="about.html">About Chel</a></li>
     <li><a href="presentation.html">Private Presentation</a></li>
     <li><a href="contact.html">Contact</a></li>
@@ -59,72 +59,56 @@
 </div>
 
 <main id="main">
+  <div id="article-loading" class="shell" style="padding-block:var(--space-20)">
+    <p class="meta">Loading…</p>
+  </div>
+  <div id="article-notfound" class="shell text-center" style="padding-block:var(--space-20)" hidden>
+    <p class="eyebrow eyebrow--bare" style="justify-content:center">Not found</p>
+    <h1 class="h2 mt-8">This piece isn't here anymore.</h1>
+    <p class="lede mt-6">It may have been unpublished or the link may be out of date.</p>
+    <a class="link-line mt-8" style="display:inline-flex;justify-content:center" href="journal.html">Back to the Journal <span class="arr">→</span></a>
+  </div>
 
-  <section class="page-hero" aria-labelledby="j-h">
-    <div class="shell">
-      <p class="eyebrow">The Journal</p>
-      <h1 class="h1" id="j-h">Essays from<br>the ground.</h1>
-      <p class="lede">Neighbourhood studies, market briefings, and the occasional property story — published when there's something worth saying, not on a content calendar.</p>
-    </div>
-  </section>
-
-  <!-- Featured essay -->
-  <section class="section section--flush-top" aria-labelledby="jf-h">
-    <div class="shell">
-      <a class="split" href="journal-article.html" style="display:grid" data-reveal>
-        <div class="split__a">
-          <figure>
-            <div class="frame frame--hover frame--corners" style="aspect-ratio:16/10">
-              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDWNZfFVE1UocKJ3D1D8bJPQ8ZjnRIl38qG1bcquhd3CIiGI3ByjZGDjUqEj6NdhpOOYgSgFj97DXzeI60NcG9NF4031vu_0eS_5qL2vR5KUueVq-xFUfa2VSVgGZy141r7xPj4WYVR3Gp9xQCU152GoaMmiKt3ixDfp65hPV5Ukb11eRK0SRru-lAWvmBShU5rJ3ONoGg21HwakDerc2dWHxv4Qu2WQm95_JVaVrnZiZtESi6wJiC1g" alt="Mature acacia canopy over a Makati village street in morning light" loading="lazy">
-            </div>
-          </figure>
-        </div>
-        <div class="split__b">
-          <p class="meta">Featured essay · Neighbourhood study</p>
-          <h2 class="h2 mt-6" id="jf-h">The Quiet Economics of a Tree-Lined Street</h2>
-          <p class="prose mt-6">Why Makati's village canopies are worth more than another storey — and what fifty-year acacias tell you about title, neighbours, and the patience of capital.</p>
-          <span class="link-line mt-8" style="display:inline-flex">Read the essay <span class="arr">→</span></span>
-        </div>
-      </a>
-    </div>
-  </section>
-
-  <!-- Index -->
-  <section class="section band-parchment" aria-labelledby="ji-h">
-    <div class="shell">
-      <div class="mb-16" data-reveal>
-        <p class="eyebrow">The Archive</p>
-        <h2 class="h2 mt-8" id="ji-h">Recent entries</h2>
+  <div id="article-content" hidden>
+    <header class="page-hero text-center" aria-labelledby="art-h">
+      <div class="shell" style="max-width:52rem">
+        <p class="eyebrow eyebrow--bare" id="art-eyebrow" style="justify-content:center"></p>
+        <h1 class="h1" id="art-h" style="margin-inline:auto;max-width:24ch"></h1>
+        <p class="meta mt-8" id="art-meta"></p>
       </div>
-      <div data-reveal-stagger id="journal-index">
-        <a class="index-row" href="journal-article.html" data-reveal>
-          <span class="index-row__no">J·05</span>
-          <span class="index-row__title">Reading a condominium board before you buy the unit</span>
-          <span class="index-row__meta">Briefing · Metro Manila</span>
-        </a>
-        <a class="index-row" href="journal-article.html" data-reveal>
-          <span class="index-row__no">J·04</span>
-          <span class="index-row__title">Salcedo mornings: a market that shops on foot</span>
-          <span class="index-row__meta">Neighbourhood essay · Makati</span>
-        </a>
-        <a class="index-row" href="journal-article.html" data-reveal>
-          <span class="index-row__no">J·03</span>
-          <span class="index-row__title">What the highlands ask of a weekend house</span>
-          <span class="index-row__meta">Essay · Batangas</span>
-        </a>
-        <a class="index-row" href="journal-article.html" data-reveal>
-          <span class="index-row__no">J·02</span>
-          <span class="index-row__title">Allocations, plainly: buying before the tower exists</span>
-          <span class="index-row__meta">Briefing · Investment</span>
-        </a>
-        <a class="index-row" href="journal-article.html" data-reveal>
-          <span class="index-row__no">J·01</span>
-          <span class="index-row__title">A house is not a listing: notes on selling well</span>
-          <span class="index-row__meta">Essay · Practice</span>
+    </header>
+
+    <div class="shell mb-16" id="art-figure-wrap" style="max-width:64rem" hidden>
+      <figure data-reveal>
+        <div class="frame" style="aspect-ratio:21/9">
+          <img id="art-image" src="" alt="" fetchpriority="high">
+        </div>
+      </figure>
+    </div>
+
+    <div id="art-body-mount"></div>
+
+    <section class="section band-parchment" aria-labelledby="art-cta-h">
+      <div class="shell grid-12">
+        <div class="col-span-6 col-start-2" data-reveal>
+          <p class="eyebrow">Continue the Conversation</p>
+          <h2 class="h3 mt-8" id="art-cta-h">A private read on your own situation.</h2>
+          <p class="prose mt-6">Every piece here is general by design. If it touches something specific to your property or your search, that conversation is best had directly.</p>
+          <a class="btn mt-12" href="presentation.html">Request a private presentation</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-label="More">
+      <div class="shell">
+        <p class="eyebrow mb-12" id="art-more-label">More</p>
+        <a class="index-row" id="art-more-link" href="journal.html">
+          <span class="index-row__title" id="art-more-title">See the full archive</span>
+          <span class="index-row__meta">→</span>
         </a>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </main>
 
 <footer class="footer">

@@ -75,6 +75,7 @@ async function init(supabase) {
     loadLeads();
     loadListings();
     loadPhotos();
+    if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto });
   }
 
   /* tabs */
@@ -82,7 +83,7 @@ async function init(supabase) {
     chip.addEventListener("click", () => {
       $$(".dash-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       chip.setAttribute("aria-pressed", "true");
-      ["leads", "listings", "photos", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
+      ["leads", "listings", "photos", "content", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
     });
   });
 
