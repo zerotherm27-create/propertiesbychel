@@ -72,32 +72,28 @@
   /* — Cinematic hero scrub (home) — */
   var cine = document.querySelector(".cine");
   if (cine && !reduceMotion) {
-    var plate = cine.querySelector(".cine__plate");
-    var img = cine.querySelector(".cine__media img");
-    var paper = cine.querySelector(".cine__paper");
-    var veil = cine.querySelector(".cine__veil");
     var lines = cine.querySelectorAll(".cine__line");
     var eyebrow = cine.querySelector(".cine__title .eyebrow");
     var close = cine.querySelector(".cine__close");
     var cue = cine.querySelector(".cine__scrollcue");
     var ticking = false;
+    var scrubbing = false;
 
     var clamp = function (v) { return Math.min(1, Math.max(0, v)); };
     var seg = function (p, a, b) { return clamp((p - a) / (b - a)); };
     var ease = function (t) { return 1 - Math.pow(1 - t, 3); };
+
+    // Let the browser paint the resting (opacity:0) entrance state once before
+    // triggering the CSS transition, so the plate/headline actually fade+drift in.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { cine.classList.add("is-ready"); });
+    });
 
     function frame() {
       ticking = false;
       var rect = cine.getBoundingClientRect();
       var total = rect.height - window.innerHeight;
       var p = clamp(-rect.top / total);
-
-      var open = ease(seg(p, 0, 0.45));
-      var top = 48 * (1 - open), side = 10 * (1 - open), bottom = 10 * (1 - open);
-      plate.style.clipPath = "inset(" + top + "% " + side + "% " + bottom + "% " + side + "%)";
-      img.style.transform = "scale(" + (1.12 - 0.12 * ease(seg(p, 0, 0.7))) + ")";
-      paper.style.opacity = String(1 - seg(p, 0.25, 0.5));
-      veil.style.opacity = String(seg(p, 0.35, 0.65));
 
       var exit = seg(p, 0.2, 0.42);
       lines.forEach(function (ln, i) {
@@ -112,12 +108,18 @@
       close.style.opacity = String(arrive);
       close.style.transform = "translateY(" + (24 * (1 - arrive)) + "px)";
       close.classList.toggle("is-live", arrive > 0.6);
+
+      if (window.heroSequence && window.heroSequence.ready) window.heroSequence.setProgress(p);
     }
-    function onScroll() {
+    function requestFrame() {
       if (!ticking) { ticking = true; requestAnimationFrame(frame); }
     }
+    function onScroll() {
+      if (!scrubbing && window.scrollY > 0) { scrubbing = true; cine.classList.add("is-scrubbing"); }
+      requestFrame();
+    }
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", requestFrame);
     frame();
   }
 
