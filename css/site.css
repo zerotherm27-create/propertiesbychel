@@ -459,6 +459,9 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .band .meta { color: var(--on-espresso-soft); }
 .band-parchment { background: var(--paper-2); }
 .band-stone { background: var(--stone); }
+/* Invitation bands sit directly on the footer (same --espresso bg) — the section's
+ * own bottom padding plus the footer's top padding otherwise doubles up into a dead gap. */
+.band:last-child { padding-bottom: var(--space-10); }
 
 /* ————— Journal / long-form prose ————— */
 .article { max-width: var(--measure); margin-inline: auto; }
