@@ -2,13 +2,13 @@
 (function () {
   "use strict";
 
-  var FRAME_COUNT = 80;
-  var FRAME_BASE = "images/hero-sequence/frame-";
+  var isLightTier = !window.matchMedia("(min-width: 800px)").matches;
+  var FRAME_COUNT = isLightTier ? 40 : 80;
+  var FRAME_BASE = isLightTier ? "images/hero-sequence-mobile/frame-" : "images/hero-sequence/frame-";
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var wideEnough = window.matchMedia("(min-width: 800px)").matches;
   var saveData = navigator.connection && navigator.connection.saveData;
-  if (reduceMotion || !wideEnough || saveData) return;
+  if (reduceMotion || saveData) return;
 
   var cine = document.querySelector(".cine");
   var canvas = cine && cine.querySelector(".cine__sequence");
