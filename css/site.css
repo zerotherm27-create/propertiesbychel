@@ -72,7 +72,6 @@ a { color: inherit; text-decoration: none; }
   transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
 }
 .btn:hover, .btn.is-hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn:active, .btn.is-active { transform: translateY(1px); }
 .btn[disabled], .btn.is-disabled { opacity: 0.4; pointer-events: none; }
 .btn[data-state="loading"] { color: transparent; position: relative; pointer-events: none; }
 .btn[data-state="loading"]::after {

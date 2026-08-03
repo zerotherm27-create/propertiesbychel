@@ -24,6 +24,7 @@
     document.body.classList.toggle("menu-open", open);
     if (toggle) toggle.setAttribute("aria-expanded", String(open));
     if (open) (closeBtn || overlay).focus();
+    document.dispatchEvent(new CustomEvent("menu:toggle", { detail: { open: open } }));
   }
   if (toggle) toggle.addEventListener("click", function () { setMenu(true); });
   if (closeBtn) closeBtn.addEventListener("click", function () { setMenu(false); });
