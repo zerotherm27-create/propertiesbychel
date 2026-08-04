@@ -6,7 +6,7 @@ const slugify = (t) => String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
 const paragraphsToBody = (text) => String(text || "").split(/\n{2,}/).map((p) => p.trim()).filter(Boolean).join("\n\n");
 
 window.DashboardContent = {
-  init(supabase, { $, $$, esc, uploadPhoto }) {
+  init(supabase, { $, $$, esc, uploadPhoto, showToast }) {
     if (this._initialized) return;
     this._initialized = true;
 
@@ -97,7 +97,7 @@ window.DashboardContent = {
       if (e.target.closest("[data-del]")) {
         if (!confirm(`Delete "${a.title}"? This cannot be undone.`)) return;
         const { error } = await supabase.from("articles").delete().eq("id", a.id);
-        if (error) alert("Could not delete: " + error.message); else loadArticles();
+        if (error) showToast("Could not delete: " + error.message, true); else loadArticles();
       }
     });
 
@@ -107,7 +107,7 @@ window.DashboardContent = {
       const publish = e.target.checked;
       const patch = { status: publish ? "published" : "draft", published_at: publish ? new Date().toISOString() : null };
       const { error } = await supabase.from("articles").update(patch).eq("id", row.dataset.id);
-      if (error) { alert("Could not update: " + error.message); loadArticles(); } else loadArticles();
+      if (error) { showToast("Could not update: " + error.message, true); loadArticles(); } else loadArticles();
     });
 
     /* ————— AI research & draft ————— */

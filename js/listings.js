@@ -41,7 +41,9 @@
   /* — Collection gallery — */
   var gallery = document.querySelector(".gallery[data-listings]");
   if (gallery) {
+    gallery.setAttribute("data-is-loading", "");
     api("listings?select=*&published=eq.true&order=sort_order.asc").then(function (rows) {
+      gallery.removeAttribute("data-is-loading");
       if (!rows.length) return;
       gallery.innerHTML = rows.map(function (l, i) {
         var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
@@ -59,14 +61,16 @@
         );
       }).join("");
       document.dispatchEvent(new CustomEvent("listings:rendered"));
-    }).catch(function () { /* static sample gallery stands */ });
+    }).catch(function () { gallery.removeAttribute("data-is-loading"); /* static sample gallery stands */ });
   }
 
   /* — Property detail — */
   var detail = document.querySelector("[data-listing-detail]");
   var slug = new URLSearchParams(location.search).get("slug");
   if (detail && slug) {
+    detail.setAttribute("data-is-loading", "");
     api("listings?select=*&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
+      detail.removeAttribute("data-is-loading");
       var l = rows[0];
       if (!l) return;
       document.title = l.title + " · Private Presentation · Properties by Chel";
@@ -112,13 +116,15 @@
       document.querySelectorAll('a[href^="presentation.html"]').forEach(function (a) {
         a.href = "presentation.html?listing=" + encodeURIComponent(l.slug);
       });
-    }).catch(function () { /* sample content stands */ });
+    }).catch(function () { detail.removeAttribute("data-is-loading"); /* sample content stands */ });
   }
 
   /* — Home spotlight (featured listing) — */
   var spot = document.querySelector("[data-featured-spotlight]");
   if (spot) {
+    spot.setAttribute("data-is-loading", "");
     api("listings?select=*&published=eq.true&featured=eq.true&order=sort_order.asc&limit=1").then(function (rows) {
+      spot.removeAttribute("data-is-loading");
       var l = rows[0];
       if (!l) return;
       var t = spot.querySelector("[data-f-title]");
@@ -136,6 +142,6 @@
         var sample = spot.querySelector("[data-sample-only]");
         if (sample) sample.hidden = true;
       }
-    }).catch(function () { /* static spotlight stands */ });
+    }).catch(function () { spot.removeAttribute("data-is-loading"); /* static spotlight stands */ });
   }
 })();

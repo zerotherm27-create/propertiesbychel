@@ -188,12 +188,47 @@
     });
   }
 
+  function fieldWrap(input) { return input.closest(".field"); }
+  function clearFieldError(input) {
+    var wrap = fieldWrap(input);
+    if (!wrap) return;
+    wrap.classList.remove("field--error");
+    var msg = wrap.querySelector(".field__error");
+    if (msg) msg.remove();
+  }
+  function setFieldError(input) {
+    var wrap = fieldWrap(input);
+    if (!wrap) return;
+    wrap.classList.add("field--error");
+    var msg = wrap.querySelector(".field__error");
+    if (!msg) {
+      msg = document.createElement("p");
+      msg.className = "field__error";
+      wrap.appendChild(msg);
+    }
+    msg.textContent = input.validationMessage;
+  }
+  function validateForm(form) {
+    var firstInvalid = null;
+    form.querySelectorAll(".field input, .field select, .field textarea").forEach(function (input) {
+      if (input.checkValidity()) { clearFieldError(input); return; }
+      setFieldError(input);
+      if (!firstInvalid) firstInvalid = input;
+    });
+    return firstInvalid;
+  }
+
   document.querySelectorAll("form[data-enquiry]").forEach(function (form) {
+    form.querySelectorAll(".field input, .field select, .field textarea").forEach(function (input) {
+      input.addEventListener("input", function () { if (input.checkValidity()) clearFieldError(input); });
+      input.addEventListener("blur", function () { if (!input.checkValidity()) setFieldError(input); });
+    });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var btn = form.querySelector('button[type="submit"]');
       var note = form.querySelector("[data-form-note]");
-      if (!form.checkValidity()) { form.reportValidity(); return; }
+      var firstInvalid = validateForm(form);
+      if (firstInvalid) { firstInvalid.focus(); return; }
       btn.dataset.state = "loading";
       submitLead(leadFromForm(form)).then(function () {
         btn.dataset.state = "success";

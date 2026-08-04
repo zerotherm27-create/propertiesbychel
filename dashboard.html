@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=28">
+<link rel="stylesheet" href="css/site.css?v=30">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -60,6 +60,7 @@
 
 <!-- App -->
 <main class="dash-shell" id="view-app" hidden>
+  <div class="dash-toast" id="dash-toast" role="status" aria-live="polite"></div>
   <nav class="dash-tabs" aria-label="Dashboard sections">
     <button class="chip" data-tab="leads" aria-pressed="true">Leads</button>
     <button class="chip" data-tab="listings" aria-pressed="false">Listings</button>

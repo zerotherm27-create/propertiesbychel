@@ -15,6 +15,17 @@ function show(name) {
   $("#signout-btn").hidden = name !== "app";
 }
 
+let toastTimer = null;
+function showToast(message, isError) {
+  const toast = $("#dash-toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.toggle("is-error", !!isError);
+  toast.classList.add("is-visible");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 4000);
+}
+
 if (!SB.url || !SB.anonKey) {
   show("unconfigured");
 } else {
@@ -94,7 +105,7 @@ async function init(supabase) {
     loadLeads();
     loadListings();
     loadPhotos();
-    if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto });
+    if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto, showToast });
   }
 
   /* tabs */
@@ -253,7 +264,7 @@ async function init(supabase) {
 
   async function updateLeadStatus(id, status) {
     const { error } = await supabase.from("leads").update({ status }).eq("id", id);
-    if (error) { alert("Could not update status: " + error.message); return false; }
+    if (error) { showToast("Could not update status: " + error.message, true); return false; }
     const lead = leads.find((l) => l.id === id);
     if (lead) lead.status = status;
     return true;
@@ -447,7 +458,7 @@ async function init(supabase) {
         const url = await uploadPhoto(f, "listings-gallery");
         galleryImages.push({ url, alt: "" });
       } catch (ex) {
-        alert("Could not upload one of the photos: " + (ex.message || ex));
+        showToast("Could not upload one of the photos: " + (ex.message || ex), true);
       }
     }
     $("#listing-gallery-input").value = "";
@@ -520,7 +531,7 @@ async function init(supabase) {
     if (e.target.closest("[data-del]")) {
       if (!confirm(`Delete "${l.title}"? This cannot be undone.`)) return;
       const { error } = await supabase.from("listings").delete().eq("id", l.id);
-      if (error) alert("Could not delete: " + error.message);
+      if (error) showToast("Could not delete: " + error.message, true);
       else loadListings();
     }
   });
@@ -532,7 +543,7 @@ async function init(supabase) {
                 : e.target.closest("[data-feat]") ? { featured: e.target.checked } : null;
     if (!patch) return;
     const { error } = await supabase.from("listings").update(patch).eq("id", row.dataset.id);
-    if (error) { alert("Could not update: " + error.message); loadListings(); }
+    if (error) { showToast("Could not update: " + error.message, true); loadListings(); }
   });
 
   /* ————— site photos ————— */
