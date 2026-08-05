@@ -294,7 +294,7 @@ figcaption { font-size: var(--text-sm); color: var(--ink-faint); padding-top: va
 a.index-row:hover .index-row__title { font-style: italic; }
 a.index-row:hover { background-color: color-mix(in oklch, var(--ink) 4%, transparent); padding-inline: var(--space-4); }
 a.index-row:hover .index-row__no { transform: translateX(2px); }
-.index-row__meta { font-size: var(--text-sm); color: var(--ink-faint); text-align: right; }
+.index-row__meta { font-size: var(--text-sm); color: var(--ink-faint); text-align: right; max-width: 22rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* — Intelligence: note strip & snapshots — */
 .masthead-note { font-size: var(--text-caps); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); display: flex; gap: var(--space-8); flex-wrap: wrap; border-block: var(--rule) solid var(--line); padding-block: var(--space-4); }

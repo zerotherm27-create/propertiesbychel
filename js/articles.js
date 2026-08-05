@@ -9,6 +9,27 @@ if (SB.url && SB.anonKey) {
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  // Article bodies are plain text blocks separated by a blank line; a block
+  // starting with "## " is a subheading and "> " is a pull-quote, matching
+  // the markup convention the AI drafting prompt is instructed to produce.
+  function renderBodyBlock(block, pClass) {
+    if (block.startsWith("## ")) {
+      const h2 = document.createElement("h2");
+      h2.textContent = block.slice(3).trim();
+      return h2;
+    }
+    if (block.startsWith("> ")) {
+      const bq = document.createElement("blockquote");
+      bq.className = "pullquote";
+      bq.textContent = block.slice(2).trim();
+      return bq;
+    }
+    const p = document.createElement("p");
+    if (pClass) p.className = pClass;
+    p.textContent = block;
+    return p;
+  }
+
   const params = new URLSearchParams(location.search);
   const slug = params.get("slug");
 
@@ -44,11 +65,11 @@ if (SB.url && SB.anonKey) {
     }
 
     const mount = document.getElementById("art-body-mount");
-    const paragraphs = String(article.body || "").split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+    const blocks = String(article.body || "").split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
     if (isJournal) {
       const art = document.createElement("article");
       art.className = "article section section--flush-top";
-      paragraphs.forEach((p) => { const el = document.createElement("p"); el.textContent = p; art.appendChild(el); });
+      blocks.forEach((b) => art.appendChild(renderBodyBlock(b)));
       mount.appendChild(art);
     } else {
       const section = document.createElement("section");
@@ -56,7 +77,7 @@ if (SB.url && SB.anonKey) {
       const shell = document.createElement("div");
       shell.className = "shell";
       shell.style.maxWidth = "52rem";
-      paragraphs.forEach((p) => { const el = document.createElement("p"); el.className = "prose mt-6"; el.textContent = p; shell.appendChild(el); });
+      blocks.forEach((b) => shell.appendChild(renderBodyBlock(b, "prose mt-6")));
       section.appendChild(shell);
       mount.appendChild(section);
     }

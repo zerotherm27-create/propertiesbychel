@@ -45,7 +45,7 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
   "title": "a specific, non-generic headline, under 70 characters",
   "dek": "one or two sentences summarizing the piece, for use as an index-row teaser",
   "meta_description": "150 to 160 characters, written for a search results page",
-  "body": "the full article as plain paragraphs separated by a blank line — no markdown, no headings, no dashes as punctuation"
+  "body": "the full article as blocks separated by a blank line: paragraphs in plain prose, plus the '## ' subheading(s) and single '> ' pull-quote called for in the section voice above. No other markdown. No dashes as punctuation."
 }`;
 
   const response = await openai.responses.create({
@@ -68,14 +68,14 @@ Section: ${section}
 Draft JSON:
 ${JSON.stringify(draft, null, 2)}
 
-Check: title length and clarity, meta description length (150-160 chars), whether the body actually addresses the topic, paragraph rhythm and sentence-length variety, and — critically — confirm there is no em dash or en dash anywhere in title, dek, meta_description, or body.
+Check: title length and clarity, meta description length (150-160 chars), whether the body actually addresses the topic, paragraph rhythm and sentence-length variety, that the "## " subheading(s) and (for journal) the single "> " pull-quote called for in the section voice are present and well placed, and — critically — confirm there is no em dash or en dash anywhere in title, dek, meta_description, or body.
 
 Return ONLY a single JSON object, no other text, with exactly these keys:
 {
   "title": "...",
   "dek": "...",
   "meta_description": "...",
-  "body": "...",
+  "body": "... (preserve the '## ' and '> ' block markers, do not flatten them into plain paragraphs)",
   "seo_notes": "two or three sentences of plain notes for the site owner: what's strong, what to watch"
 }
 Return the draft unchanged in the four content fields if it already passes; otherwise return your corrected version.`;
