@@ -216,6 +216,197 @@ window.DashboardContent = {
       }
     });
 
+    /* ————— Standing briefings (one PDF per section) ————— */
+    const BRIEFING_SECTIONS = ["journal", "intelligence"];
+    const BRIEFING_DEFAULTS = {
+      journal: { eyebrow: "Companion Briefing", title: "The Village Market: an Owner's Paper" },
+      intelligence: { eyebrow: "The Library", title: "Prime Residential Quarterly" }
+    };
+    let briefings = {};
+    let currentBriefingSection = null;
+    let currentBriefingPdfUrl = null;
+
+    function sectionsToText(sections) {
+      return (sections || []).map((s) => `## ${s.heading}\n\n${paragraphsToBody(s.body)}`).join("\n\n");
+    }
+
+    function textToSections(text) {
+      const blocks = String(text || "").split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+      const out = [];
+      let current = null;
+      blocks.forEach((b) => {
+        if (b.startsWith("## ")) {
+          current = { heading: b.slice(3).trim(), body: [] };
+          out.push(current);
+        } else if (current) {
+          current.body.push(b);
+        }
+      });
+      return out.map((s) => ({ heading: s.heading, body: s.body.join("\n\n") }));
+    }
+
+    function specFromForm(form) {
+      const rows = [];
+      for (let i = 0; i < 3; i++) {
+        const label = form.elements["spec_label_" + i].value.trim();
+        const value = form.elements["spec_value_" + i].value.trim();
+        if (label && value) rows.push({ label, value });
+      }
+      return rows;
+    }
+
+    async function loadBriefings() {
+      const { data, error } = await supabase.from("briefings").select("*");
+      if (!error && data) briefings = Object.fromEntries(data.map((b) => [b.section, b]));
+      renderBriefingsList();
+    }
+
+    function renderBriefingsList() {
+      const labels = { journal: "Journal", intelligence: "Intelligence" };
+      $("#briefings-list").innerHTML = BRIEFING_SECTIONS.map((section) => {
+        const b = briefings[section];
+        const status = b ? b.status : "not created";
+        const title = b ? b.title : BRIEFING_DEFAULTS[section].title;
+        return `
+        <div class="dash-row" data-section="${section}">
+          <div class="dash-row__line">
+            <span class="dash-row__name">${esc(labels[section])} &middot; ${esc(title)}</span>
+            <span class="dash-row__meta">${esc(status)}${b && b.pdf_url ? " · PDF ready" : ""}</span>
+            <span class="dash-row__spacer"></span>
+            ${b && b.pdf_url ? `<a class="dash-linkbtn" href="${esc(b.pdf_url)}" target="_blank" rel="noopener">View PDF</a>` : ""}
+            <button class="dash-linkbtn" data-edit-briefing>Edit</button>
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    const briefingEditor = $("#briefing-editor");
+    const briefingForm = $("#briefing-form");
+
+    function openBriefingEditor(section) {
+      currentBriefingSection = section;
+      const b = briefings[section];
+      currentBriefingPdfUrl = b ? b.pdf_url || null : null;
+      briefingEditor.hidden = false;
+      $("#briefing-editor-title").textContent = (section === "journal" ? "Journal" : "Intelligence") + " briefing";
+      briefingForm.reset();
+      $("#briefing-ai-status").textContent = "";
+      $("#briefing-pdf-status").textContent = "";
+      briefingForm.elements.section.value = section;
+      const defaults = BRIEFING_DEFAULTS[section];
+      briefingForm.elements.eyebrow.value = b ? b.eyebrow : defaults.eyebrow;
+      briefingForm.elements.title.value = b ? b.title : defaults.title;
+      briefingForm.elements.intro.value = b ? b.intro || "" : "";
+      briefingForm.elements.sections_text.value = sectionsToText(b ? b.sections : []);
+      const spec = b ? b.spec || [] : [];
+      for (let i = 0; i < 3; i++) {
+        briefingForm.elements["spec_label_" + i].value = spec[i] ? spec[i].label : "";
+        briefingForm.elements["spec_value_" + i].value = spec[i] ? spec[i].value : "";
+      }
+      briefingForm.elements.published.checked = b ? b.status === "published" : false;
+      briefingEditor.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    $("#briefing-editor-close").addEventListener("click", () => { briefingEditor.hidden = true; });
+
+    $("#briefings-list").addEventListener("click", (e) => {
+      const row = e.target.closest(".dash-row");
+      if (!row || !e.target.closest("[data-edit-briefing]")) return;
+      openBriefingEditor(row.dataset.section);
+    });
+
+    $("#briefing-draft-btn").addEventListener("click", async () => {
+      if (!AGENT_URL) { $("#briefing-ai-status").textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+      $("#briefing-ai-status").textContent = "Drafting a fresh edition: this can take a minute…";
+      $("#briefing-draft-btn").disabled = true;
+      try {
+        const headers = { "Content-Type": "application/json", ...(await authHeader()) };
+        const r = await fetch(AGENT_URL + "/generate-briefing", { method: "POST", headers, body: JSON.stringify({ section: currentBriefingSection }) });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "Draft failed");
+        briefingForm.elements.eyebrow.value = data.eyebrow || briefingForm.elements.eyebrow.value;
+        briefingForm.elements.title.value = data.title || briefingForm.elements.title.value;
+        briefingForm.elements.intro.value = data.intro || "";
+        briefingForm.elements.sections_text.value = sectionsToText(data.sections);
+        const spec = data.spec || [];
+        for (let i = 0; i < 3; i++) {
+          briefingForm.elements["spec_label_" + i].value = spec[i] ? spec[i].label : "";
+          briefingForm.elements["spec_value_" + i].value = spec[i] ? spec[i].value : "";
+        }
+        $("#briefing-ai-status").textContent = "Draft ready. Review below, then generate the PDF.";
+      } catch (ex) {
+        $("#briefing-ai-status").textContent = "Could not draft: " + (ex.message || ex);
+      } finally {
+        $("#briefing-draft-btn").disabled = false;
+      }
+    });
+
+    async function saveBriefing(pdfUrl) {
+      const payload = {
+        section: currentBriefingSection,
+        eyebrow: briefingForm.elements.eyebrow.value.trim(),
+        title: briefingForm.elements.title.value.trim(),
+        intro: briefingForm.elements.intro.value.trim() || null,
+        sections: textToSections(briefingForm.elements.sections_text.value),
+        spec: specFromForm(briefingForm),
+        pdf_url: pdfUrl !== undefined ? pdfUrl : currentBriefingPdfUrl,
+        status: briefingForm.elements.published.checked ? "published" : "draft"
+      };
+      const { error } = await supabase.from("briefings").upsert(payload, { onConflict: "section" });
+      if (error) throw error;
+      currentBriefingPdfUrl = payload.pdf_url;
+      await loadBriefings();
+    }
+
+    $("#briefing-pdf-btn").addEventListener("click", async () => {
+      if (!AGENT_URL) { $("#briefing-pdf-status").textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+      if (!briefingForm.elements.title.value.trim()) { $("#briefing-pdf-status").textContent = "Add a title first."; return; }
+      $("#briefing-pdf-status").textContent = "Rendering PDF: this can take a moment…";
+      $("#briefing-pdf-btn").disabled = true;
+      try {
+        const headers = { "Content-Type": "application/json", ...(await authHeader()) };
+        const body = JSON.stringify({
+          title: briefingForm.elements.title.value.trim(),
+          eyebrow: briefingForm.elements.eyebrow.value.trim(),
+          intro: briefingForm.elements.intro.value.trim(),
+          sections: textToSections(briefingForm.elements.sections_text.value),
+          spec: specFromForm(briefingForm)
+        });
+        const r = await fetch(AGENT_URL + "/render-briefing-pdf", { method: "POST", headers, body });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "PDF rendering failed");
+        const bytes = atob(data.b64);
+        const arr = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+        const blob = new Blob([arr], { type: data.contentType || "application/pdf" });
+        const file = new File([blob], "briefing.pdf", { type: data.contentType || "application/pdf" });
+        const url = await uploadPhoto(file, "briefings");
+        await saveBriefing(url);
+        $("#briefing-pdf-status").textContent = "PDF generated and saved.";
+      } catch (ex) {
+        $("#briefing-pdf-status").textContent = "Could not generate PDF: " + (ex.message || ex);
+      } finally {
+        $("#briefing-pdf-btn").disabled = false;
+      }
+    });
+
+    briefingForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const err = $("#briefing-error");
+      err.textContent = "";
+      const btn = $("#briefing-save");
+      btn.textContent = "Saving…";
+      try {
+        await saveBriefing();
+        briefingEditor.hidden = true;
+      } catch (ex) {
+        err.textContent = ex.message || String(ex);
+      } finally {
+        btn.textContent = "Save briefing";
+      }
+    });
+
     loadArticles();
+    loadBriefings();
   }
 };

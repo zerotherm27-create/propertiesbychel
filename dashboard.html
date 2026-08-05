@@ -265,6 +265,56 @@
         <p class="field__error" id="article-error" role="alert"></p>
       </form>
     </div>
+
+    <!-- Standing Briefings (one PDF per section, e.g. "Prime Residential Quarterly") -->
+    <div class="dash-panel">
+      <div class="dash-panel__head"><h2 class="h3">Standing Briefings</h2></div>
+      <p class="field__note">These are the PDFs promised by the "Companion Briefing" and "The Library" bands on published articles: one standing document per section, refreshed occasionally rather than written per-article.</p>
+      <div id="briefings-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel" id="briefing-editor" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="briefing-editor-title">Briefing</h2>
+        <button class="funnel-back" id="briefing-editor-close">Close</button>
+      </div>
+
+      <div class="dash-panel" style="background:var(--paper-2, var(--paper))">
+        <p class="eyebrow">AI Draft</p>
+        <p class="field__note">Drafts a fresh edition: an introduction, several sections, and an at-a-glance spec list. Review and edit before generating the PDF.</p>
+        <button class="btn" type="button" id="briefing-draft-btn">Draft with AI</button>
+        <p class="field__note" id="briefing-ai-status"></p>
+      </div>
+
+      <form id="briefing-form" class="dash-form">
+        <input type="hidden" name="section">
+        <div class="field"><label>Eyebrow</label><input name="eyebrow" required></div>
+        <div class="field"><label>Title</label><input name="title" required></div>
+        <div class="field"><label>Introduction</label><textarea name="intro" rows="3"></textarea></div>
+        <div class="field"><label>Sections (start each with "## Heading", then its paragraphs, blank line between blocks)</label><textarea name="sections_text" rows="12"></textarea></div>
+        <div class="field"><label>At a glance (up to 3 rows)</label>
+          <div class="dash-form__row">
+            <div class="field"><input name="spec_label_0" placeholder="Label, e.g. Coverage"></div>
+            <div class="field"><input name="spec_value_0" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="spec_label_1" placeholder="Label"></div>
+            <div class="field"><input name="spec_value_1" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="spec_label_2" placeholder="Label"></div>
+            <div class="field"><input name="spec_value_2" placeholder="Value"></div>
+          </div>
+        </div>
+        <label class="dash-switch"><input type="checkbox" name="published"> Published on the site</label>
+        <div class="dash-form__row">
+          <button class="btn" type="button" id="briefing-pdf-btn">Generate PDF</button>
+          <button class="btn btn--solid" type="submit" id="briefing-save">Save briefing</button>
+        </div>
+        <p class="field__note" id="briefing-pdf-status"></p>
+        <p class="field__error" id="briefing-error" role="alert"></p>
+      </form>
+    </div>
   </section>
 
   <!-- Automation -->

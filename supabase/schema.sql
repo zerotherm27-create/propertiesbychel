@@ -185,3 +185,27 @@ create policy "articles_owner_all" on public.articles
 drop trigger if exists articles_touch on public.articles;
 create trigger articles_touch before update on public.articles
   for each row execute function public.touch_updated_at();
+
+-- ————————————————————————————— briefings (one standing PDF per section) —————————————————————————————
+create table if not exists public.briefings (
+  section      text primary key check (section in ('journal','intelligence')),
+  title        text not null,
+  eyebrow      text not null default 'Companion Briefing',
+  intro        text,
+  sections     jsonb not null default '[]'::jsonb,
+  spec         jsonb not null default '[]'::jsonb,
+  pdf_url      text,
+  status       text not null default 'draft' check (status in ('draft','published')),
+  updated_at   timestamptz not null default now()
+);
+
+alter table public.briefings enable row level security;
+
+create policy "briefings_public_read" on public.briefings
+  for select using (status = 'published');
+create policy "briefings_owner_all" on public.briefings
+  for all using (public.is_owner()) with check (public.is_owner());
+
+drop trigger if exists briefings_touch on public.briefings;
+create trigger briefings_touch before update on public.briefings
+  for each row execute function public.touch_updated_at();
