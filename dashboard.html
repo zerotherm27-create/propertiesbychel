@@ -172,12 +172,17 @@
         <div class="field">
           <label>Photo</label>
           <input type="file" id="listing-photo" accept="image/*">
+          <input type="url" id="listing-photo-url" placeholder="or paste an image URL">
           <img id="listing-photo-preview" class="dash-preview" hidden alt="Listing photo preview">
           <input type="hidden" name="hero_image_url">
         </div>
         <div class="field">
           <label>Gallery photos (shown on the listing's own page, in addition to the hero photo)</label>
           <input type="file" id="listing-gallery-input" accept="image/*" multiple>
+          <div class="dash-form__row">
+            <input type="url" id="listing-gallery-url" placeholder="or paste an image URL, then press Add">
+            <button class="btn" type="button" id="listing-gallery-url-add">Add</button>
+          </div>
           <div id="listing-gallery-grid" class="dash-gallery-grid"></div>
         </div>
         <div class="dash-form__row">

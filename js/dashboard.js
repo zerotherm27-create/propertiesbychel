@@ -437,6 +437,8 @@ async function init(supabase) {
     const prev = $("#listing-photo-preview");
     prev.hidden = !(l && l.hero_image_url);
     if (l && l.hero_image_url) prev.src = l.hero_image_url;
+    $("#listing-photo-url").value = "";
+    $("#listing-gallery-url").value = "";
     galleryImages = l && Array.isArray(l.gallery_images) ? l.gallery_images.slice() : [];
     renderGalleryGrid();
     editor.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -447,6 +449,14 @@ async function init(supabase) {
     if (!f) return;
     const prev = $("#listing-photo-preview");
     prev.src = URL.createObjectURL(f);
+    prev.hidden = false;
+  });
+
+  $("#listing-photo-url").addEventListener("input", () => {
+    const url = $("#listing-photo-url").value.trim();
+    if (!url) return;
+    const prev = $("#listing-photo-preview");
+    prev.src = url;
     prev.hidden = false;
   });
 
@@ -462,6 +472,14 @@ async function init(supabase) {
       }
     }
     $("#listing-gallery-input").value = "";
+    renderGalleryGrid();
+  });
+
+  $("#listing-gallery-url-add").addEventListener("click", () => {
+    const url = $("#listing-gallery-url").value.trim();
+    if (!url) return;
+    galleryImages.push({ url, alt: "" });
+    $("#listing-gallery-url").value = "";
     renderGalleryGrid();
   });
 
@@ -490,7 +508,9 @@ async function init(supabase) {
     btn.textContent = "Saving…";
     try {
       const photoFile = $("#listing-photo").files[0];
+      const photoUrl = $("#listing-photo-url").value.trim();
       if (photoFile) form.elements.hero_image_url.value = await uploadPhoto(photoFile, "listings");
+      else if (photoUrl) form.elements.hero_image_url.value = photoUrl;
       const isEdit = !!form.elements.id.value;
       const payload = {
         title: form.elements.title.value.trim(),
