@@ -33,5 +33,5 @@ window.SUPABASE_CONFIG = {
  * While apiKey is empty, listings simply show no map section.
  */
 window.GOOGLE_MAPS_CONFIG = {
-  apiKey: ""
+  apiKey: "AIzaSyDByG1ucJioayzuTGa_PoUhBXGcLuhx0eA"
 };
