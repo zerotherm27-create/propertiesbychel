@@ -433,6 +433,12 @@ async function init(supabase) {
       form.elements.published.checked = l.published;
       form.elements.featured.checked = l.featured;
       $$('input[name="collections"]', form).forEach((cb) => { cb.checked = (l.collections || []).includes(cb.value); });
+      form.elements.map_coords.value = (l.map_lat != null && l.map_lng != null) ? l.map_lat + ", " + l.map_lng : "";
+      const features = Array.isArray(l.location_features) ? l.location_features : [];
+      for (let i = 0; i < 3; i++) {
+        form.elements["feature_label_" + i].value = features[i] ? features[i].label : "";
+        form.elements["feature_value_" + i].value = features[i] ? features[i].value : "";
+      }
     }
     const prev = $("#listing-photo-preview");
     prev.hidden = !(l && l.hero_image_url);
@@ -500,6 +506,22 @@ async function init(supabase) {
 
   const slugify = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
+  function parseMapCoords(text) {
+    const parts = String(text || "").split(",").map((p) => Number(p.trim()));
+    if (parts.length !== 2 || parts.some((n) => Number.isNaN(n))) return { lat: null, lng: null };
+    return { lat: parts[0], lng: parts[1] };
+  }
+
+  function featuresFromForm() {
+    const rows = [];
+    for (let i = 0; i < 3; i++) {
+      const label = form.elements["feature_label_" + i].value.trim();
+      const value = form.elements["feature_value_" + i].value.trim();
+      if (label && value) rows.push({ label, value });
+    }
+    return rows;
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const err = $("#listing-error");
@@ -526,8 +548,12 @@ async function init(supabase) {
         aspect: form.elements.aspect.value,
         sort_order: Number(form.elements.sort_order.value) || 100,
         published: form.elements.published.checked,
-        featured: form.elements.featured.checked
+        featured: form.elements.featured.checked,
+        location_features: featuresFromForm()
       };
+      const coords = parseMapCoords(form.elements.map_coords.value);
+      payload.map_lat = coords.lat;
+      payload.map_lng = coords.lng;
       if (!isEdit) payload.slug = slugify(payload.title);
       const q = isEdit
         ? supabase.from("listings").update(payload).eq("id", form.elements.id.value)

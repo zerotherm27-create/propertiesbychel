@@ -31,8 +31,17 @@ create table if not exists public.listings (
   featured       boolean not null default false,
   published      boolean not null default true,
   sort_order     integer not null default 100,
+  map_lat            double precision,
+  map_lng            double precision,
+  location_features  jsonb not null default '[]'::jsonb,
   created_at     timestamptz not null default now()
 );
+
+-- Idempotent for databases where public.listings already existed before these
+-- columns were added (create table if not exists above is a no-op on those).
+alter table public.listings add column if not exists map_lat double precision;
+alter table public.listings add column if not exists map_lng double precision;
+alter table public.listings add column if not exists location_features jsonb not null default '[]'::jsonb;
 
 alter table public.listings enable row level security;
 

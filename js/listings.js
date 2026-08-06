@@ -25,6 +25,42 @@
     });
   }
 
+  /* — Brand-styled Google Map (listing detail pages with coordinates set) — */
+  var BRAND_MAP_STYLE = [
+    { elementType: "geometry", stylers: [{ color: "#f1eee6" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#5f5e5a" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#faf8f4" }] },
+    { featureType: "poi", stylers: [{ visibility: "off" }] },
+    { featureType: "transit", stylers: [{ visibility: "off" }] },
+    { featureType: "road", elementType: "geometry", stylers: [{ color: "#e3ded1" }] },
+    { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a6b14" }] },
+    { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#d4c9a8" }] },
+    { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9d3d9" }] },
+    { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9c4b5" }] }
+  ];
+  var BRAND_PIN_ICON = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">' +
+    '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.7 23.3 0 15 0z" fill="#8A6B14"/>' +
+    '<circle cx="15" cy="15" r="5.5" fill="#FAF8F4"/></svg>'
+  );
+
+  var mapsLoadPromise = null;
+  function loadGoogleMaps(apiKey) {
+    if (window.google && window.google.maps) return Promise.resolve();
+    if (!mapsLoadPromise) {
+      mapsLoadPromise = new Promise(function (resolve, reject) {
+        var cbName = "__initGoogleMaps" + Date.now();
+        window[cbName] = function () { delete window[cbName]; resolve(); };
+        var script = document.createElement("script");
+        script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(apiKey) + "&callback=" + cbName;
+        script.async = true;
+        script.onerror = function () { reject(new Error("Google Maps script failed to load")); };
+        document.head.appendChild(script);
+      });
+    }
+    return mapsLoadPromise;
+  }
+
   /* — Site photos (hero background, portrait) — */
   var settingImgs = document.querySelectorAll("[data-setting-img]");
   if (settingImgs.length) {
@@ -101,6 +137,31 @@
       if (overview) {
         overview.innerHTML = "<p>" + esc(l.overview ||
           "Full particulars, photography, and diligence materials for this residence are shared within the private presentation.") + "</p>";
+      }
+
+      var mapSection = document.getElementById("location-map-section");
+      var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
+      if (mapSection && l.map_lat != null && l.map_lng != null && mapConfig.apiKey) {
+        var featuresTable = document.getElementById("location-features-table");
+        if (featuresTable && Array.isArray(l.location_features) && l.location_features.length) {
+          featuresTable.innerHTML = l.location_features.map(function (f) {
+            return "<tr><th scope=\"row\">" + esc(f.label) + "</th><td>" + esc(f.value) + "</td></tr>";
+          }).join("");
+        }
+        loadGoogleMaps(mapConfig.apiKey).then(function () {
+          var mapEl = document.getElementById("listing-map");
+          if (!mapEl) return;
+          var center = { lat: l.map_lat, lng: l.map_lng };
+          var map = new google.maps.Map(mapEl, {
+            center: center,
+            zoom: 15,
+            disableDefaultUI: true,
+            zoomControl: true,
+            styles: BRAND_MAP_STYLE
+          });
+          new google.maps.Marker({ position: center, map: map, icon: BRAND_PIN_ICON });
+        }).catch(function () { /* map section stays hidden if the script fails to load */ });
+        mapSection.hidden = false;
       }
 
       // Sections written for the sample residence don't apply to other listings

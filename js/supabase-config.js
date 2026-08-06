@@ -18,3 +18,20 @@ window.SUPABASE_CONFIG = {
   // AI research/draft/image server for the dashboard's Content tab (see server/).
   contentAgentUrl: "https://propertiesbychel-content-agent-production.up.railway.app"
 };
+
+/* Google Maps (listing detail pages)
+ *   1. console.cloud.google.com → create/select a project → APIs & Services →
+ *      Library → enable "Maps JavaScript API".
+ *   2. Link a billing account (required by Google even though normal small-site
+ *      traffic stays inside the $200/month free credit).
+ *   3. Credentials → Create Credentials → API key.
+ *   4. Restrict the key: Application restrictions → HTTP referrers → add your
+ *      site's domain (and localhost if testing locally). API restrictions →
+ *      limit to "Maps JavaScript API" only.
+ * This key is meant to be public/client-side, same as the Supabase anon key
+ * above — the HTTP-referrer restriction is what protects it, not secrecy.
+ * While apiKey is empty, listings simply show no map section.
+ */
+window.GOOGLE_MAPS_CONFIG = {
+  apiKey: ""
+};
