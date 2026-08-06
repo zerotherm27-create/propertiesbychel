@@ -433,7 +433,6 @@ async function init(supabase) {
       form.elements.published.checked = l.published;
       form.elements.featured.checked = l.featured;
       $$('input[name="collections"]', form).forEach((cb) => { cb.checked = (l.collections || []).includes(cb.value); });
-      form.elements.map_coords.value = (l.map_lat != null && l.map_lng != null) ? l.map_lat + ", " + l.map_lng : "";
       const features = Array.isArray(l.location_features) ? l.location_features : [];
       for (let i = 0; i < 3; i++) {
         form.elements["feature_label_" + i].value = features[i] ? features[i].label : "";
@@ -447,6 +446,7 @@ async function init(supabase) {
     $("#listing-gallery-url").value = "";
     galleryImages = l && Array.isArray(l.gallery_images) ? l.gallery_images.slice() : [];
     renderGalleryGrid();
+    resetListingMap(l && l.map_lat != null ? l.map_lat : null, l && l.map_lng != null ? l.map_lng : null);
     editor.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -496,6 +496,177 @@ async function init(supabase) {
     renderGalleryGrid();
   });
 
+  // Google Drive picker — lets the photo/gallery file inputs also be filled
+  // from Drive. Configure js/supabase-config.js's GOOGLE_DRIVE_CONFIG to enable.
+  const driveConfig = window.GOOGLE_DRIVE_CONFIG || {};
+  let drivePickerReady = null;
+  let driveTokenClient = null;
+  let driveAccessToken = null;
+
+  function loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error("Failed to load " + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  function loadDrivePicker() {
+    if (!drivePickerReady) {
+      drivePickerReady = Promise.all([
+        loadScriptOnce("https://apis.google.com/js/api.js").then(() => new Promise((resolve) => window.gapi.load("picker", resolve))),
+        loadScriptOnce("https://accounts.google.com/gsi/client")
+      ]);
+    }
+    return drivePickerReady;
+  }
+
+  function getDriveAccessToken() {
+    return new Promise((resolve, reject) => {
+      if (driveAccessToken) return resolve(driveAccessToken);
+      if (!driveTokenClient) {
+        driveTokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: driveConfig.clientId,
+          scope: "https://www.googleapis.com/auth/drive.readonly",
+          callback: (resp) => {
+            if (resp.error) return reject(new Error(resp.error));
+            driveAccessToken = resp.access_token;
+            resolve(driveAccessToken);
+          }
+        });
+      }
+      driveTokenClient.requestAccessToken({ prompt: "" });
+    });
+  }
+
+  async function fetchDriveFile(doc, token) {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${doc.id}?alt=media`, {
+      headers: { Authorization: "Bearer " + token }
+    });
+    if (!res.ok) throw new Error("Drive download failed (" + res.status + ")");
+    const blob = await res.blob();
+    return new File([blob], doc.name || (doc.id + ".jpg"), { type: doc.mimeType || blob.type || "image/jpeg" });
+  }
+
+  function openDrivePicker(multiple, onFiles) {
+    if (!driveConfig.apiKey || !driveConfig.clientId) {
+      showToast("Google Drive isn't configured yet — add GOOGLE_DRIVE_CONFIG in js/supabase-config.js", true);
+      return;
+    }
+    loadDrivePicker()
+      .then(getDriveAccessToken)
+      .then((token) => {
+        const view = new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES).setSelectFolderEnabled(false);
+        const builder = new google.picker.PickerBuilder()
+          .addView(view)
+          .setOAuthToken(token)
+          .setDeveloperKey(driveConfig.apiKey)
+          .setCallback((data) => {
+            if (data.action !== google.picker.Action.PICKED) return;
+            Promise.all(data.docs.map((doc) => fetchDriveFile(doc, token)))
+              .then(onFiles)
+              .catch((ex) => showToast("Could not fetch from Google Drive: " + (ex.message || ex), true));
+          });
+        if (multiple) builder.enableFeature(google.picker.Feature.MULTISELECT_ENABLED);
+        builder.build().setVisible(true);
+      })
+      .catch((ex) => showToast("Google Drive sign-in failed: " + (ex.message || ex), true));
+  }
+
+  function filesIntoInput(input, files) {
+    const dt = new DataTransfer();
+    files.forEach((f) => dt.items.add(f));
+    input.files = dt.files;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  $("#listing-photo-drive").addEventListener("click", () => {
+    openDrivePicker(false, (files) => filesIntoInput($("#listing-photo"), files));
+  });
+
+  $("#listing-gallery-drive").addEventListener("click", () => {
+    openDrivePicker(true, (files) => filesIntoInput($("#listing-gallery-input"), files));
+  });
+
+  // Map location — type an address, geocode it, drop a draggable pin.
+  const mapsConfig = window.GOOGLE_MAPS_CONFIG || {};
+  let mapsSdkReady = null;
+  let listingMap = null;
+  let listingMapMarker = null;
+
+  function loadMapsSdk() {
+    if (window.google && window.google.maps) return Promise.resolve();
+    if (!mapsSdkReady) {
+      mapsSdkReady = new Promise((resolve, reject) => {
+        const cbName = "__initDashMaps" + Date.now();
+        window[cbName] = () => { delete window[cbName]; resolve(); };
+        loadScriptOnce("https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapsConfig.apiKey) + "&callback=" + cbName)
+          .catch(reject);
+      });
+    }
+    return mapsSdkReady;
+  }
+
+  function placeListingMapPin(lat, lng) {
+    const preview = $("#listing-map-preview");
+    preview.hidden = false;
+    const pos = { lat, lng };
+    if (!listingMap) {
+      listingMap = new google.maps.Map(preview, { center: pos, zoom: 15, streetViewControl: false, mapTypeControl: false });
+      listingMapMarker = new google.maps.Marker({ position: pos, map: listingMap, draggable: true });
+      listingMapMarker.addListener("dragend", () => {
+        const p = listingMapMarker.getPosition();
+        form.elements.map_lat.value = p.lat();
+        form.elements.map_lng.value = p.lng();
+      });
+    } else {
+      listingMap.setCenter(pos);
+      listingMapMarker.setPosition(pos);
+    }
+    form.elements.map_lat.value = lat;
+    form.elements.map_lng.value = lng;
+  }
+
+  function resetListingMap(lat, lng) {
+    $("#listing-map-address").value = "";
+    $("#listing-map-note").textContent = "Type an address and press Locate, then drag the pin to fine-tune.";
+    form.elements.map_lat.value = lat != null ? lat : "";
+    form.elements.map_lng.value = lng != null ? lng : "";
+    if (lat == null || lng == null) {
+      $("#listing-map-preview").hidden = true;
+      return;
+    }
+    loadMapsSdk().then(() => {
+      placeListingMapPin(lat, lng);
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === "OK" && results[0]) $("#listing-map-address").value = results[0].formatted_address;
+      });
+    }).catch(() => {});
+  }
+
+  $("#listing-map-locate").addEventListener("click", () => {
+    const address = $("#listing-map-address").value.trim();
+    const note = $("#listing-map-note");
+    if (!address) { showToast("Type an address first", true); return; }
+    if (!mapsConfig.apiKey) { showToast("Google Maps isn't configured yet — add GOOGLE_MAPS_CONFIG in js/supabase-config.js", true); return; }
+    note.textContent = "Locating…";
+    loadMapsSdk().then(() => {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address }, (results, status) => {
+        if (status !== "OK" || !results[0]) {
+          note.textContent = "Couldn't find that address — try refining it.";
+          return;
+        }
+        const loc = results[0].geometry.location;
+        placeListingMapPin(loc.lat(), loc.lng());
+        note.textContent = "Found: " + results[0].formatted_address + ". Drag the pin to fine-tune.";
+      });
+    }).catch((ex) => { note.textContent = "Could not load Google Maps: " + (ex.message || ex); });
+  });
+
   async function uploadPhoto(file, prefix) {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const path = `${prefix}/${Date.now()}.${ext}`;
@@ -505,12 +676,6 @@ async function init(supabase) {
   }
 
   const slugify = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-
-  function parseMapCoords(text) {
-    const parts = String(text || "").split(",").map((p) => Number(p.trim()));
-    if (parts.length !== 2 || parts.some((n) => Number.isNaN(n))) return { lat: null, lng: null };
-    return { lat: parts[0], lng: parts[1] };
-  }
 
   function featuresFromForm() {
     const rows = [];
@@ -551,9 +716,8 @@ async function init(supabase) {
         featured: form.elements.featured.checked,
         location_features: featuresFromForm()
       };
-      const coords = parseMapCoords(form.elements.map_coords.value);
-      payload.map_lat = coords.lat;
-      payload.map_lng = coords.lng;
+      payload.map_lat = form.elements.map_lat.value !== "" ? Number(form.elements.map_lat.value) : null;
+      payload.map_lng = form.elements.map_lng.value !== "" ? Number(form.elements.map_lng.value) : null;
       if (!isEdit) payload.slug = slugify(payload.title);
       const q = isEdit
         ? supabase.from("listings").update(payload).eq("id", form.elements.id.value)

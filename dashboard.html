@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=31">
+<link rel="stylesheet" href="css/site.css?v=32">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -163,7 +163,17 @@
         </div>
         <div class="field"><label>Card meta line</label><input name="meta_line" placeholder="e.g. Salcedo Village, Makati · 210 sqm · 3 bedrooms"></div>
         <div class="field"><label>Overview (shown on the property page)</label><textarea name="overview" rows="4" placeholder="Two or three considered sentences."></textarea></div>
-        <div class="field"><label>Map coordinates (paste from Google Maps — right-click the pin)</label><input name="map_coords" placeholder="14.5764, 121.0851"></div>
+        <div class="field">
+          <label>Map location</label>
+          <div class="dash-form__row">
+            <input type="text" id="listing-map-address" placeholder="Type an address, e.g. One Bonifacio High Street, BGC">
+            <button class="btn" type="button" id="listing-map-locate">Locate</button>
+          </div>
+          <div id="listing-map-preview" class="dash-map-preview" hidden></div>
+          <p class="field__note" id="listing-map-note">Type an address and press Locate, then drag the pin to fine-tune.</p>
+          <input type="hidden" name="map_lat">
+          <input type="hidden" name="map_lng">
+        </div>
         <div class="field"><label>Nearby features (up to 3 rows)</label>
           <div class="dash-form__row">
             <div class="field"><input name="feature_label_0" placeholder="Label, e.g. Connectivity"></div>
@@ -188,12 +198,14 @@
           <label>Photo</label>
           <input type="file" id="listing-photo" accept="image/*">
           <input type="url" id="listing-photo-url" placeholder="or paste an image URL">
+          <button class="btn" type="button" id="listing-photo-drive">Choose from Google Drive</button>
           <img id="listing-photo-preview" class="dash-preview" hidden alt="Listing photo preview">
           <input type="hidden" name="hero_image_url">
         </div>
         <div class="field">
           <label>Gallery photos (shown on the listing's own page, in addition to the hero photo)</label>
           <input type="file" id="listing-gallery-input" accept="image/*" multiple>
+          <button class="btn" type="button" id="listing-gallery-drive">Choose from Google Drive</button>
           <div class="dash-form__row">
             <input type="url" id="listing-gallery-url" placeholder="or paste an image URL, then press Add">
             <button class="btn" type="button" id="listing-gallery-url-add">Add</button>
@@ -346,8 +358,8 @@
   </section>
 </main>
 
-<script src="js/supabase-config.js?v=16"></script>
+<script src="js/supabase-config.js?v=17"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=21"></script>
+<script type="module" src="js/dashboard.js?v=23"></script>
 </body>
 </html>

@@ -35,3 +35,22 @@ window.SUPABASE_CONFIG = {
 window.GOOGLE_MAPS_CONFIG = {
   apiKey: "AIzaSyDByG1ucJioayzuTGa_PoUhBXGcLuhx0eA"
 };
+
+/* Google Drive picker (dashboard: choose listing photos straight from Drive)
+ *   1. console.cloud.google.com → same project as above → APIs & Services →
+ *      Library → enable "Google Picker API" and "Google Drive API".
+ *   2. Credentials → Create Credentials → API key. Restrict it the same way
+ *      as the Maps key (HTTP referrers → your domain + localhost).
+ *   3. Credentials → Create Credentials → OAuth client ID → Web application.
+ *      Add your dashboard's origin(s) under "Authorized JavaScript origins"
+ *      (e.g. https://propertiesbychel.com and http://localhost:xxxx).
+ *   4. OAuth consent screen → add the owner's Google account as a test user
+ *      (or publish the app) so sign-in works.
+ * Both values are public/client-side, same as the keys above. While either
+ * is empty, the "Choose from Google Drive" buttons tell the user it isn't
+ * configured yet instead of failing silently.
+ */
+window.GOOGLE_DRIVE_CONFIG = {
+  apiKey: "AIzaSyCzdjVRHVPLqVZJNSeW1aAJAvqTH5BRT_8",
+  clientId: "882807325111-pbonmn0nga7khne7qtg1oh3qq6s9ahmm.apps.googleusercontent.com"
+};
