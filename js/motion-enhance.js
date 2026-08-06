@@ -44,14 +44,18 @@
     });
   });
 
-  /* — Property frames: a light pointer-tilt, considered rather than gimmicky — */
+  /* — Property frames: a light pointer-tilt, considered rather than gimmicky —
+   * Owns the hover zoom too (scale folded into the tilt), so it doesn't run
+   * alongside the CSS `:hover` zoom in css/site.css — the .has-frame-tilt class
+   * tells that CSS rule to stand down on devices where this handler is active. */
   if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    document.documentElement.classList.add("has-frame-tilt");
     document.querySelectorAll(".frame--hover").forEach(function (frame) {
       frame.addEventListener("pointermove", function (e) {
         var r = frame.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width - 0.5;
         var py = (e.clientY - r.top) / r.height - 0.5;
-        animate(frame, { rotateX: py * -5, rotateY: px * 6, scale: 1.01 }, PRESS);
+        animate(frame, { rotateX: py * -5, rotateY: px * 6, scale: 1.035 }, PRESS);
       });
       frame.addEventListener("pointerleave", function () {
         animate(frame, { rotateX: 0, rotateY: 0, scale: 1 }, REST);

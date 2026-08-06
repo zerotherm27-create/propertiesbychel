@@ -36,7 +36,7 @@
   if (!reduceMotion) {
     document.querySelectorAll("[data-reveal-stagger]").forEach(function (group) {
       group.querySelectorAll("[data-reveal]").forEach(function (el, i) {
-        el.style.transitionDelay = Math.min(i, 7) * 70 + "ms";
+        el.style.transitionDelay = Math.min(i, 5) * 40 + "ms";
       });
     });
   }
