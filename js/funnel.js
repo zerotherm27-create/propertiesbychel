@@ -11,6 +11,7 @@
   var steps = Array.prototype.slice.call(form.querySelectorAll(".funnel-step"));
   var progress = document.querySelector("[data-funnel-progress]");
   var current = 1;
+  var transitioning = false;
 
   // Carry ?listing=<slug> into the submission so the CRM shows provenance
   var listingParam = new URLSearchParams(location.search).get("listing");
@@ -20,12 +21,14 @@
   }
 
   function setStep(n, backwards) {
+    if (transitioning) return;
     var prev = form.querySelector('.funnel-step.is-active');
     var next = form.querySelector('.funnel-step[data-step="' + n + '"]');
     if (!next || next === prev) return;
     current = n;
 
     if (prev && !reduceMotion) {
+      transitioning = true;
       prev.classList.add(backwards ? "is-leaving-back" : "is-leaving");
       window.setTimeout(function () {
         prev.classList.remove("is-active", "is-leaving", "is-leaving-back");
@@ -35,6 +38,7 @@
             next.classList.remove("is-entering", "is-entering-back");
           });
         });
+        transitioning = false;
       }, 220);
     } else {
       if (prev) prev.classList.remove("is-active");

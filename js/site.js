@@ -133,7 +133,7 @@
       document.querySelectorAll("[data-status]").forEach(function (c) {
         var okStatus = state.status === "all" || c.dataset.status === state.status;
         var okColl = state.collection === "all" || (c.dataset.collection || "").split(" ").indexOf(state.collection) !== -1;
-        c.style.display = okStatus && okColl ? "" : "none";
+        c.classList.toggle("is-filtered-out", !(okStatus && okColl));
       });
     }
     filterbars.forEach(function (bar) {
