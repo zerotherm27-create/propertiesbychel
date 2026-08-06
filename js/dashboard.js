@@ -602,7 +602,7 @@ async function init(supabase) {
       mapsSdkReady = new Promise((resolve, reject) => {
         const cbName = "__initDashMaps" + Date.now();
         window[cbName] = () => { delete window[cbName]; resolve(); };
-        loadScriptOnce("https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapsConfig.apiKey) + "&callback=" + cbName)
+        loadScriptOnce("https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapsConfig.apiKey) + "&libraries=places&callback=" + cbName)
           .catch(reject);
       });
     }
@@ -634,15 +634,95 @@ async function init(supabase) {
     $("#listing-map-note").textContent = "Type an address and press Locate, then drag the pin to fine-tune.";
     form.elements.map_lat.value = lat != null ? lat : "";
     form.elements.map_lng.value = lng != null ? lng : "";
+    $("#listing-nearby-suggestions").hidden = true;
+    $("#listing-nearby-suggestions").innerHTML = "";
+    $("#listing-nearby-note").textContent = "";
     if (lat == null || lng == null) {
       $("#listing-map-preview").hidden = true;
       return;
     }
     loadMapsSdk().then(() => {
       placeListingMapPin(lat, lng);
+      suggestNearbyFeatures(lat, lng);
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: { lat, lng } }, (results, status) => {
         if (status === "OK" && results[0]) $("#listing-map-address").value = results[0].formatted_address;
+      });
+    }).catch(() => {});
+  }
+
+  // Suggest nearby features (transit, shopping, schools, healthcare) from Places, closest of each within 1.5km.
+  const NEARBY_CATEGORIES = [
+    { type: "transit_station", label: "Transit" },
+    { type: "shopping_mall", label: "Shopping" },
+    { type: "school", label: "Schools" },
+    { type: "hospital", label: "Healthcare" }
+  ];
+
+  function haversineMeters(lat1, lng1, lat2, lng2) {
+    const R = 6371000;
+    const toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  const formatDistance = (m) => (m < 1000 ? Math.round(m) + "m" : (m / 1000).toFixed(1) + "km");
+
+  function fillNextFeatureRow(label, value) {
+    for (let i = 0; i < 3; i++) {
+      if (!form.elements["feature_label_" + i].value.trim()) {
+        form.elements["feature_label_" + i].value = label;
+        form.elements["feature_value_" + i].value = value;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function renderNearbySuggestions(found) {
+    const box = $("#listing-nearby-suggestions");
+    const note = $("#listing-nearby-note");
+    if (!found.length) return;
+    found.sort((a, b) => a.distance - b.distance);
+    box.innerHTML = found.map((f, i) =>
+      `<button type="button" class="dash-suggest-chip" data-suggest="${i}">${esc(f.label)}: ${esc(f.name)} · ${formatDistance(f.distance)}</button>`
+    ).join("");
+    box.hidden = false;
+    note.textContent = "Suggested from nearby places — click to add a row.";
+    $$("[data-suggest]", box).forEach((btn, i) => {
+      btn.addEventListener("click", () => {
+        const f = found[i];
+        if (!fillNextFeatureRow(f.label, f.name + ", " + formatDistance(f.distance) + " away")) {
+          showToast("All 3 nearby-feature rows are full", true);
+          return;
+        }
+        btn.remove();
+      });
+    });
+  }
+
+  function suggestNearbyFeatures(lat, lng) {
+    if (!mapsConfig.apiKey) return;
+    loadMapsSdk().then(() => {
+      const service = new google.maps.places.PlacesService(listingMap || document.createElement("div"));
+      const found = [];
+      let pending = NEARBY_CATEGORIES.length;
+      NEARBY_CATEGORIES.forEach((cat) => {
+        service.nearbySearch({ location: { lat, lng }, radius: 1500, type: cat.type }, (results, status) => {
+          pending -= 1;
+          if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length) {
+            let best = null, bestDist = Infinity;
+            results.forEach((r) => {
+              if (!r.geometry || !r.geometry.location) return;
+              const d = haversineMeters(lat, lng, r.geometry.location.lat(), r.geometry.location.lng());
+              if (d < bestDist) { bestDist = d; best = r; }
+            });
+            if (best) found.push({ label: cat.label, name: best.name, distance: bestDist });
+          }
+          if (pending === 0) renderNearbySuggestions(found);
+        });
       });
     }).catch(() => {});
   }
@@ -653,6 +733,9 @@ async function init(supabase) {
     if (!address) { showToast("Type an address first", true); return; }
     if (!mapsConfig.apiKey) { showToast("Google Maps isn't configured yet — add GOOGLE_MAPS_CONFIG in js/supabase-config.js", true); return; }
     note.textContent = "Locating…";
+    $("#listing-nearby-suggestions").hidden = true;
+    $("#listing-nearby-suggestions").innerHTML = "";
+    $("#listing-nearby-note").textContent = "";
     loadMapsSdk().then(() => {
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ address }, (results, status) => {
@@ -662,6 +745,7 @@ async function init(supabase) {
         }
         const loc = results[0].geometry.location;
         placeListingMapPin(loc.lat(), loc.lng());
+        suggestNearbyFeatures(loc.lat(), loc.lng());
         note.textContent = "Found: " + results[0].formatted_address + ". Drag the pin to fine-tune.";
       });
     }).catch((ex) => { note.textContent = "Could not load Google Maps: " + (ex.message || ex); });

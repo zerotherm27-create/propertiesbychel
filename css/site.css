@@ -600,6 +600,10 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .dash-switch { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--ink-soft); cursor: pointer; margin-bottom: var(--space-6); }
 .dash-preview { max-width: 100%; width: 16rem; aspect-ratio: 4/3; object-fit: cover; border: var(--rule) solid var(--line); display: block; margin-block: var(--space-3); background: var(--stone); }
 .dash-map-preview { width: 100%; height: 16rem; border: var(--rule) solid var(--line); margin-block: var(--space-3); background: var(--stone); }
+.dash-suggest-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.dash-suggest-chip { appearance: none; cursor: pointer; border: var(--rule) solid var(--line); background: var(--paper-2); color: var(--ink-soft); font-family: var(--font-body); font-size: var(--text-sm); padding: var(--space-2) var(--space-4); transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out); }
+.dash-suggest-chip:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.dash-suggest-chip[disabled] { opacity: 0.5; pointer-events: none; }
 .dash-gallery-grid { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-3); }
 .dash-gallery-item { width: 6rem; }
 .dash-gallery-item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border: var(--rule) solid var(--line); display: block; background: var(--stone); }
