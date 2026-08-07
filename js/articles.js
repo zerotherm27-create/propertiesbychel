@@ -93,7 +93,7 @@ if (SB.url && SB.anonKey) {
     }
 
     document.getElementById("art-more-label").textContent = isJournal ? "More from the Journal" : "More from the Desk";
-    document.getElementById("art-more-link").href = isJournal ? "journal.html" : "intelligence.html#notes-h";
+    document.getElementById("art-more-link").href = isJournal ? "journal" : "intelligence#notes-h";
     document.getElementById("art-more-title").textContent = isJournal ? "See the full archive" : "See recent observations";
 
     document.getElementById("article-content").hidden = false;
@@ -105,7 +105,7 @@ if (SB.url && SB.anonKey) {
     if (error || !data || !data.length) return;
     const prefix = section === "journal" ? "J" : "N";
     container.innerHTML = data.map((a, i) => `
-      <a class="index-row" href="article.html?slug=${encodeURIComponent(a.slug)}" data-reveal>
+      <a class="index-row" href="article?slug=${encodeURIComponent(a.slug)}" data-reveal>
         <span class="index-row__no">${prefix}·${String(i + 1).padStart(2, "0")}</span>
         <span class="index-row__title">${esc(a.title)}</span>
         <span class="index-row__meta">${esc(a.dek || "")}</span>

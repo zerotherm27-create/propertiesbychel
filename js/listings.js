@@ -84,7 +84,7 @@
       gallery.innerHTML = rows.map(function (l, i) {
         var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
         return (
-          '<a class="plisting is-in" href="property.html?slug=' + encodeURIComponent(l.slug) + '"' +
+          '<a class="plisting is-in" href="property?slug=' + encodeURIComponent(l.slug) + '"' +
           ' data-status="' + esc(l.status) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
             '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
               (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
@@ -174,8 +174,8 @@
       }
 
       // Carry provenance into the funnel
-      document.querySelectorAll('a[href^="presentation.html"]').forEach(function (a) {
-        a.href = "presentation.html?listing=" + encodeURIComponent(l.slug);
+      document.querySelectorAll('a[href^="presentation"]').forEach(function (a) {
+        a.href = "presentation?listing=" + encodeURIComponent(l.slug);
       });
     }).catch(function () { detail.removeAttribute("data-is-loading"); /* sample content stands */ });
   }
@@ -196,7 +196,7 @@
       if (t) t.textContent = l.title;
       if (m) m.textContent = l.meta_line || l.location_label || "";
       if (img && l.hero_image_url) { img.src = l.hero_image_url; img.alt = l.image_alt || l.title; }
-      if (link) link.href = "property.html?slug=" + encodeURIComponent(l.slug);
+      if (link) link.href = "property?slug=" + encodeURIComponent(l.slug);
       if (ov && l.overview) ov.textContent = l.overview;
       // the sample spec table only describes the original featured residence
       if (l.slug !== "the-zenith-penthouse") {

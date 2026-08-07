@@ -291,18 +291,20 @@ figcaption { font-size: var(--text-sm); color: var(--ink-faint); padding-top: va
 /* — Index rows (districts, journal) — */
 .index-row {
   display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: var(--space-6);
-  padding-block: var(--space-8); padding-inline: 0; border-bottom: var(--rule) solid var(--line);
-  transition: padding var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+  padding-block: var(--space-8); border-bottom: var(--rule) solid var(--line);
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 .index-row:first-child { border-top: var(--rule) solid var(--line); }
-.index-row__no { font-size: var(--text-caps); letter-spacing: var(--track-caps); color: var(--brass-deep); font-weight: 600; transition: transform var(--dur) var(--ease-out); }
-.index-row__title { font-family: var(--font-display); font-size: var(--text-h3); transition: font-style var(--dur-fast) var(--ease-out); }
+.index-row__no { font-size: var(--text-caps); letter-spacing: var(--track-caps); color: var(--brass-deep); font-weight: 600; transition: transform var(--dur-fast) var(--ease-out); }
+.index-row__title { font-family: var(--font-display); font-size: var(--text-h3); transition: font-style var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
 a.index-row:hover .index-row__title { font-style: italic; }
 @media (hover: hover) and (pointer: fine) {
-  a.index-row:hover { background-color: color-mix(in oklch, var(--ink) 4%, transparent); padding-inline: var(--space-4); }
-  a.index-row:hover .index-row__no { transform: translateX(2px); }
+  a.index-row:hover { background-color: color-mix(in oklch, var(--ink) 4%, transparent); }
+  a.index-row:hover .index-row__no,
+  a.index-row:hover .index-row__title { transform: translateX(var(--space-4)); }
+  a.index-row:hover .index-row__meta { transform: translateX(calc(-1 * var(--space-4))); }
 }
-.index-row__meta { font-size: var(--text-sm); color: var(--ink-faint); text-align: right; max-width: 22rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.index-row__meta { font-size: var(--text-sm); color: var(--ink-faint); text-align: right; max-width: 22rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: transform var(--dur-fast) var(--ease-out); }
 
 /* — Intelligence: note strip & snapshots — */
 .masthead-note { font-size: var(--text-caps); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); display: flex; gap: var(--space-8); flex-wrap: wrap; border-block: var(--rule) solid var(--line); padding-block: var(--space-4); }
@@ -402,18 +404,22 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .funnel-choice {
   display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: var(--space-6);
   padding: var(--space-6) var(--space-2); border-bottom: var(--rule) solid var(--line); cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease-out), padding var(--dur) var(--ease-out);
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 .funnel-choice:first-child { border-top: var(--rule) solid var(--line); }
 @media (hover: hover) and (pointer: fine) {
-  .funnel-choice:hover { background: color-mix(in oklch, var(--ink) 4%, transparent); padding-inline: var(--space-4); }
-  .funnel-choice:hover .funnel-choice__arr { transform: translateX(4px); color: var(--brass-deep); }
+  .funnel-choice:hover { background: color-mix(in oklch, var(--ink) 4%, transparent); }
+  .funnel-choice:hover .funnel-choice__no,
+  .funnel-choice:hover .funnel-choice__title { transform: translateX(var(--space-2)); }
+  .funnel-choice:hover .funnel-choice__arr { transform: translateX(calc(var(--space-2) + 4px)); color: var(--brass-deep); }
 }
 .funnel-choice input { position: absolute; opacity: 0; pointer-events: none; }
-.funnel-choice__no { font-size: var(--text-caps); letter-spacing: var(--track-caps); color: var(--brass-deep); font-weight: 600; }
-.funnel-choice__title { font-family: var(--font-display); font-size: var(--text-lede); color: var(--ink); }
+.funnel-choice__no { font-size: var(--text-caps); letter-spacing: var(--track-caps); color: var(--brass-deep); font-weight: 600; transition: transform var(--dur-fast) var(--ease-out); }
+.funnel-choice__title { font-family: var(--font-display); font-size: var(--text-lede); color: var(--ink); transition: transform var(--dur-fast) var(--ease-out); }
 .funnel-choice__arr { color: var(--ink-faint); transition: transform var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
-.funnel-choice:has(input:checked) { background: color-mix(in oklch, var(--brass) 10%, transparent); padding-inline: var(--space-4); }
+.funnel-choice:has(input:checked) { background: color-mix(in oklch, var(--brass) 10%, transparent); }
+.funnel-choice:has(input:checked) .funnel-choice__no,
+.funnel-choice:has(input:checked) .funnel-choice__title { transform: translateX(var(--space-2)); }
 .funnel-choice:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
 .funnel-nav { display: flex; align-items: center; gap: var(--space-6); margin-top: var(--space-4); }
 .funnel-nav .btn { flex: 1; }
@@ -594,7 +600,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .dash-funnel__row { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-3); }
 .dash-funnel__label { width: 6.5rem; flex-shrink: 0; font-size: var(--text-sm); color: var(--ink-soft); }
 .dash-funnel__bar-track { flex: 1; height: 0.6rem; background: var(--paper-2); }
-.dash-funnel__bar { height: 100%; background: var(--brass); min-width: 2px; transition: width var(--dur-slow) var(--ease-out); }
+.dash-funnel__bar { width: 100%; height: 100%; background: var(--brass); transform-origin: left; transform: scaleX(0); transition: transform var(--dur-slow) var(--ease-out); }
 .dash-funnel__count { width: 2rem; text-align: right; font-family: var(--font-mono); font-size: var(--text-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
 .dash-trend { display: flex; align-items: flex-end; gap: 3px; height: 6rem; border-bottom: var(--rule) solid var(--line-strong); }
 .dash-trend__bar { flex: 1; background: var(--brass); min-height: 2px; }

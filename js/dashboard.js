@@ -190,7 +190,7 @@ async function init(supabase) {
     $("#leads-funnel").innerHTML = STATUSES.map((s, i) => `
       <div class="dash-funnel__row">
         <span class="dash-funnel__label">${STATUS_LABELS[s]}</span>
-        <div class="dash-funnel__bar-track"><div class="dash-funnel__bar" style="width:${Math.round((statusCounts[i] / maxCount) * 100)}%"></div></div>
+        <div class="dash-funnel__bar-track"><div class="dash-funnel__bar" style="transform:scaleX(${Math.max(statusCounts[i] / maxCount, 0.02)})"></div></div>
         <span class="dash-funnel__count">${statusCounts[i]}</span>
       </div>`).join("");
 

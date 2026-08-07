@@ -165,7 +165,7 @@
       timeframe: fd.get("timeframe") || null,
       notes: fd.get("notes") || fd.get("message") || null,
       listing_slug: fd.get("listing_slug") || null,
-      source_page: location.pathname.split("/").pop() || "index.html"
+      source_page: location.pathname.split("/").pop() || "index"
     };
   }
 
