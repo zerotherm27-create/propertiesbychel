@@ -164,14 +164,13 @@
         mapSection.hidden = false;
       }
 
-      // Sections written for the sample residence don't apply to other listings
-      if (l.slug !== "the-zenith-penthouse") {
-        document.querySelectorAll("[data-sample-only]").forEach(function (el) { el.hidden = true; });
-        var generic = document.querySelector("[data-generic-spec]");
-        if (generic) generic.hidden = false;
-        var heading = document.querySelector("[data-l-heading]");
-        if (heading) heading.textContent = "The residence, in brief.";
-      }
+      // Sections written for the static fallback markup don't apply once real data has loaded,
+      // regardless of what slug that data happens to carry.
+      document.querySelectorAll("[data-sample-only]").forEach(function (el) { el.hidden = true; });
+      var generic = document.querySelector("[data-generic-spec]");
+      if (generic) generic.hidden = false;
+      var heading = document.querySelector("[data-l-heading]");
+      if (heading) heading.textContent = "The residence, in brief.";
 
       // Carry provenance into the funnel
       document.querySelectorAll('a[href^="presentation"]').forEach(function (a) {
