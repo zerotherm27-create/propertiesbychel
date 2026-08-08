@@ -443,7 +443,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
 }
 
 /* ————— Charts (hand-built SVG) ————— */
-.chart { width: 100%; }
+.chart { width: 100%; margin: 0; }
 .chart svg { display: block; width: 100%; height: auto; }
 .chart .axis { stroke: var(--line-on-dark); stroke-width: 1; }
 .chart .series { stroke: var(--brass); stroke-width: 1.5; fill: none; }
