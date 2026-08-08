@@ -287,6 +287,11 @@ figcaption { font-size: var(--text-sm); color: var(--ink-faint); padding-top: va
 .spec--on-dark th { color: var(--on-espresso-soft); }
 .spec--on-dark td { color: var(--on-espresso); }
 .spec--on-dark th, .spec--on-dark td { border-color: var(--line-on-dark); }
+@media (max-width: 48rem) {
+  .spec, .spec tbody, .spec tr, .spec th, .spec td { display: block; width: auto; }
+  .spec th { white-space: normal; padding: var(--space-4) 0 var(--space-1); border-bottom: 0; }
+  .spec td { padding: 0 0 var(--space-4); }
+}
 
 /* — Index rows (districts, journal) — */
 .index-row {
