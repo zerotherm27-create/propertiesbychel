@@ -405,6 +405,11 @@ async function init(supabase) {
       </div>`).join("");
   }
 
+  const AGENT_URL = (window.SUPABASE_CONFIG || {}).contentAgentUrl || "";
+  async function listingAuthHeader() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session ? { Authorization: "Bearer " + session.access_token } : {};
+  }
   const editor = $("#listing-editor");
   const form = $("#listing-form");
   let galleryImages = [];
@@ -426,7 +431,8 @@ async function init(supabase) {
     form.reset();
     form.elements.id.value = l ? l.id : "";
     if (l) {
-      ["title", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url"].forEach((k) => { form.elements[k].value = l[k] || ""; });
+      ["title", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description"].forEach((k) => { form.elements[k].value = l[k] || ""; });
+      updateMetaCount();
       form.elements.status.value = l.status;
       form.elements.aspect.value = l.aspect || "4/3";
       form.elements.sort_order.value = l.sort_order;
@@ -464,6 +470,45 @@ async function init(supabase) {
     const prev = $("#listing-photo-preview");
     prev.src = url;
     prev.hidden = false;
+  });
+
+  function updateMetaCount() {
+    const n = form.elements.meta_description.value.length;
+    const el = $("#listing-meta-count");
+    el.textContent = n + " / 160";
+    el.classList.toggle("is-over", n > 160);
+  }
+  form.elements.meta_description.addEventListener("input", updateMetaCount);
+
+  $("#listing-ai-draft-btn").addEventListener("click", async () => {
+    const title = form.elements.title.value.trim();
+    const status = $("#listing-ai-status");
+    if (!title) { status.textContent = "Enter a title first."; return; }
+    if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+    status.textContent = "Drafting…";
+    $("#listing-ai-draft-btn").disabled = true;
+    try {
+      const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+      const body = JSON.stringify({
+        title,
+        location_label: form.elements.location_label.value.trim(),
+        price_display: form.elements.price_display.value.trim(),
+        meta_line: form.elements.meta_line.value.trim(),
+        features: featuresFromForm(),
+        notes: form.elements.listing_notes.value.trim()
+      });
+      const r = await fetch(AGENT_URL + "/generate-listing-description", { method: "POST", headers, body });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Draft failed");
+      form.elements.overview.value = data.overview || "";
+      form.elements.meta_description.value = data.meta_description || "";
+      updateMetaCount();
+      status.textContent = "Draft ready. Review below, then save.";
+    } catch (ex) {
+      status.textContent = "Could not draft: " + (ex.message || ex);
+    } finally {
+      $("#listing-ai-draft-btn").disabled = false;
+    }
   });
 
   $("#listing-gallery-input").addEventListener("change", async () => {
@@ -792,6 +837,7 @@ async function init(supabase) {
         meta_line: form.elements.meta_line.value.trim() || null,
         price_display: form.elements.price_display.value.trim() || null,
         overview: form.elements.overview.value.trim() || null,
+        meta_description: form.elements.meta_description.value.trim() || null,
         hero_image_url: form.elements.hero_image_url.value || null,
         gallery_images: galleryImages,
         aspect: form.elements.aspect.value,
