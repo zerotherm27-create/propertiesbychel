@@ -24,6 +24,7 @@ create table if not exists public.listings (
   meta_line      text,
   price_display  text,
   overview       text,
+  meta_description text,
   hero_image_url text,
   image_alt      text,
   gallery_images jsonb not null default '[]'::jsonb,
@@ -42,6 +43,7 @@ create table if not exists public.listings (
 alter table public.listings add column if not exists map_lat double precision;
 alter table public.listings add column if not exists map_lng double precision;
 alter table public.listings add column if not exists location_features jsonb not null default '[]'::jsonb;
+alter table public.listings add column if not exists meta_description text;
 
 alter table public.listings enable row level security;
 
