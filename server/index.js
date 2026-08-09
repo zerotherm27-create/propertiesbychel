@@ -6,6 +6,7 @@ import { generateArticle } from "./lib/articles.js";
 import { generateImage } from "./lib/images.js";
 import { draftBriefing } from "./lib/briefings.js";
 import { renderBriefingHtml, htmlToPdfBuffer } from "./lib/briefing-pdf.js";
+import { draftListingDescription } from "./lib/listings.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -44,6 +45,22 @@ app.post("/generate-article", requireOwner, async (req, res) => {
   try {
     const article = await generateArticle(client, { topic, section });
     res.json(article);
+  } catch (err) {
+    console.error(err);
+    res.status(502).json({ error: err.message || "Generation failed" });
+  }
+});
+
+app.post("/generate-listing-description", requireOwner, async (req, res) => {
+  const client = getOpenAI();
+  if (!client) return res.status(503).json({ error: "OPENAI_API_KEY is not set on this server yet" });
+  const { title, location_label, price_display, meta_line, features, notes } = req.body || {};
+  if (!title) {
+    return res.status(400).json({ error: "title is required" });
+  }
+  try {
+    const draft = await draftListingDescription(client, { title, location_label, price_display, meta_line, features, notes });
+    res.json(draft);
   } catch (err) {
     console.error(err);
     res.status(502).json({ error: err.message || "Generation failed" });
