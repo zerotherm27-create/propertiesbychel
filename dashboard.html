@@ -163,6 +163,13 @@
         </div>
         <div class="field"><label>Card meta line</label><input name="meta_line" placeholder="e.g. Salcedo Village, Makati · 210 sqm · 3 bedrooms"></div>
         <div class="field"><label>Overview (shown on the property page)</label><textarea name="overview" rows="4" placeholder="Two or three considered sentences."></textarea></div>
+        <div class="field"><label>Anything else to mention? (optional)</label><input name="listing_notes" placeholder="e.g. corner unit, renovated 2024, park view"></div>
+        <button class="btn" type="button" id="listing-ai-draft-btn">Draft with AI</button>
+        <p class="field__note" id="listing-ai-status"></p>
+        <div class="field"><label>Meta description (for search results)</label>
+          <textarea name="meta_description" rows="2" placeholder="One sentence for search results, 120 to 155 characters."></textarea>
+          <p class="field__note" id="listing-meta-count">0 / 160</p>
+        </div>
         <div class="field">
           <label>Map location</label>
           <div class="dash-form__row">

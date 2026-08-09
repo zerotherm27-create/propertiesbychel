@@ -389,6 +389,7 @@ a.index-row:hover .index-row__title { font-style: italic; }
 .field--error input, .field--error textarea { border-bottom-color: var(--brass-deep); }
 .field__note { font-size: var(--text-sm); color: var(--ink-faint); }
 .field__error { font-size: var(--text-sm); color: var(--brass-deep); margin: 0; }
+#listing-meta-count.is-over { color: var(--brass-deep); }
 
 /* Live data swap-in: sample content dims briefly while the real fetch is in flight. */
 [data-is-loading] { opacity: 0.45; transition: opacity var(--dur) var(--ease-out); pointer-events: none; }
