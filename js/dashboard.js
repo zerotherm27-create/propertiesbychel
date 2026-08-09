@@ -429,10 +429,10 @@ async function init(supabase) {
     editor.hidden = false;
     $("#editor-title").textContent = l ? "Edit: " + l.title : "New listing";
     form.reset();
+    $("#listing-ai-status").textContent = "";
     form.elements.id.value = l ? l.id : "";
     if (l) {
       ["title", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description"].forEach((k) => { form.elements[k].value = l[k] || ""; });
-      updateMetaCount();
       form.elements.status.value = l.status;
       form.elements.aspect.value = l.aspect || "4/3";
       form.elements.sort_order.value = l.sort_order;
@@ -445,6 +445,7 @@ async function init(supabase) {
         form.elements["feature_value_" + i].value = features[i] ? features[i].value : "";
       }
     }
+    updateMetaCount();
     const prev = $("#listing-photo-preview");
     prev.hidden = !(l && l.hero_image_url);
     if (l && l.hero_image_url) prev.src = l.hero_image_url;

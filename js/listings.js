@@ -115,12 +115,16 @@
         var el = document.querySelector(selector);
         if (el && value) el.setAttribute(attr, value);
       };
-      var pageUrl = "https://www.propertiesbychel.com/property?slug=" + encodeURIComponent(l.slug);
+      var pageUrl = "https://propertiesbychel.vercel.app/property?slug=" + encodeURIComponent(l.slug);
       var pageTitle = l.title + (l.location_label ? ", " + l.location_label : "") + " · Private Presentation · Properties by Chel";
       setMeta('link[rel="canonical"]', "href", pageUrl);
       setMeta('meta[property="og:url"]', "content", pageUrl);
       setMeta('meta[property="og:title"]', "content", pageTitle);
       setMeta('meta[name="twitter:title"]', "content", pageTitle);
+      if (l.hero_image_url) {
+        setMeta('meta[property="og:image"]', "content", l.hero_image_url);
+        setMeta('meta[name="twitter:image"]', "content", l.hero_image_url);
+      }
       if (l.meta_description) {
         setMeta('meta[name="description"]', "content", l.meta_description);
         setMeta('meta[property="og:description"]', "content", l.meta_description);
