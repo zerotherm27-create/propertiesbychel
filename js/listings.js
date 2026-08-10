@@ -115,7 +115,7 @@
         var el = document.querySelector(selector);
         if (el && value) el.setAttribute(attr, value);
       };
-      var pageUrl = "https://propertiesbychel.vercel.app/property?slug=" + encodeURIComponent(l.slug);
+      var pageUrl = "https://www.propertiesbychel.com/property?slug=" + encodeURIComponent(l.slug);
       var pageTitle = l.title + (l.location_label ? ", " + l.location_label : "") + " · Private Presentation · Properties by Chel";
       setMeta('link[rel="canonical"]', "href", pageUrl);
       setMeta('meta[property="og:url"]', "content", pageUrl);

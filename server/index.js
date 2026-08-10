@@ -12,6 +12,8 @@ const app = express();
 app.use(express.json({ limit: "2mb" }));
 
 const allowedOrigins = [
+  "https://propertiesbychel.com",
+  "https://www.propertiesbychel.com",
   "https://propertiesbychel.vercel.app",
   /^https:\/\/propertiesbychel-[a-z0-9]+-zerotherm27-8336s-projects\.vercel\.app$/,
   /^http:\/\/localhost(:\d+)?$/

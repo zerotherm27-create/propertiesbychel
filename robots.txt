@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /dashboard
 
-Sitemap: https://propertiesbychel.vercel.app/sitemap.xml
+Sitemap: https://www.propertiesbychel.com/sitemap.xml
