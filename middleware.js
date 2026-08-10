@@ -17,6 +17,7 @@ const PASSTHROUGH_PATHS = new Set([
   "/robots.txt",
   "/sitemap.xml",
   "/favicon.ico",
+  "/tokens.css",
 ]);
 const PREVIEW_COOKIE = "pbc_preview";
 
