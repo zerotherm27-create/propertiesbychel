@@ -1,0 +1,8 @@
+{
+  "name": "propertiesbychel",
+  "private": true,
+  "dependencies": {
+    "@vercel/edge-config": "^1.4.0",
+    "@vercel/functions": "^1.6.0"
+  }
+}

@@ -7,9 +7,9 @@ frame-hover tilt/zoom double-animation — see that commit for context).
 
 | # | Title | Severity | Category | Status |
 | --- | --- | --- | --- | --- |
-| [001](001-gate-hover-transforms-touch.md) | Gate transform/layout-shifting hover effects behind `(hover: hover) and (pointer: fine)` | MEDIUM | Accessibility | TODO |
-| [002](002-funnel-step-reentrancy-guard.md) | Guard funnel step transitions against rapid re-entry | MEDIUM | Interruptibility | TODO |
-| [003](003-animate-gallery-filter-swap.md) | Animate property-gallery filter swap instead of teleporting | MEDIUM | Missed opportunity / Purpose | TODO |
+| [001](001-gate-hover-transforms-touch.md) | Gate transform/layout-shifting hover effects behind `(hover: hover) and (pointer: fine)` | MEDIUM | Accessibility | DONE |
+| [002](002-funnel-step-reentrancy-guard.md) | Guard funnel step transitions against rapid re-entry | MEDIUM | Interruptibility | DONE |
+| [003](003-animate-gallery-filter-swap.md) | Animate property-gallery filter swap instead of teleporting | MEDIUM | Missed opportunity / Purpose | DONE |
 
 ## Recommended execution order
 

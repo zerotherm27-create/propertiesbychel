@@ -501,6 +501,16 @@ fieldset { border: 0; padding: 0; margin: 0; }
  * own bottom padding plus the footer's top padding otherwise doubles up into a dead gap. */
 .band:last-child { padding-bottom: var(--space-10); }
 
+/* ————— Coming soon / maintenance splash ————— */
+.coming-soon {
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: var(--space-10) var(--margin);
+}
+.coming-soon__logo { height: 44px; width: auto; margin-bottom: var(--space-10); }
+.coming-soon .h1 { max-width: 18ch; margin-inline: auto; }
+.coming-soon .lede { margin-inline: auto; }
+
 /* ————— Journal / long-form prose ————— */
 .article { max-width: var(--measure); margin-inline: auto; }
 .article > p:first-of-type::first-letter {
