@@ -2,6 +2,10 @@
 // when the "coming_soon" Edge Config flag is true. Flip it in the Vercel
 // dashboard (Storage → Edge Config) or `vercel edge-config update` — takes
 // effect immediately, no redeploy needed.
+//
+// Preview bypass: visiting /?preview=<PREVIEW_BYPASS_TOKEN> once sets a
+// cookie so the owner keeps seeing the real site everywhere, even while
+// coming_soon is on for everyone else.
 import { get } from "@vercel/edge-config";
 import { rewrite, next } from "@vercel/functions";
 
@@ -13,6 +17,18 @@ const PASSTHROUGH_PATHS = new Set([
   "/sitemap.xml",
   "/favicon.ico",
 ]);
+const PREVIEW_COOKIE = "pbc_preview";
+
+function getCookie(request, name) {
+  const header = request.headers.get("cookie");
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq === -1) continue;
+    if (part.slice(0, eq).trim() === name) return part.slice(eq + 1).trim();
+  }
+  return null;
+}
 
 export default async function middleware(request) {
   const url = new URL(request.url);
@@ -23,6 +39,25 @@ export default async function middleware(request) {
     PASSTHROUGH_PREFIXES.some((prefix) => path.startsWith(prefix))
   ) {
     return next();
+  }
+
+  const bypassToken = process.env.PREVIEW_BYPASS_TOKEN;
+  if (bypassToken) {
+    const queryToken = url.searchParams.get("preview");
+    if (queryToken === bypassToken) {
+      const cleanUrl = new URL(url);
+      cleanUrl.searchParams.delete("preview");
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: cleanUrl.pathname + cleanUrl.search,
+          "Set-Cookie": `${PREVIEW_COOKIE}=${bypassToken}; Path=/; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax`,
+        },
+      });
+    }
+    if (getCookie(request, PREVIEW_COOKIE) === bypassToken) {
+      return next();
+    }
   }
 
   let comingSoon = false;
