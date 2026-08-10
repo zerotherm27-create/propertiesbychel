@@ -1,5 +1,5 @@
-// Vercel Routing Middleware — fronts the public site with coming-soon.html
-// when the "coming_soon" Edge Config flag is true. Flip it in the Vercel
+// Vercel Routing Middleware — fronts the public site with the coming-soon
+// page when the "coming_soon" Edge Config flag is true. Flip it in the Vercel
 // dashboard (Storage → Edge Config) or `vercel edge-config update` — takes
 // effect immediately, no redeploy needed.
 //
@@ -12,6 +12,7 @@ import { rewrite, next } from "@vercel/functions";
 const PASSTHROUGH_PREFIXES = ["/css/", "/js/", "/images/"];
 const PASSTHROUGH_PATHS = new Set([
   "/dashboard",
+  "/coming-soon",
   "/coming-soon.html",
   "/robots.txt",
   "/sitemap.xml",
@@ -70,7 +71,7 @@ export default async function middleware(request) {
 
   if (!comingSoon) return next();
 
-  url.pathname = "/coming-soon.html";
+  url.pathname = "/coming-soon";
   return rewrite(url);
 }
 
