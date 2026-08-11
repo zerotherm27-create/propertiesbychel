@@ -169,6 +169,16 @@
     };
   }
 
+  function notifyLead(payload) {
+    // Best-effort email notification (owner alert + enquirer auto-reply).
+    // Failures here don't affect the lead, which is already saved above.
+    fetch("/api/notify-lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).catch(function () {});
+  }
+
   function submitLead(payload) {
     if (!SB.url || !SB.anonKey) {
       // Backend not configured yet — simulate success so the site remains usable.
@@ -185,6 +195,7 @@
       body: JSON.stringify(payload)
     }).then(function (r) {
       if (!r.ok) throw new Error("lead submit failed: " + r.status);
+      notifyLead(payload);
     });
   }
 
