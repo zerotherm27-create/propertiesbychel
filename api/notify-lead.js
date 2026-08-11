@@ -63,11 +63,7 @@ function autoReplyHtml(lead) {
   );
 }
 
-export default async function handler(request) {
-  if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
-
+export async function POST(request) {
   const from = process.env.RESEND_FROM_EMAIL;
   if (!process.env.RESEND_API_KEY || !from) {
     return new Response(JSON.stringify({ error: "Email not configured" }), {
