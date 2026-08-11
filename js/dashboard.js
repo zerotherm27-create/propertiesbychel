@@ -103,6 +103,7 @@ async function init(supabase) {
   function enter() {
     show("app");
     loadLeads();
+    loadDevelopments();
     loadListings();
     loadPhotos();
     if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto, showToast });
@@ -405,6 +406,41 @@ async function init(supabase) {
       </div>`).join("");
   }
 
+  /* ————— developments ————— */
+  let developments = [];
+
+  async function loadDevelopments() {
+    const { data, error } = await supabase.from("developments").select("*").order("sort_order", { ascending: true });
+    if (error) { $("#developments-list").innerHTML = '<p class="dash-empty">Could not load developments: ' + esc(error.message) + "</p>"; return; }
+    developments = data;
+    renderDevelopments();
+    populateDevelopmentPicker();
+  }
+
+  function renderDevelopments() {
+    if (!developments.length) { $("#developments-list").innerHTML = '<p class="dash-empty">No developments yet. Add the first one.</p>'; return; }
+    $("#developments-list").innerHTML = developments.map((d) => `
+      <div class="dash-row" data-id="${d.id}">
+        <div class="dash-row__line">
+          <span class="dash-row__name">${esc(d.name)}</span>
+          <span class="dash-row__meta">${esc(d.developer_name || "")}</span>
+          <span class="dash-row__spacer"></span>
+          <label class="dash-switch" style="margin:0"><input type="checkbox" data-pub ${d.published ? "checked" : ""}> Published</label>
+          <label class="dash-switch" style="margin:0"><input type="checkbox" data-feat ${d.featured ? "checked" : ""}> Featured</label>
+          <button class="dash-linkbtn" data-edit>Edit</button>
+          <button class="dash-linkbtn" data-del>Delete</button>
+        </div>
+      </div>`).join("");
+  }
+
+  function populateDevelopmentPicker() {
+    const select = form.elements.development_id;
+    const current = select.value;
+    select.innerHTML = '<option value="">— Standalone listing —</option>' +
+      developments.map((d) => `<option value="${d.id}">${esc(d.name)}</option>`).join("");
+    select.value = current;
+  }
+
   const AGENT_URL = (window.SUPABASE_CONFIG || {}).contentAgentUrl || "";
   async function listingAuthHeader() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -414,14 +450,29 @@ async function init(supabase) {
   const form = $("#listing-form");
   let galleryImages = [];
 
+  const devEditor = $("#development-editor");
+  const devForm = $("#development-form");
+  let devGalleryImages = [];
+
   $("#listing-new-btn").addEventListener("click", () => openEditor(null));
   $("#editor-close").addEventListener("click", () => { editor.hidden = true; });
+
+  $("#development-new-btn").addEventListener("click", () => openDevelopmentEditor(null));
+  $("#dev-editor-close").addEventListener("click", () => { devEditor.hidden = true; });
 
   function renderGalleryGrid() {
     $("#listing-gallery-grid").innerHTML = galleryImages.map((g, i) => `
       <div class="dash-gallery-item">
         <img src="${esc(g.url)}" alt="">
         <button type="button" class="dash-linkbtn" data-remove-gallery="${i}">Remove</button>
+      </div>`).join("");
+  }
+
+  function renderDevGalleryGrid() {
+    $("#development-gallery-grid").innerHTML = devGalleryImages.map((g, i) => `
+      <div class="dash-gallery-item">
+        <img src="${esc(g.url)}" alt="">
+        <button type="button" class="dash-linkbtn" data-remove-dev-gallery="${i}">Remove</button>
       </div>`).join("");
   }
 
@@ -432,7 +483,7 @@ async function init(supabase) {
     $("#listing-ai-status").textContent = "";
     form.elements.id.value = l ? l.id : "";
     if (l) {
-      ["title", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description"].forEach((k) => { form.elements[k].value = l[k] || ""; });
+      ["title", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description", "development_id"].forEach((k) => { form.elements[k].value = l[k] || ""; });
       form.elements.status.value = l.status;
       form.elements.aspect.value = l.aspect || "4/3";
       form.elements.sort_order.value = l.sort_order;
@@ -453,8 +504,37 @@ async function init(supabase) {
     $("#listing-gallery-url").value = "";
     galleryImages = l && Array.isArray(l.gallery_images) ? l.gallery_images.slice() : [];
     renderGalleryGrid();
-    resetListingMap(l && l.map_lat != null ? l.map_lat : null, l && l.map_lng != null ? l.map_lng : null);
+    listingLocationPicker.reset(l && l.map_lat != null ? l.map_lat : null, l && l.map_lng != null ? l.map_lng : null);
     editor.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function openDevelopmentEditor(d) {
+    devEditor.hidden = false;
+    $("#dev-editor-title").textContent = d ? "Edit: " + d.name : "New development";
+    devForm.reset();
+    devForm.elements.id.value = d ? d.id : "";
+    if (d) {
+      ["name", "developer_name", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
+      devForm.elements.sort_order.value = d.sort_order;
+      devForm.elements.published.checked = d.published;
+      devForm.elements.featured.checked = d.featured;
+      devForm.elements.amenities_text.value = (d.amenities || []).join("\n");
+      const features = Array.isArray(d.location_features) ? d.location_features : [];
+      for (let i = 0; i < 5; i++) {
+        devForm.elements["feature_label_" + i].value = features[i] ? features[i].label : "";
+        devForm.elements["feature_value_" + i].value = features[i] ? features[i].value : "";
+      }
+    }
+    updateDevMetaCount();
+    const prev = $("#development-photo-preview");
+    prev.hidden = !(d && d.hero_image_url);
+    if (d && d.hero_image_url) prev.src = d.hero_image_url;
+    $("#development-photo-url").value = "";
+    $("#development-gallery-url").value = "";
+    devGalleryImages = d && Array.isArray(d.gallery_images) ? d.gallery_images.slice() : [];
+    renderDevGalleryGrid();
+    devLocationPicker.reset(d && d.map_lat != null ? d.map_lat : null, d && d.map_lng != null ? d.map_lng : null);
+    devEditor.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   $("#listing-photo").addEventListener("change", () => {
@@ -481,6 +561,30 @@ async function init(supabase) {
   }
   form.elements.meta_description.addEventListener("input", updateMetaCount);
 
+  $("#development-photo").addEventListener("change", () => {
+    const f = $("#development-photo").files[0];
+    if (!f) return;
+    const prev = $("#development-photo-preview");
+    prev.src = URL.createObjectURL(f);
+    prev.hidden = false;
+  });
+
+  $("#development-photo-url").addEventListener("input", () => {
+    const url = $("#development-photo-url").value.trim();
+    if (!url) return;
+    const prev = $("#development-photo-preview");
+    prev.src = url;
+    prev.hidden = false;
+  });
+
+  function updateDevMetaCount() {
+    const n = devForm.elements.meta_description.value.length;
+    const el = $("#dev-meta-count");
+    el.textContent = n + " / 160";
+    el.classList.toggle("is-over", n > 160);
+  }
+  devForm.elements.meta_description.addEventListener("input", updateDevMetaCount);
+
   $("#listing-ai-draft-btn").addEventListener("click", async () => {
     const title = form.elements.title.value.trim();
     const status = $("#listing-ai-status");
@@ -495,7 +599,7 @@ async function init(supabase) {
         location_label: form.elements.location_label.value.trim(),
         price_display: form.elements.price_display.value.trim(),
         meta_line: form.elements.meta_line.value.trim(),
-        features: featuresFromForm(),
+        features: listingLocationPicker.featuresFromForm(),
         notes: form.elements.listing_notes.value.trim()
       });
       const r = await fetch(AGENT_URL + "/generate-listing-description", { method: "POST", headers, body });
@@ -540,6 +644,36 @@ async function init(supabase) {
     if (!btn) return;
     galleryImages.splice(Number(btn.dataset.removeGallery), 1);
     renderGalleryGrid();
+  });
+
+  $("#development-gallery-input").addEventListener("change", async () => {
+    const files = Array.from($("#development-gallery-input").files);
+    if (!files.length) return;
+    for (const f of files) {
+      try {
+        const url = await uploadPhoto(f, "developments-gallery");
+        devGalleryImages.push({ url, alt: "" });
+      } catch (ex) {
+        showToast("Could not upload one of the photos: " + (ex.message || ex), true);
+      }
+    }
+    $("#development-gallery-input").value = "";
+    renderDevGalleryGrid();
+  });
+
+  $("#development-gallery-url-add").addEventListener("click", () => {
+    const url = $("#development-gallery-url").value.trim();
+    if (!url) return;
+    devGalleryImages.push({ url, alt: "" });
+    $("#development-gallery-url").value = "";
+    renderDevGalleryGrid();
+  });
+
+  $("#development-gallery-grid").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-dev-gallery]");
+    if (!btn) return;
+    devGalleryImages.splice(Number(btn.dataset.removeDevGallery), 1);
+    renderDevGalleryGrid();
   });
 
   // Google Drive picker — lets the photo/gallery file inputs also be filled
@@ -636,11 +770,20 @@ async function init(supabase) {
     openDrivePicker(true, (files) => filesIntoInput($("#listing-gallery-input"), files));
   });
 
+  $("#development-photo-drive").addEventListener("click", () => {
+    openDrivePicker(false, (files) => filesIntoInput($("#development-photo"), files));
+  });
+
+  $("#development-gallery-drive").addEventListener("click", () => {
+    openDrivePicker(true, (files) => filesIntoInput($("#development-gallery-input"), files));
+  });
+
   // Map location — type an address, geocode it, drop a draggable pin.
+  // Shared by both the listing form and the development form via
+  // createLocationPicker(), parameterized by DOM-id prefix, owning form,
+  // and how many nearby-feature rows that form has.
   const mapsConfig = window.GOOGLE_MAPS_CONFIG || {};
   let mapsSdkReady = null;
-  let listingMap = null;
-  let listingMapMarker = null;
 
   function loadMapsSdk() {
     if (window.google && window.google.maps) return Promise.resolve();
@@ -653,48 +796,6 @@ async function init(supabase) {
       });
     }
     return mapsSdkReady;
-  }
-
-  function placeListingMapPin(lat, lng) {
-    const preview = $("#listing-map-preview");
-    preview.hidden = false;
-    const pos = { lat, lng };
-    if (!listingMap) {
-      listingMap = new google.maps.Map(preview, { center: pos, zoom: 15, streetViewControl: false, mapTypeControl: false });
-      listingMapMarker = new google.maps.Marker({ position: pos, map: listingMap, draggable: true });
-      listingMapMarker.addListener("dragend", () => {
-        const p = listingMapMarker.getPosition();
-        form.elements.map_lat.value = p.lat();
-        form.elements.map_lng.value = p.lng();
-      });
-    } else {
-      listingMap.setCenter(pos);
-      listingMapMarker.setPosition(pos);
-    }
-    form.elements.map_lat.value = lat;
-    form.elements.map_lng.value = lng;
-  }
-
-  function resetListingMap(lat, lng) {
-    $("#listing-map-address").value = "";
-    $("#listing-map-note").textContent = "Type an address and press Locate, then drag the pin to fine-tune.";
-    form.elements.map_lat.value = lat != null ? lat : "";
-    form.elements.map_lng.value = lng != null ? lng : "";
-    $("#listing-nearby-suggestions").hidden = true;
-    $("#listing-nearby-suggestions").innerHTML = "";
-    $("#listing-nearby-note").textContent = "";
-    if (lat == null || lng == null) {
-      $("#listing-map-preview").hidden = true;
-      return;
-    }
-    loadMapsSdk().then(() => {
-      placeListingMapPin(lat, lng);
-      suggestNearbyFeatures(lat, lng);
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-        if (status === "OK" && results[0]) $("#listing-map-address").value = results[0].formatted_address;
-      });
-    }).catch(() => {});
   }
 
   // Suggest nearby features (transit, shopping, schools, healthcare) from Places, closest of each within 1.5km.
@@ -716,86 +817,148 @@ async function init(supabase) {
 
   const formatDistance = (m) => (m < 1000 ? Math.round(m) + "m" : (m / 1000).toFixed(1) + "km");
 
-  function fillNextFeatureRow(label, value) {
-    for (let i = 0; i < 3; i++) {
-      if (!form.elements["feature_label_" + i].value.trim()) {
-        form.elements["feature_label_" + i].value = label;
-        form.elements["feature_value_" + i].value = value;
-        return true;
+  function createLocationPicker({ formEl, prefix, featureRowCount }) {
+    let map = null;
+    let marker = null;
+
+    function placePin(lat, lng) {
+      const preview = $("#" + prefix + "-map-preview");
+      preview.hidden = false;
+      const pos = { lat, lng };
+      if (!map) {
+        map = new google.maps.Map(preview, { center: pos, zoom: 15, streetViewControl: false, mapTypeControl: false });
+        marker = new google.maps.Marker({ position: pos, map, draggable: true });
+        marker.addListener("dragend", () => {
+          const p = marker.getPosition();
+          formEl.elements.map_lat.value = p.lat();
+          formEl.elements.map_lng.value = p.lng();
+        });
+      } else {
+        map.setCenter(pos);
+        marker.setPosition(pos);
       }
+      formEl.elements.map_lat.value = lat;
+      formEl.elements.map_lng.value = lng;
     }
-    return false;
-  }
 
-  function renderNearbySuggestions(found) {
-    const box = $("#listing-nearby-suggestions");
-    const note = $("#listing-nearby-note");
-    if (!found.length) return;
-    found.sort((a, b) => a.distance - b.distance);
-    box.innerHTML = found.map((f, i) =>
-      `<button type="button" class="dash-suggest-chip" data-suggest="${i}">${esc(f.label)}: ${esc(f.name)} · ${formatDistance(f.distance)}</button>`
-    ).join("");
-    box.hidden = false;
-    note.textContent = "Suggested from nearby places — click to add a row.";
-    $$("[data-suggest]", box).forEach((btn, i) => {
-      btn.addEventListener("click", () => {
-        const f = found[i];
-        if (!fillNextFeatureRow(f.label, f.name + ", " + formatDistance(f.distance) + " away")) {
-          showToast("All 3 nearby-feature rows are full", true);
-          return;
+    function fillNextFeatureRow(label, value) {
+      for (let i = 0; i < featureRowCount; i++) {
+        if (!formEl.elements["feature_label_" + i].value.trim()) {
+          formEl.elements["feature_label_" + i].value = label;
+          formEl.elements["feature_value_" + i].value = value;
+          return true;
         }
-        btn.remove();
-      });
-    });
-  }
+      }
+      return false;
+    }
 
-  function suggestNearbyFeatures(lat, lng) {
-    if (!mapsConfig.apiKey) return;
-    loadMapsSdk().then(() => {
-      const service = new google.maps.places.PlacesService(listingMap || document.createElement("div"));
-      const found = [];
-      let pending = NEARBY_CATEGORIES.length;
-      NEARBY_CATEGORIES.forEach((cat) => {
-        service.nearbySearch({ location: { lat, lng }, radius: 1500, type: cat.type }, (results, status) => {
-          pending -= 1;
-          if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length) {
-            let best = null, bestDist = Infinity;
-            results.forEach((r) => {
-              if (!r.geometry || !r.geometry.location) return;
-              const d = haversineMeters(lat, lng, r.geometry.location.lat(), r.geometry.location.lng());
-              if (d < bestDist) { bestDist = d; best = r; }
-            });
-            if (best) found.push({ label: cat.label, name: best.name, distance: bestDist });
+    function renderNearbySuggestions(found) {
+      const box = $("#" + prefix + "-nearby-suggestions");
+      const note = $("#" + prefix + "-nearby-note");
+      if (!found.length) return;
+      found.sort((a, b) => a.distance - b.distance);
+      box.innerHTML = found.map((f, i) =>
+        `<button type="button" class="dash-suggest-chip" data-suggest="${i}">${esc(f.label)}: ${esc(f.name)} · ${formatDistance(f.distance)}</button>`
+      ).join("");
+      box.hidden = false;
+      note.textContent = "Suggested from nearby places — click to add a row.";
+      $$("[data-suggest]", box).forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          const f = found[i];
+          if (!fillNextFeatureRow(f.label, f.name + ", " + formatDistance(f.distance) + " away")) {
+            showToast("All " + featureRowCount + " nearby-feature rows are full", true);
+            return;
           }
-          if (pending === 0) renderNearbySuggestions(found);
+          btn.remove();
         });
       });
-    }).catch(() => {});
+    }
+
+    function suggestNearby(lat, lng) {
+      if (!mapsConfig.apiKey) return;
+      loadMapsSdk().then(() => {
+        const service = new google.maps.places.PlacesService(map || document.createElement("div"));
+        const found = [];
+        let pending = NEARBY_CATEGORIES.length;
+        NEARBY_CATEGORIES.forEach((cat) => {
+          service.nearbySearch({ location: { lat, lng }, radius: 1500, type: cat.type }, (results, status) => {
+            pending -= 1;
+            if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length) {
+              let best = null, bestDist = Infinity;
+              results.forEach((r) => {
+                if (!r.geometry || !r.geometry.location) return;
+                const d = haversineMeters(lat, lng, r.geometry.location.lat(), r.geometry.location.lng());
+                if (d < bestDist) { bestDist = d; best = r; }
+              });
+              if (best) found.push({ label: cat.label, name: best.name, distance: bestDist });
+            }
+            if (pending === 0) renderNearbySuggestions(found);
+          });
+        });
+      }).catch(() => {});
+    }
+
+    function reset(lat, lng) {
+      $("#" + prefix + "-map-address").value = "";
+      $("#" + prefix + "-map-note").textContent = "Type an address and press Locate, then drag the pin to fine-tune.";
+      formEl.elements.map_lat.value = lat != null ? lat : "";
+      formEl.elements.map_lng.value = lng != null ? lng : "";
+      $("#" + prefix + "-nearby-suggestions").hidden = true;
+      $("#" + prefix + "-nearby-suggestions").innerHTML = "";
+      $("#" + prefix + "-nearby-note").textContent = "";
+      if (lat == null || lng == null) {
+        $("#" + prefix + "-map-preview").hidden = true;
+        return;
+      }
+      loadMapsSdk().then(() => {
+        placePin(lat, lng);
+        suggestNearby(lat, lng);
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+          if (status === "OK" && results[0]) $("#" + prefix + "-map-address").value = results[0].formatted_address;
+        });
+      }).catch(() => {});
+    }
+
+    function featuresFromForm() {
+      const rows = [];
+      for (let i = 0; i < featureRowCount; i++) {
+        const label = formEl.elements["feature_label_" + i].value.trim();
+        const value = formEl.elements["feature_value_" + i].value.trim();
+        if (label && value) rows.push({ label, value });
+      }
+      return rows;
+    }
+
+    $("#" + prefix + "-map-locate").addEventListener("click", () => {
+      const address = $("#" + prefix + "-map-address").value.trim();
+      const note = $("#" + prefix + "-map-note");
+      if (!address) { showToast("Type an address first", true); return; }
+      if (!mapsConfig.apiKey) { showToast("Google Maps isn't configured yet — add GOOGLE_MAPS_CONFIG in js/supabase-config.js", true); return; }
+      note.textContent = "Locating…";
+      $("#" + prefix + "-nearby-suggestions").hidden = true;
+      $("#" + prefix + "-nearby-suggestions").innerHTML = "";
+      $("#" + prefix + "-nearby-note").textContent = "";
+      loadMapsSdk().then(() => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address }, (results, status) => {
+          if (status !== "OK" || !results[0]) {
+            note.textContent = "Couldn't find that address — try refining it.";
+            return;
+          }
+          const loc = results[0].geometry.location;
+          placePin(loc.lat(), loc.lng());
+          suggestNearby(loc.lat(), loc.lng());
+          note.textContent = "Found: " + results[0].formatted_address + ". Drag the pin to fine-tune.";
+        });
+      }).catch((ex) => { note.textContent = "Could not load Google Maps: " + (ex.message || ex); });
+    });
+
+    return { reset, featuresFromForm };
   }
 
-  $("#listing-map-locate").addEventListener("click", () => {
-    const address = $("#listing-map-address").value.trim();
-    const note = $("#listing-map-note");
-    if (!address) { showToast("Type an address first", true); return; }
-    if (!mapsConfig.apiKey) { showToast("Google Maps isn't configured yet — add GOOGLE_MAPS_CONFIG in js/supabase-config.js", true); return; }
-    note.textContent = "Locating…";
-    $("#listing-nearby-suggestions").hidden = true;
-    $("#listing-nearby-suggestions").innerHTML = "";
-    $("#listing-nearby-note").textContent = "";
-    loadMapsSdk().then(() => {
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ address }, (results, status) => {
-        if (status !== "OK" || !results[0]) {
-          note.textContent = "Couldn't find that address — try refining it.";
-          return;
-        }
-        const loc = results[0].geometry.location;
-        placeListingMapPin(loc.lat(), loc.lng());
-        suggestNearbyFeatures(loc.lat(), loc.lng());
-        note.textContent = "Found: " + results[0].formatted_address + ". Drag the pin to fine-tune.";
-      });
-    }).catch((ex) => { note.textContent = "Could not load Google Maps: " + (ex.message || ex); });
-  });
+  const listingLocationPicker = createLocationPicker({ formEl: form, prefix: "listing", featureRowCount: 3 });
+  const devLocationPicker = createLocationPicker({ formEl: devForm, prefix: "dev", featureRowCount: 5 });
 
   async function uploadPhoto(file, prefix) {
     const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
@@ -806,16 +969,6 @@ async function init(supabase) {
   }
 
   const slugify = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-
-  function featuresFromForm() {
-    const rows = [];
-    for (let i = 0; i < 3; i++) {
-      const label = form.elements["feature_label_" + i].value.trim();
-      const value = form.elements["feature_value_" + i].value.trim();
-      if (label && value) rows.push({ label, value });
-    }
-    return rows;
-  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -845,7 +998,8 @@ async function init(supabase) {
         sort_order: Number(form.elements.sort_order.value) || 100,
         published: form.elements.published.checked,
         featured: form.elements.featured.checked,
-        location_features: featuresFromForm()
+        development_id: form.elements.development_id.value || null,
+        location_features: listingLocationPicker.featuresFromForm()
       };
       payload.map_lat = form.elements.map_lat.value !== "" ? Number(form.elements.map_lat.value) : null;
       payload.map_lng = form.elements.map_lng.value !== "" ? Number(form.elements.map_lng.value) : null;
@@ -885,6 +1039,74 @@ async function init(supabase) {
     if (!patch) return;
     const { error } = await supabase.from("listings").update(patch).eq("id", row.dataset.id);
     if (error) { showToast("Could not update: " + error.message, true); loadListings(); }
+  });
+
+  devForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("#development-error");
+    err.textContent = "";
+    const btn = $("#development-save");
+    btn.textContent = "Saving…";
+    try {
+      const photoFile = $("#development-photo").files[0];
+      const photoUrl = $("#development-photo-url").value.trim();
+      if (photoFile) devForm.elements.hero_image_url.value = await uploadPhoto(photoFile, "developments");
+      else if (photoUrl) devForm.elements.hero_image_url.value = photoUrl;
+      const isEdit = !!devForm.elements.id.value;
+      const payload = {
+        name: devForm.elements.name.value.trim(),
+        developer_name: devForm.elements.developer_name.value.trim() || null,
+        tagline: devForm.elements.tagline.value.trim() || null,
+        location_label: devForm.elements.location_label.value.trim() || null,
+        meta_line: devForm.elements.meta_line.value.trim() || null,
+        overview: devForm.elements.overview.value.trim() || null,
+        meta_description: devForm.elements.meta_description.value.trim() || null,
+        hero_image_url: devForm.elements.hero_image_url.value || null,
+        gallery_images: devGalleryImages,
+        amenities: devForm.elements.amenities_text.value.split("\n").map((s) => s.trim()).filter(Boolean),
+        sort_order: Number(devForm.elements.sort_order.value) || 100,
+        published: devForm.elements.published.checked,
+        featured: devForm.elements.featured.checked,
+        location_features: devLocationPicker.featuresFromForm()
+      };
+      payload.map_lat = devForm.elements.map_lat.value !== "" ? Number(devForm.elements.map_lat.value) : null;
+      payload.map_lng = devForm.elements.map_lng.value !== "" ? Number(devForm.elements.map_lng.value) : null;
+      if (!isEdit) payload.slug = slugify(payload.name);
+      const q = isEdit
+        ? supabase.from("developments").update(payload).eq("id", devForm.elements.id.value)
+        : supabase.from("developments").insert(payload);
+      const { error } = await q;
+      if (error) throw error;
+      devEditor.hidden = true;
+      await loadDevelopments();
+    } catch (ex) {
+      err.textContent = ex.message || String(ex);
+    } finally {
+      btn.textContent = "Save development";
+    }
+  });
+
+  $("#developments-list").addEventListener("click", async (e) => {
+    const row = e.target.closest(".dash-row");
+    if (!row) return;
+    const d = developments.find((x) => x.id === row.dataset.id);
+    if (e.target.closest("[data-edit]")) openDevelopmentEditor(d);
+    if (e.target.closest("[data-del]")) {
+      if (!confirm(`Delete "${d.name}"? Units linked to it become standalone listings. This cannot be undone.`)) return;
+      const { error } = await supabase.from("developments").delete().eq("id", d.id);
+      if (error) showToast("Could not delete: " + error.message, true);
+      else { await loadDevelopments(); loadListings(); }
+    }
+  });
+
+  $("#developments-list").addEventListener("change", async (e) => {
+    const row = e.target.closest(".dash-row");
+    if (!row) return;
+    const patch = e.target.closest("[data-pub]") ? { published: e.target.checked }
+                : e.target.closest("[data-feat]") ? { featured: e.target.checked } : null;
+    if (!patch) return;
+    const { error } = await supabase.from("developments").update(patch).eq("id", row.dataset.id);
+    if (error) { showToast("Could not update: " + error.message, true); loadDevelopments(); }
   });
 
   /* ————— site photos ————— */

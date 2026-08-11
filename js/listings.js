@@ -74,28 +74,36 @@
     }).catch(function () { /* fallback content stands */ });
   }
 
+  /* — Listing card partial — shared by the collection gallery and any
+   * development page's "linked units" grid. When a row carries an
+   * embedded `development` (via a `development:developments(name,slug)`
+   * select), a small "Part of <name>" note is added under the meta line. */
+  function listingCardHTML(l, i) {
+    var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
+    var devNote = l.development ? '<p class="plisting__meta">Part of ' + esc(l.development.name) + "</p>" : "";
+    return (
+      '<a class="plisting is-in" href="property?slug=' + encodeURIComponent(l.slug) + '"' +
+      ' data-status="' + esc(l.status) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
+        '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
+          (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
+          '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.image_alt || l.title) + '" ' + imgAttrs + '>' +
+        "</div>" +
+        '<div class="plisting__head"><span class="plisting__title">' + esc(l.title) + "</span>" +
+          '<span class="plisting__rule"></span><span class="plisting__price">' + esc(l.price_display || "Price on application") + "</span></div>" +
+        '<p class="plisting__meta">' + esc(l.meta_line || l.location_label || "") + "</p>" +
+        devNote +
+      "</a>"
+    );
+  }
+
   /* — Collection gallery — */
   var gallery = document.querySelector(".gallery[data-listings]");
   if (gallery) {
     gallery.setAttribute("data-is-loading", "");
-    api("listings?select=*&published=eq.true&order=sort_order.asc").then(function (rows) {
+    api("listings?select=*,development:developments(name,slug)&published=eq.true&order=sort_order.asc").then(function (rows) {
       gallery.removeAttribute("data-is-loading");
       if (!rows.length) return;
-      gallery.innerHTML = rows.map(function (l, i) {
-        var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
-        return (
-          '<a class="plisting is-in" href="property?slug=' + encodeURIComponent(l.slug) + '"' +
-          ' data-status="' + esc(l.status) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
-            '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
-              (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
-              '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.image_alt || l.title) + '" ' + imgAttrs + '>' +
-            "</div>" +
-            '<div class="plisting__head"><span class="plisting__title">' + esc(l.title) + "</span>" +
-              '<span class="plisting__rule"></span><span class="plisting__price">' + esc(l.price_display || "Price on application") + "</span></div>" +
-            '<p class="plisting__meta">' + esc(l.meta_line || l.location_label || "") + "</p>" +
-          "</a>"
-        );
-      }).join("");
+      gallery.innerHTML = rows.map(listingCardHTML).join("");
       document.dispatchEvent(new CustomEvent("listings:rendered"));
     }).catch(function () { gallery.removeAttribute("data-is-loading"); /* static sample gallery stands */ });
   }
@@ -197,6 +205,117 @@
         a.href = "presentation?listing=" + encodeURIComponent(l.slug);
       });
     }).catch(function () { detail.removeAttribute("data-is-loading"); /* sample content stands */ });
+  }
+
+  /* — Development detail — */
+  var devDetail = document.querySelector("[data-development-detail]");
+  var devSlug = new URLSearchParams(location.search).get("slug");
+  if (devDetail && devSlug) {
+    devDetail.setAttribute("data-is-loading", "");
+    api("developments?select=*&slug=eq." + encodeURIComponent(devSlug) + "&limit=1").then(function (rows) {
+      devDetail.removeAttribute("data-is-loading");
+      var d = rows[0];
+      if (!d) return;
+      document.title = d.name + " · Properties by Chel";
+
+      var setMeta = function (selector, attr, value) {
+        var el = document.querySelector(selector);
+        if (el && value) el.setAttribute(attr, value);
+      };
+      var pageUrl = "https://www.propertiesbychel.com/development?slug=" + encodeURIComponent(d.slug);
+      var pageTitle = d.name + (d.location_label ? ", " + d.location_label : "") + " · Properties by Chel";
+      setMeta('link[rel="canonical"]', "href", pageUrl);
+      setMeta('meta[property="og:url"]', "content", pageUrl);
+      setMeta('meta[property="og:title"]', "content", pageTitle);
+      setMeta('meta[name="twitter:title"]', "content", pageTitle);
+      if (d.hero_image_url) {
+        setMeta('meta[property="og:image"]', "content", d.hero_image_url);
+        setMeta('meta[name="twitter:image"]', "content", d.hero_image_url);
+      }
+      if (d.meta_description) {
+        setMeta('meta[name="description"]', "content", d.meta_description);
+        setMeta('meta[property="og:description"]', "content", d.meta_description);
+        setMeta('meta[name="twitter:description"]', "content", d.meta_description);
+      }
+
+      var bindD = function (name, text) {
+        document.querySelectorAll('[data-d="' + name + '"]').forEach(function (el) { el.textContent = text; });
+      };
+      bindD("name", d.name);
+      bindD("developer_name", d.developer_name || "");
+      bindD("tagline", d.tagline || "A considered building.");
+      bindD("meta_line", d.meta_line || "");
+      bindD("location_label", d.location_label || "");
+      bindD("developer_line", d.developer_name ? "Developed by " + d.developer_name + "." : "");
+
+      var hero = document.querySelector("[data-d-img]");
+      if (hero && d.hero_image_url) { hero.src = d.hero_image_url; hero.alt = d.image_alt || d.name; }
+
+      var galleryMount = document.getElementById("dyn-gallery");
+      var galleryGrid = document.getElementById("dyn-gallery-grid");
+      if (galleryMount && galleryGrid && Array.isArray(d.gallery_images) && d.gallery_images.length) {
+        galleryGrid.innerHTML = d.gallery_images.map(function (g) {
+          return '<figure><div class="frame frame--hover" style="aspect-ratio:4/3">' +
+            '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || d.name) + '" loading="lazy"></div></figure>';
+        }).join("");
+        galleryMount.hidden = false;
+      }
+
+      var overview = document.querySelector("[data-d-overview]");
+      if (overview) {
+        overview.innerHTML = "<p>" + esc(d.overview ||
+          "Full particulars for this development are shared within the private presentation.") + "</p>";
+      }
+
+      var amenitiesSection = document.getElementById("dev-amenities");
+      var amenitiesList = document.getElementById("dev-amenities-list");
+      if (amenitiesSection && amenitiesList && Array.isArray(d.amenities) && d.amenities.length) {
+        amenitiesList.innerHTML = d.amenities.map(function (a) { return "<li>" + esc(a) + "</li>"; }).join("");
+        amenitiesSection.hidden = false;
+      }
+
+      var mapSection = document.getElementById("location-map-section");
+      var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
+      if (mapSection && d.map_lat != null && d.map_lng != null && mapConfig.apiKey) {
+        var featuresTable = document.getElementById("location-features-table");
+        if (featuresTable && Array.isArray(d.location_features) && d.location_features.length) {
+          featuresTable.innerHTML = d.location_features.map(function (f) {
+            return "<tr><th scope=\"row\">" + esc(f.label) + "</th><td>" + esc(f.value) + "</td></tr>";
+          }).join("");
+        }
+        loadGoogleMaps(mapConfig.apiKey).then(function () {
+          var mapEl = document.getElementById("development-map");
+          if (!mapEl) return;
+          var center = { lat: d.map_lat, lng: d.map_lng };
+          var map = new google.maps.Map(mapEl, {
+            center: center,
+            zoom: 15,
+            disableDefaultUI: true,
+            zoomControl: true,
+            styles: BRAND_MAP_STYLE
+          });
+          new google.maps.Marker({ position: center, map: map, icon: BRAND_PIN_ICON });
+        }).catch(function () { /* map section stays hidden if the script fails to load */ });
+        mapSection.hidden = false;
+      }
+
+      // Carry provenance into the funnel
+      document.querySelectorAll('a[href^="presentation"]').forEach(function (a) {
+        a.href = "presentation?development=" + encodeURIComponent(d.slug);
+      });
+
+      // Linked units
+      var unitsSection = document.getElementById("dev-units");
+      var unitsGrid = document.querySelector("[data-development-listings]");
+      if (unitsSection && unitsGrid) {
+        api("listings?select=*&development_id=eq." + encodeURIComponent(d.id) + "&published=eq.true&order=sort_order.asc").then(function (units) {
+          if (!units.length) return;
+          unitsGrid.innerHTML = units.map(listingCardHTML).join("");
+          unitsSection.hidden = false;
+          document.dispatchEvent(new CustomEvent("listings:rendered"));
+        }).catch(function () { /* section stays hidden */ });
+      }
+    }).catch(function () { devDetail.removeAttribute("data-is-loading"); });
   }
 
   /* — Home spotlight (featured listing) — */

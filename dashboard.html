@@ -127,6 +127,102 @@
   <section id="tab-listings" class="dash-tab" hidden>
     <div class="dash-panel">
       <div class="dash-panel__head">
+        <h2 class="h3">Developments</h2>
+        <button class="btn" id="development-new-btn">+ Add development</button>
+      </div>
+      <p class="field__note">A whole building or project, e.g. an entire tower — group multiple units under it below.</p>
+      <div id="developments-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel" id="development-editor" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="dev-editor-title">New development</h2>
+        <button class="funnel-back" id="dev-editor-close">Close</button>
+      </div>
+      <form id="development-form" class="dash-form">
+        <input type="hidden" name="id">
+        <div class="field"><label>Name</label><input name="name" required placeholder="e.g. Ongpin Tower"></div>
+        <div class="dash-form__row">
+          <div class="field"><label>Developer</label><input name="developer_name" placeholder="e.g. Keen &amp; Worth Property Developers"></div>
+          <div class="field"><label>Tagline</label><input name="tagline" placeholder="e.g. Redefining Chinatown Living"></div>
+        </div>
+        <div class="dash-form__row">
+          <div class="field"><label>Location label</label><input name="location_label" placeholder="e.g. Ongpin St, Binondo, Manila"></div>
+          <div class="field"><label>Card meta line</label><input name="meta_line" placeholder="e.g. 57 floors · Residences, Estates &amp; Penthouse"></div>
+        </div>
+        <div class="field"><label>Overview (shown on the development page)</label><textarea name="overview" rows="4" placeholder="Two or three considered sentences on the building and its positioning."></textarea></div>
+        <div class="field"><label>Meta description (for search results)</label>
+          <textarea name="meta_description" rows="2" placeholder="One sentence for search results, 120 to 155 characters."></textarea>
+          <p class="field__note" id="dev-meta-count">0 / 160</p>
+        </div>
+        <div class="field"><label>Amenities (one per line)</label>
+          <textarea name="amenities_text" rows="6" placeholder="25-metre lap pool and residents' gym&#10;Rooftop garden and event lounge&#10;24-hour concierge and security"></textarea>
+        </div>
+        <div class="field">
+          <label>Map location</label>
+          <div class="dash-form__row">
+            <input type="text" id="dev-map-address" placeholder="Type an address, e.g. Ongpin St, Binondo, Manila">
+            <button class="btn" type="button" id="dev-map-locate">Locate</button>
+          </div>
+          <div id="dev-map-preview" class="dash-map-preview" hidden></div>
+          <p class="field__note" id="dev-map-note">Type an address and press Locate, then drag the pin to fine-tune.</p>
+          <input type="hidden" name="map_lat">
+          <input type="hidden" name="map_lng">
+        </div>
+        <div class="field"><label>Nearby landmarks (up to 5 rows)</label>
+          <div id="dev-nearby-suggestions" class="dash-suggest-row" hidden></div>
+          <p class="field__note" id="dev-nearby-note"></p>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_0" placeholder="Label, e.g. Transit"></div>
+            <div class="field"><input name="feature_value_0" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_1" placeholder="Label"></div>
+            <div class="field"><input name="feature_value_1" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_2" placeholder="Label"></div>
+            <div class="field"><input name="feature_value_2" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_3" placeholder="Label"></div>
+            <div class="field"><input name="feature_value_3" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_4" placeholder="Label"></div>
+            <div class="field"><input name="feature_value_4" placeholder="Value"></div>
+          </div>
+        </div>
+        <div class="field"><label>Sort order</label><input name="sort_order" type="number" value="100"></div>
+        <div class="field">
+          <label>Hero photo</label>
+          <input type="file" id="development-photo" accept="image/*">
+          <input type="url" id="development-photo-url" placeholder="or paste an image URL">
+          <button class="btn" type="button" id="development-photo-drive">Choose from Google Drive</button>
+          <img id="development-photo-preview" class="dash-preview" hidden alt="Development hero photo preview">
+          <input type="hidden" name="hero_image_url">
+        </div>
+        <div class="field">
+          <label>Gallery photos</label>
+          <input type="file" id="development-gallery-input" accept="image/*" multiple>
+          <button class="btn" type="button" id="development-gallery-drive">Choose from Google Drive</button>
+          <div class="dash-form__row">
+            <input type="url" id="development-gallery-url" placeholder="or paste an image URL, then press Add">
+            <button class="btn" type="button" id="development-gallery-url-add">Add</button>
+          </div>
+          <div id="development-gallery-grid" class="dash-gallery-grid"></div>
+        </div>
+        <div class="dash-form__row">
+          <label class="dash-switch"><input type="checkbox" name="published" checked> Published on the site</label>
+          <label class="dash-switch"><input type="checkbox" name="featured"> Featured</label>
+        </div>
+        <button class="btn btn--solid" type="submit" id="development-save">Save development</button>
+        <p class="field__error" id="development-error" role="alert"></p>
+      </form>
+    </div>
+
+    <div class="dash-panel">
+      <div class="dash-panel__head">
         <h2 class="h3">Listings</h2>
         <button class="btn" id="listing-new-btn">+ Add listing</button>
       </div>
@@ -146,6 +242,9 @@
             <select name="status"><option value="sale">For sale</option><option value="lease">For lease</option><option value="investment">Investment</option></select>
           </div>
           <div class="field"><label>Corner tag (optional)</label><input name="tag" placeholder="Featured · Reserved · Allocation"></div>
+        </div>
+        <div class="field"><label>Part of a development (optional)</label>
+          <select name="development_id"><option value="">— Standalone listing —</option></select>
         </div>
         <fieldset class="field" style="border:0;padding:0">
           <label>Collections</label>
