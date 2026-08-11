@@ -12,6 +12,58 @@ function extractJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
+const IMAGE_NOISE_PATTERN = /logo|icon|favicon|sprite|avatar|pixel|spacer|blank/i;
+const MAX_IMAGES = 24;
+const MIN_IMAGE_DIMENSION = 150;
+
+function tagAttr(tag, name) {
+  const m = tag.match(new RegExp("\\b" + name + "\\s*=\\s*[\"']([^\"']*)[\"']", "i"));
+  return m ? m[1] : null;
+}
+
+// Best-effort: catches <img>/og:image sources, not CSS background-image heroes.
+function extractImageUrls(html, baseUrl) {
+  const found = [];
+
+  const imgTags = html.match(/<img\b[^>]*>/gi) || [];
+  for (const tag of imgTags) {
+    const src = tagAttr(tag, "src") || tagAttr(tag, "data-src") || tagAttr(tag, "data-lazy-src") || tagAttr(tag, "data-original");
+    if (!src) continue;
+    const width = Number(tagAttr(tag, "width"));
+    const height = Number(tagAttr(tag, "height"));
+    if (width && width < MIN_IMAGE_DIMENSION) continue;
+    if (height && height < MIN_IMAGE_DIMENSION) continue;
+    found.push(src);
+  }
+
+  const metaTags = html.match(/<meta\b[^>]*>/gi) || [];
+  for (const tag of metaTags) {
+    const isOgImage = tagAttr(tag, "property") === "og:image" || tagAttr(tag, "name") === "og:image";
+    if (!isOgImage) continue;
+    const content = tagAttr(tag, "content");
+    if (content) found.push(content);
+  }
+
+  const seen = new Set();
+  const images = [];
+  for (const src of found) {
+    if (src.startsWith("data:")) continue;
+    if (IMAGE_NOISE_PATTERN.test(src)) continue;
+    let abs;
+    try {
+      abs = new URL(src, baseUrl).toString();
+    } catch {
+      continue;
+    }
+    if (/\.svg(\?|#|$)/i.test(abs)) continue;
+    if (seen.has(abs)) continue;
+    seen.add(abs);
+    images.push(abs);
+    if (images.length >= MAX_IMAGES) break;
+  }
+  return images;
+}
+
 function htmlToText(html) {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -48,6 +100,8 @@ export async function importDevelopmentFromUrl(openai, { url }) {
     throw new Error("Could not fetch that page: " + (err.message || err));
   }
 
+  const images = extractImageUrls(html, parsed);
+
   const text = htmlToText(html).slice(0, MAX_TEXT_CHARS);
   if (!text) throw new Error("That page returned no readable text");
 
@@ -82,6 +136,7 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
     location_label: draft.location_label || "",
     meta_line: draft.meta_line || "",
     overview: draft.overview || "",
-    amenities: Array.isArray(draft.amenities) ? draft.amenities.filter((a) => typeof a === "string" && a.trim()) : []
+    amenities: Array.isArray(draft.amenities) ? draft.amenities.filter((a) => typeof a === "string" && a.trim()) : [],
+    images
   });
 }

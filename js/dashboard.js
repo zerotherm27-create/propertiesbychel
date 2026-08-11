@@ -636,7 +636,26 @@ async function init(supabase) {
       if (data.meta_line) devForm.elements.meta_line.value = data.meta_line;
       if (data.overview) devForm.elements.overview.value = data.overview;
       if (Array.isArray(data.amenities) && data.amenities.length) devForm.elements.amenities_text.value = data.amenities.join("\n");
-      status.textContent = "Imported — review every field below before saving. Add the hero photo, gallery, and map location yourself.";
+
+      let importedPhotos = false;
+      if ($("#dev-import-photos-ok").checked && Array.isArray(data.images) && data.images.length) {
+        const existing = new Set(devGalleryImages.map((g) => g.url));
+        const newImages = data.images.filter((u) => !existing.has(u));
+        if (newImages.length) {
+          devGalleryImages.push(...newImages.map((url) => ({ url, alt: "" })));
+          renderDevGalleryGrid();
+          importedPhotos = true;
+        }
+        if (!devForm.elements.hero_image_url.value && data.images[0]) {
+          devForm.elements.hero_image_url.value = data.images[0];
+          const prev = $("#development-photo-preview");
+          prev.src = data.images[0];
+          prev.hidden = false;
+        }
+      }
+      status.textContent = importedPhotos
+        ? "Imported — review every field below before saving, including the photos. Add the map location yourself."
+        : "Imported — review every field below before saving. Add the hero photo, gallery, and map location yourself.";
     } catch (ex) {
       status.textContent = "Could not import: " + (ex.message || ex);
     } finally {
