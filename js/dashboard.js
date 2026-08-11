@@ -616,6 +616,34 @@ async function init(supabase) {
     }
   });
 
+  $("#dev-import-btn").addEventListener("click", async () => {
+    const url = $("#dev-import-url").value.trim();
+    const status = $("#dev-import-status");
+    if (!url) { status.textContent = "Paste the project's URL first."; return; }
+    if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+    status.textContent = "Fetching and reading the page…";
+    $("#dev-import-btn").disabled = true;
+    try {
+      const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+      const body = JSON.stringify({ url });
+      const r = await fetch(AGENT_URL + "/import-development", { method: "POST", headers, body });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Import failed");
+      if (data.name) devForm.elements.name.value = data.name;
+      if (data.developer_name) devForm.elements.developer_name.value = data.developer_name;
+      if (data.tagline) devForm.elements.tagline.value = data.tagline;
+      if (data.location_label) devForm.elements.location_label.value = data.location_label;
+      if (data.meta_line) devForm.elements.meta_line.value = data.meta_line;
+      if (data.overview) devForm.elements.overview.value = data.overview;
+      if (Array.isArray(data.amenities) && data.amenities.length) devForm.elements.amenities_text.value = data.amenities.join("\n");
+      status.textContent = "Imported — review every field below before saving. Add the hero photo, gallery, and map location yourself.";
+    } catch (ex) {
+      status.textContent = "Could not import: " + (ex.message || ex);
+    } finally {
+      $("#dev-import-btn").disabled = false;
+    }
+  });
+
   $("#listing-gallery-input").addEventListener("change", async () => {
     const files = Array.from($("#listing-gallery-input").files);
     if (!files.length) return;

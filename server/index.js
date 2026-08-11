@@ -7,6 +7,7 @@ import { generateImage } from "./lib/images.js";
 import { draftBriefing } from "./lib/briefings.js";
 import { renderBriefingHtml, htmlToPdfBuffer } from "./lib/briefing-pdf.js";
 import { draftListingDescription } from "./lib/listings.js";
+import { importDevelopmentFromUrl } from "./lib/developments.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -66,6 +67,22 @@ app.post("/generate-listing-description", requireOwner, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(502).json({ error: err.message || "Generation failed" });
+  }
+});
+
+app.post("/import-development", requireOwner, async (req, res) => {
+  const client = getOpenAI();
+  if (!client) return res.status(503).json({ error: "OPENAI_API_KEY is not set on this server yet" });
+  const { url } = req.body || {};
+  if (!url) {
+    return res.status(400).json({ error: "url is required" });
+  }
+  try {
+    const draft = await importDevelopmentFromUrl(client, { url });
+    res.json(draft);
+  } catch (err) {
+    console.error(err);
+    res.status(502).json({ error: err.message || "Import failed" });
   }
 });
 

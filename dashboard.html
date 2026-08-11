@@ -141,6 +141,13 @@
       </div>
       <form id="development-form" class="dash-form">
         <input type="hidden" name="id">
+        <div class="field"><label>Import from the project's own webpage (optional)</label>
+          <div class="dash-form__row">
+            <input type="url" id="dev-import-url" placeholder="e.g. https://ongpintower.com">
+            <button class="btn" type="button" id="dev-import-btn">Import from URL</button>
+          </div>
+          <p class="field__note" id="dev-import-status">Fills in the text fields below from what the page states. Review everything before saving — nothing is invented, but always double-check facts and figures. Photos aren't imported (copyright); add your own below.</p>
+        </div>
         <div class="field"><label>Name</label><input name="name" required placeholder="e.g. Ongpin Tower"></div>
         <div class="dash-form__row">
           <div class="field"><label>Developer</label><input name="developer_name" placeholder="e.g. Keen &amp; Worth Property Developers"></div>
