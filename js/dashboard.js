@@ -636,6 +636,12 @@ async function init(supabase) {
       if (data.meta_line) devForm.elements.meta_line.value = data.meta_line;
       if (data.overview) devForm.elements.overview.value = data.overview;
       if (Array.isArray(data.amenities) && data.amenities.length) devForm.elements.amenities_text.value = data.amenities.join("\n");
+      if (Array.isArray(data.nearby_landmarks) && data.nearby_landmarks.length) {
+        data.nearby_landmarks.slice(0, 5).forEach((f, i) => {
+          devForm.elements["feature_label_" + i].value = f.label || "";
+          devForm.elements["feature_value_" + i].value = f.value || "";
+        });
+      }
 
       let importedPhotos = false;
       if ($("#dev-import-photos-ok").checked && Array.isArray(data.images) && data.images.length) {

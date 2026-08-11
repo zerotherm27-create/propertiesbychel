@@ -120,8 +120,10 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
   "location_label": "the address or neighborhood, as stated on the page",
   "meta_line": "a short factual summary, e.g. floor count and unit types, only if stated",
   "overview": "2 to 4 sentences of plain, factual prose summarizing the development, not marketing copy, just a neutral restatement of what the page says",
-  "amenities": ["one amenity per array item, only ones explicitly named on the page"]
-}`;
+  "amenities": ["one amenity per array item, only ones explicitly named on the page"],
+  "nearby_landmarks": [{"label": "the landmark's name, e.g. Binondo Church", "value": "the stated distance or travel time, e.g. 5 min walk"}]
+}
+Include at most 5 nearby_landmarks, only ones the page explicitly names with a distance or travel time.`;
 
   const response = await openai.responses.create({
     model: DRAFT_MODEL,
@@ -137,6 +139,11 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
     meta_line: draft.meta_line || "",
     overview: draft.overview || "",
     amenities: Array.isArray(draft.amenities) ? draft.amenities.filter((a) => typeof a === "string" && a.trim()) : [],
+    nearby_landmarks: Array.isArray(draft.nearby_landmarks)
+      ? draft.nearby_landmarks
+          .filter((f) => f && typeof f.label === "string" && f.label.trim() && typeof f.value === "string" && f.value.trim())
+          .slice(0, 5)
+      : [],
     images
   });
 }
