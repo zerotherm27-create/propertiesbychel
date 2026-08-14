@@ -50,7 +50,9 @@
    * tells that CSS rule to stand down on devices where this handler is active. */
   if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
     document.documentElement.classList.add("has-frame-tilt");
-    document.querySelectorAll(".frame--hover").forEach(function (frame) {
+    function wireFrameTilt(frame) {
+      if (frame.dataset.tiltWired) return;
+      frame.dataset.tiltWired = "1";
       frame.addEventListener("pointermove", function (e) {
         var r = frame.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width - 0.5;
@@ -60,6 +62,12 @@
       frame.addEventListener("pointerleave", function () {
         animate(frame, { rotateX: 0, rotateY: 0, scale: 1 }, REST);
       });
+    }
+    document.querySelectorAll(".frame--hover").forEach(wireFrameTilt);
+    /* Gallery photos and other listing content render after this script runs
+       (async Supabase fetch in js/listings.js), so re-scan when they land. */
+    document.addEventListener("listings:rendered", function () {
+      document.querySelectorAll(".frame--hover").forEach(wireFrameTilt);
     });
   }
 
