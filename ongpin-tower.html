@@ -26,7 +26,13 @@
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <style>
   /* page-scoped composition helpers, tokens only — same pattern as development.html */
-  .ot-status-banner { background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin); text-align: center; font-size: var(--text-sm); margin-top: 6.5rem; }
+  .ot-status-banner {
+    background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin);
+    text-align: center; font-size: var(--text-sm); margin-top: 6.5rem;
+    opacity: 0; transition: opacity var(--dur) var(--ease-out);
+  }
+  .ot-status-banner.is-in { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .ot-status-banner { transition: none; } }
   .ot-status-banner a { color: var(--brass); text-decoration: underline; }
   .ot-hero { max-width: 44rem; margin-inline: auto; text-align: center; padding-top: var(--space-12); }
   .ot-hero .eyebrow { justify-content: center; margin-inline: auto; }
@@ -37,7 +43,9 @@
     background: linear-gradient(color-mix(in oklch, var(--espresso) 25%, transparent), color-mix(in oklch, var(--espresso) 55%, transparent));
     border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
   }
-  .ot-video__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .ot-video__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity var(--dur) var(--ease-out); }
+  .ot-video__frame.is-in { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .ot-video__frame { transition: none; } }
   .ot-video__ring {
     width: 4.75rem; height: 4.75rem; border-radius: 50%; border: var(--rule) solid var(--on-espresso);
     display: flex; align-items: center; justify-content: center;
@@ -79,8 +87,18 @@
   }
   button.link-line { background: none; border: 0; border-bottom: var(--rule) solid var(--line); padding: 0 0 0.35rem; font-family: var(--font-body); cursor: pointer; }
 
-  .ot-lightbox { position: fixed; inset: 0; z-index: 70; background: color-mix(in oklch, var(--espresso) 92%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8); }
+  .ot-lightbox {
+    position: fixed; inset: 0; z-index: 70; background: color-mix(in oklch, var(--espresso) 92%, transparent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8);
+    opacity: 0; transition: opacity var(--dur) var(--ease-out);
+  }
   .ot-lightbox[hidden] { display: none; }
+  .ot-lightbox.is-in { opacity: 1; }
+  .ot-lightbox__frame { transition: transform var(--dur) var(--ease-out); transform: scale(0.96); }
+  .ot-lightbox.is-in .ot-lightbox__frame { transform: scale(1); }
+  @media (prefers-reduced-motion: reduce) {
+    .ot-lightbox, .ot-lightbox__frame { transition: none; }
+  }
   .ot-lightbox__frame { max-width: 42rem; width: 100%; }
   .ot-lightbox__frame img { width: 100%; max-height: 70vh; object-fit: contain; display: block; }
   .ot-lightbox__caption { margin-top: var(--space-4); text-align: center; color: var(--on-espresso-soft); font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; }
@@ -594,6 +612,14 @@
 (function () {
   "use strict";
 
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fadeIn(el) {
+    if (reduceMotion) { el.classList.add("is-in"); return; }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("is-in"); });
+    });
+  }
+
   /* — Reflect the dashboard-managed development's published status. The
      bespoke page is otherwise fully static, so this is the one live signal
      it pulls from Supabase: if the owner unpublishes Ongpin Tower from the
@@ -607,7 +633,9 @@
       .then(function (rows) {
         var d = rows[0];
         if (d && d.published === false) {
-          document.getElementById("ot-status-banner").hidden = false;
+          var banner = document.getElementById("ot-status-banner");
+          banner.hidden = false;
+          fadeIn(banner);
         }
       })
       .catch(function () { /* fail open — page stays as-is if the check can't run */ });
@@ -676,11 +704,23 @@
     lastFocused = document.activeElement;
     showSlide(0);
     lightbox.hidden = false;
+    fadeIn(lightbox);
     lightboxClose.focus();
   }
   function closeGallery() {
-    lightbox.hidden = true;
-    lightboxImg.src = "";
+    lightbox.classList.remove("is-in");
+    if (reduceMotion) {
+      lightbox.hidden = true;
+      lightboxImg.src = "";
+    } else {
+      var onEnd = function (e) {
+        if (e.target !== lightbox) return;
+        lightbox.removeEventListener("transitionend", onEnd);
+        lightbox.hidden = true;
+        lightboxImg.src = "";
+      };
+      lightbox.addEventListener("transitionend", onEnd);
+    }
     if (lastFocused) lastFocused.focus();
   }
   document.querySelectorAll("[data-gallery-open]").forEach(function (btn) {
@@ -710,6 +750,7 @@
       iframe.allowFullscreen = true;
       host.innerHTML = "";
       host.appendChild(iframe);
+      fadeIn(iframe);
     });
   }
 
