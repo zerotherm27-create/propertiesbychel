@@ -53,14 +53,20 @@
     function wireFrameTilt(frame) {
       if (frame.dataset.tiltWired) return;
       frame.dataset.tiltWired = "1";
+      /* Tilt the photo itself, not the frame -- the frame clips its own edges
+         (overflow: hidden) and holds the static corner-bracket marks, so
+         rotating it in 3D opened a hairline seam at the corner and warped
+         the brackets along with it. Rotating the img inside keeps the frame
+         (and its clip boundary + brackets) perfectly still. */
+      var target = frame.querySelector("img") || frame;
       frame.addEventListener("pointermove", function (e) {
         var r = frame.getBoundingClientRect();
         var px = (e.clientX - r.left) / r.width - 0.5;
         var py = (e.clientY - r.top) / r.height - 0.5;
-        animate(frame, { rotateX: py * -5, rotateY: px * 6, scale: 1.035 }, PRESS);
+        animate(target, { rotateX: py * -5, rotateY: px * 6, scale: 1.035 }, PRESS);
       });
       frame.addEventListener("pointerleave", function () {
-        animate(frame, { rotateX: 0, rotateY: 0, scale: 1 }, REST);
+        animate(target, { rotateX: 0, rotateY: 0, scale: 1 }, REST);
       });
     }
     document.querySelectorAll(".frame--hover").forEach(wireFrameTilt);
