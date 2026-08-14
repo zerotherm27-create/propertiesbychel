@@ -44,38 +44,15 @@
     });
   });
 
-  /* — Property frames: a light pointer-tilt, considered rather than gimmicky —
-   * Owns the hover zoom too (scale folded into the tilt), so it doesn't run
-   * alongside the CSS `:hover` zoom in css/site.css — the .has-frame-tilt class
-   * tells that CSS rule to stand down on devices where this handler is active. */
-  if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    document.documentElement.classList.add("has-frame-tilt");
-    function wireFrameTilt(frame) {
-      if (frame.dataset.tiltWired) return;
-      frame.dataset.tiltWired = "1";
-      /* Tilt the photo itself, not the frame -- the frame clips its own edges
-         (overflow: hidden) and holds the static corner-bracket marks, so
-         rotating it in 3D opened a hairline seam at the corner and warped
-         the brackets along with it. Rotating the img inside keeps the frame
-         (and its clip boundary + brackets) perfectly still. */
-      var target = frame.querySelector("img") || frame;
-      frame.addEventListener("pointermove", function (e) {
-        var r = frame.getBoundingClientRect();
-        var px = (e.clientX - r.left) / r.width - 0.5;
-        var py = (e.clientY - r.top) / r.height - 0.5;
-        animate(target, { rotateX: py * -5, rotateY: px * 6, scale: 1.035 }, PRESS);
-      });
-      frame.addEventListener("pointerleave", function () {
-        animate(target, { rotateX: 0, rotateY: 0, scale: 1 }, REST);
-      });
-    }
-    document.querySelectorAll(".frame--hover").forEach(wireFrameTilt);
-    /* Gallery photos and other listing content render after this script runs
-       (async Supabase fetch in js/listings.js), so re-scan when they land. */
-    document.addEventListener("listings:rendered", function () {
-      document.querySelectorAll(".frame--hover").forEach(wireFrameTilt);
-    });
-  }
+  /* — Property frames: the 3D pointer-tilt this used to do (rotateX/rotateY on
+   * the image, inside a zero-radius overflow:hidden frame, with no CSS
+   * `perspective` set anywhere) kept producing a hairline gap at one corner
+   * on hover no matter which element it rotated -- an orthographic rotation
+   * shrinks the rotated element along that axis by a cos(angle) factor,
+   * and the fixed scale-up wasn't reliably covering that shrink at every
+   * pointer position. Removed entirely: the CSS-only `:hover` scale in
+   * css/site.css (a flat, non-rotated zoom -- no clip-edge geometry to get
+   * wrong) is the hover effect on every .frame--hover element now. */
 
   /* — Full-screen menu: staggered entrance on open (site.js dispatches menu:toggle) — */
   document.addEventListener("menu:toggle", function (e) {
