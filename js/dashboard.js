@@ -669,6 +669,56 @@ async function init(supabase) {
     }
   });
 
+  $("#listing-import-btn").addEventListener("click", async () => {
+    const url = $("#listing-import-url").value.trim();
+    const status = $("#listing-import-status");
+    if (!url) { status.textContent = "Paste the project's URL first."; return; }
+    if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+    status.textContent = "Fetching and reading the page…";
+    $("#listing-import-btn").disabled = true;
+    try {
+      const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+      const body = JSON.stringify({ url });
+      const r = await fetch(AGENT_URL + "/import-development", { method: "POST", headers, body });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Import failed");
+      if (data.name) form.elements.title.value = data.name;
+      if (data.location_label) form.elements.location_label.value = data.location_label;
+      if (data.meta_line) form.elements.meta_line.value = data.meta_line;
+      if (data.overview) form.elements.overview.value = data.overview;
+      if (Array.isArray(data.nearby_landmarks) && data.nearby_landmarks.length) {
+        data.nearby_landmarks.slice(0, 3).forEach((f, i) => {
+          form.elements["feature_label_" + i].value = f.label || "";
+          form.elements["feature_value_" + i].value = f.value || "";
+        });
+      }
+
+      let importedPhotos = false;
+      if ($("#listing-import-photos-ok").checked && Array.isArray(data.images) && data.images.length) {
+        const existing = new Set(galleryImages.map((g) => g.url));
+        const newImages = data.images.filter((u) => !existing.has(u));
+        if (newImages.length) {
+          galleryImages.push(...newImages.map((url) => ({ url, alt: "" })));
+          renderGalleryGrid();
+          importedPhotos = true;
+        }
+        if (!form.elements.hero_image_url.value && data.images[0]) {
+          form.elements.hero_image_url.value = data.images[0];
+          const prev = $("#listing-photo-preview");
+          prev.src = data.images[0];
+          prev.hidden = false;
+        }
+      }
+      status.textContent = importedPhotos
+        ? "Imported — review every field below before saving, including the photos. Add the map location yourself."
+        : "Imported — review every field below before saving. Add the hero photo, gallery, and map location yourself.";
+    } catch (ex) {
+      status.textContent = "Could not import: " + (ex.message || ex);
+    } finally {
+      $("#listing-import-btn").disabled = false;
+    }
+  });
+
   $("#listing-gallery-input").addEventListener("change", async () => {
     const files = Array.from($("#listing-gallery-input").files);
     if (!files.length) return;

@@ -81,12 +81,13 @@
   function listingCardHTML(l, i) {
     var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
     var devNote = l.development ? '<p class="plisting__meta">Part of ' + esc(l.development.name) + "</p>" : "";
+    var heroUrl = l.hero_image_url || (l.development && l.development.hero_image_url) || "";
     return (
       '<a class="plisting is-in" href="property?slug=' + encodeURIComponent(l.slug) + '"' +
       ' data-status="' + esc(l.status) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
         '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
           (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
-          '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.image_alt || l.title) + '" ' + imgAttrs + '>' +
+          '<img src="' + esc(heroUrl) + '" alt="' + esc(l.image_alt || l.title) + '" ' + imgAttrs + '>' +
         "</div>" +
         '<div class="plisting__head"><span class="plisting__title">' + esc(l.title) + "</span>" +
           '<span class="plisting__rule"></span><span class="plisting__price">' + esc(l.price_display || "Price on application") + "</span></div>" +
@@ -100,7 +101,7 @@
   var gallery = document.querySelector(".gallery[data-listings]");
   if (gallery) {
     gallery.setAttribute("data-is-loading", "");
-    api("listings?select=*,development:developments(name,slug)&published=eq.true&order=sort_order.asc").then(function (rows) {
+    api("listings?select=*,development:developments(name,slug,hero_image_url)&published=eq.true&order=sort_order.asc").then(function (rows) {
       gallery.removeAttribute("data-is-loading");
       if (!rows.length) return;
       gallery.innerHTML = rows.map(listingCardHTML).join("");
@@ -113,11 +114,16 @@
   var slug = new URLSearchParams(location.search).get("slug");
   if (detail && slug) {
     detail.setAttribute("data-is-loading", "");
-    api("listings?select=*&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
+    api("listings?select=*,development:developments(overview,hero_image_url,image_alt,gallery_images)&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
       detail.removeAttribute("data-is-loading");
       var l = rows[0];
       if (!l) return;
       document.title = l.title + " · Private Presentation · Properties by Chel";
+
+      // A listing with no photos/overview of its own falls back to its
+      // parent development's, so linking it is enough to make it presentable.
+      var dev = l.development || null;
+      var heroUrl = l.hero_image_url || (dev && dev.hero_image_url) || "";
 
       var setMeta = function (selector, attr, value) {
         var el = document.querySelector(selector);
@@ -129,9 +135,9 @@
       setMeta('meta[property="og:url"]', "content", pageUrl);
       setMeta('meta[property="og:title"]', "content", pageTitle);
       setMeta('meta[name="twitter:title"]', "content", pageTitle);
-      if (l.hero_image_url) {
-        setMeta('meta[property="og:image"]', "content", l.hero_image_url);
-        setMeta('meta[name="twitter:image"]', "content", l.hero_image_url);
+      if (heroUrl) {
+        setMeta('meta[property="og:image"]', "content", heroUrl);
+        setMeta('meta[name="twitter:image"]', "content", heroUrl);
       }
       if (l.meta_description) {
         setMeta('meta[name="description"]', "content", l.meta_description);
@@ -149,12 +155,14 @@
       bind("status", l.status === "lease" ? "For Lease" : l.status === "investment" ? "Investment" : "For Sale");
 
       var hero = document.querySelector("[data-l-img]");
-      if (hero && l.hero_image_url) { hero.src = l.hero_image_url; hero.alt = l.image_alt || l.title; }
+      if (hero && heroUrl) { hero.src = heroUrl; hero.alt = l.image_alt || (dev && dev.image_alt) || l.title; }
 
+      var galleryImages = (Array.isArray(l.gallery_images) && l.gallery_images.length) ? l.gallery_images :
+        ((dev && Array.isArray(dev.gallery_images)) ? dev.gallery_images : []);
       var galleryMount = document.getElementById("dyn-gallery");
       var galleryGrid = document.getElementById("dyn-gallery-grid");
-      if (galleryMount && galleryGrid && Array.isArray(l.gallery_images) && l.gallery_images.length) {
-        galleryGrid.innerHTML = l.gallery_images.map(function (g) {
+      if (galleryMount && galleryGrid && galleryImages.length) {
+        galleryGrid.innerHTML = galleryImages.map(function (g) {
           return '<figure><div class="frame frame--hover" style="aspect-ratio:4/3">' +
             '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || l.title) + '" loading="lazy"></div></figure>';
         }).join("");
@@ -163,7 +171,7 @@
 
       var overview = document.querySelector("[data-l-overview]");
       if (overview) {
-        overview.innerHTML = "<p>" + esc(l.overview ||
+        overview.innerHTML = "<p>" + esc(l.overview || (dev && dev.overview) ||
           "Full particulars, photography, and diligence materials for this residence are shared within the private presentation.") + "</p>";
       }
 
