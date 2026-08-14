@@ -62,7 +62,11 @@
   .unit-row:first-child { border-top: var(--rule) solid var(--line); }
   .unit-row__thumb { width: 6rem; aspect-ratio: 1; flex-shrink: 0; }
   .unit-row__name { font-family: var(--font-display); font-size: var(--text-h3); }
-  .unit-row__meta { font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); text-align: right; white-space: nowrap; }
+  .unit-row__meta { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); text-align: right; white-space: nowrap; }
+  .unit-row__sqm { font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); }
+  .unit-row__breakdown { font-size: var(--text-sm); color: var(--ink-faint); }
+  .unit-row__tour { font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--brass-deep); }
+  div.unit-row { cursor: default; }
   @media (hover: hover) and (pointer: fine) {
     a.unit-row:hover { background-color: color-mix(in oklch, var(--ink) 4%, transparent); }
   }
@@ -154,43 +158,71 @@
     <div class="shell mt-16">
       <div class="ot-tier__units-head">
         <p class="meta">Unit Types</p>
-        <p class="meta" style="text-transform:none;letter-spacing:normal;font-weight:400;color:var(--ink-faint)">Opens the plan on ongpintower.com</p>
+        <p class="meta" style="text-transform:none;letter-spacing:normal;font-weight:400;color:var(--ink-faint)">Full plans shown here — 360° tours where available</p>
       </div>
       <div>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-a" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/design/3FO3HLWXX2R6/show" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-A-320x320.png" alt="Residences A floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences A</span>
-          <span class="unit-row__meta">155.55 sqm · 3 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">155.55 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">145 sqm interior · 10.55 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-b" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/design/3FO3HIPIKHYO/airoaming" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-B-320x320.png" alt="Residences B floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences B</span>
-          <span class="unit-row__meta">136 sqm · 3 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">136 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">127 sqm interior · 9 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-d" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/cloud/design/3FO3HMN1QGGO/show" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-D-320x320.png" alt="Residences D floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences D</span>
-          <span class="unit-row__meta">125.83 sqm · 3 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">125.83 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">115 sqm interior · 10.83 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-e" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/design/3FO3HLWXX2R6/show" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-E-320x320.png" alt="Residences E floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences E</span>
-          <span class="unit-row__meta">135.82 sqm · 3 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">135.82 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">124 sqm interior · 11.82 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-f" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/design/3FO3H2W6BQOF/airoaming" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-F-320x320.png" alt="Residences F floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences F</span>
-          <span class="unit-row__meta">111.75 sqm · 2 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">111.75 sqm · 2 BR</span>
+            <span class="unit-row__breakdown">102 sqm interior · 9.75 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-g" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://www.kujiale.com/cloud/design/3FO3HOR1YC7X/show" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-G-320x320.png" alt="Residences G floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences G</span>
-          <span class="unit-row__meta">138.77 sqm · 3 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">138.77 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">128 sqm interior · 10.77 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-residences/?tab=residence-h" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/cloud/design/3FO3H5CR9COF/airoaming" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Floor-Plan-Box-H-320x320.png" alt="Residences H floor plan" loading="lazy"></span>
           <span class="unit-row__name">Residences H</span>
-          <span class="unit-row__meta">99.66 sqm · 2 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">99.66 sqm · 2 BR</span>
+            <span class="unit-row__breakdown">96 sqm interior · 3.66 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
       </div>
     </div>
@@ -218,28 +250,42 @@
     <div class="shell mt-16">
       <div class="ot-tier__units-head">
         <p class="meta">Unit Types</p>
-        <p class="meta" style="text-transform:none;letter-spacing:normal;font-weight:400;color:var(--ink-faint)">Opens the plan on ongpintower.com</p>
+        <p class="meta" style="text-transform:none;letter-spacing:normal;font-weight:400;color:var(--ink-faint)">Full plans shown here — 360° tours where available</p>
       </div>
       <div>
-        <a class="unit-row" href="https://ongpintower.com/the-estates/?tab=estate-a" target="_blank" rel="noopener">
+        <a class="unit-row" href="https://yun.kujiale.com/cloud/design/3FO3BUCFS42L/show" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Estates-A-320x320.png" alt="Estates A floor plan" loading="lazy"></span>
           <span class="unit-row__name">Estates A</span>
-          <span class="unit-row__meta">216.21 sqm · 4 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">216.21 sqm · 4 BR</span>
+            <span class="unit-row__breakdown">202 sqm interior · 14 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
-        <a class="unit-row" href="https://ongpintower.com/the-estates/?tab=estate-b" target="_blank" rel="noopener">
+        <div class="unit-row">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Estates-B-320x320.png" alt="Estates B floor plan" loading="lazy"></span>
           <span class="unit-row__name">Estates B</span>
-          <span class="unit-row__meta">205.92 sqm · 3 BR</span>
-        </a>
-        <a class="unit-row" href="https://ongpintower.com/the-estates/?tab=estate-d" target="_blank" rel="noopener">
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">205.92 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">191 sqm interior · 14.92 sqm exterior</span>
+          </span>
+        </div>
+        <div class="unit-row">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Estates-D-320x320.png" alt="Estates D floor plan" loading="lazy"></span>
           <span class="unit-row__name">Estates D</span>
-          <span class="unit-row__meta">243.69 sqm · 3 BR</span>
-        </a>
-        <a class="unit-row" href="https://ongpintower.com/the-estates/?tab=estate-e" target="_blank" rel="noopener">
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">243.69 sqm · 3 BR</span>
+            <span class="unit-row__breakdown">226 sqm interior · 17.69 sqm exterior</span>
+          </span>
+        </div>
+        <a class="unit-row" href="https://yun.kujiale.com/cloud/design/3FO3C5MA1UVA/show" target="_blank" rel="noopener">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Estates-E-320x320.png" alt="Estates E floor plan" loading="lazy"></span>
           <span class="unit-row__name">Estates E</span>
-          <span class="unit-row__meta">237.94 sqm · 4 BR</span>
+          <span class="unit-row__meta">
+            <span class="unit-row__sqm">237.94 sqm · 4 BR</span>
+            <span class="unit-row__breakdown">212 sqm interior · 25.94 sqm exterior</span>
+            <span class="unit-row__tour">360° Tour <span class="arr">→</span></span>
+          </span>
         </a>
       </div>
     </div>
@@ -267,19 +313,19 @@
     <div class="shell mt-16">
       <div class="ot-tier__units-head">
         <p class="meta">Unit Types</p>
-        <p class="meta" style="text-transform:none;letter-spacing:normal;font-weight:400;color:var(--ink-faint)">Opens the plan on ongpintower.com</p>
+        <p class="meta" style="text-transform:none;letter-spacing:normal;font-weight:400;color:var(--ink-faint)">Full plans shown here — 360° tours where available</p>
       </div>
       <div>
-        <a class="unit-row" href="https://ongpintower.com/the-penthouse/?tab=penthouse-a" target="_blank" rel="noopener">
+        <div class="unit-row">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Penthouse-A-320x320.png" alt="Penthouse A floor plan" loading="lazy"></span>
           <span class="unit-row__name">Penthouse A</span>
-          <span class="unit-row__meta">480.52 sqm · 5 BR</span>
-        </a>
-        <a class="unit-row" href="https://ongpintower.com/the-penthouse/?tab=penthouse-b" target="_blank" rel="noopener">
+          <span class="unit-row__meta"><span class="unit-row__sqm">480.52 sqm · 5 BR</span></span>
+        </div>
+        <div class="unit-row">
           <span class="frame unit-row__thumb"><img src="https://ongpintower.com/wp-content/uploads/2025/11/Penthouse-B-320x320.png" alt="Penthouse B floor plan" loading="lazy"></span>
           <span class="unit-row__name">Penthouse B</span>
-          <span class="unit-row__meta">461.60 sqm · 4 BR</span>
-        </a>
+          <span class="unit-row__meta"><span class="unit-row__sqm">461.60 sqm · 4 BR</span></span>
+        </div>
       </div>
     </div>
   </section>
@@ -334,6 +380,23 @@
           <span class="index-row__title" style="font-size:1.375rem">Family-Oriented Community</span>
           <span class="index-row__meta" style="white-space:normal;max-width:20rem">Gardens, playgrounds, and shared spaces designed for bonding across generations.</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hand-Over Provisions -->
+  <section id="provisions" class="section" aria-labelledby="ot-provisions-h">
+    <div class="shell" style="max-width:48rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">What's Included</p>
+        <h2 class="h2 mt-8" id="ot-provisions-h">Hand-Over Provisions</h2>
+        <p class="lede mt-8" style="margin-inline:auto">Every residence, estate, and penthouse unit hands over with the same fit-out standard.</p>
+      </div>
+      <div class="mt-16">
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">VRF Airconditioning System</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Rangehood &amp; Cooktops</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Toilet Fixtures</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Water Heater</span></div>
       </div>
     </div>
   </section>
