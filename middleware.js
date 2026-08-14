@@ -36,10 +36,17 @@ export default async function middleware(request) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // The generic listing page for Ongpin Tower is superseded by its bespoke
+  // Developments with a bespoke landing page supersede their generic listing
   // page; send that URL there permanently instead of showing the thinner one.
-  if (path === "/property" && url.searchParams.get("slug") === "ongpin-tower") {
-    return new Response(null, { status: 301, headers: { Location: "/ongpin-tower" } });
+  const BESPOKE_DEV_PAGES = {
+    "ongpin-tower": "/ongpin-tower",
+    "laya-by-shang-properties": "/laya-by-shang",
+  };
+  if (path === "/property") {
+    const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
+    if (bespokePath) {
+      return new Response(null, { status: 301, headers: { Location: bespokePath } });
+    }
   }
 
   if (

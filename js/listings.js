@@ -25,6 +25,13 @@
     });
   }
 
+  /* Developments with a bespoke landing page (richer than the generic
+     development.html/property.html template) — cross-linked below. */
+  var BESPOKE_DEV_PAGES = {
+    "ongpin-tower": "ongpin-tower",
+    "laya-by-shang-properties": "laya-by-shang"
+  };
+
   /* — Shared photo-grid lightbox (masonry click-to-view, listing + development detail) — */
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function fadeIn(el) {
@@ -248,11 +255,11 @@
           "Full particulars, photography, and diligence materials for this residence are shared within the private presentation.") + "</p>";
       }
 
-      // Bespoke developments (currently just Ongpin Tower) get their own richer
-      // page; everything else falls back to the generic development template.
+      // Bespoke developments get their own richer page; everything else falls
+      // back to the generic development template.
       var devNoteEl = document.querySelector("[data-l-dev-note]");
       if (devNoteEl && dev && dev.slug) {
-        var devHref = dev.slug === "ongpin-tower" ? "ongpin-tower" : "development?slug=" + encodeURIComponent(dev.slug);
+        var devHref = BESPOKE_DEV_PAGES[dev.slug] || "development?slug=" + encodeURIComponent(dev.slug);
         devNoteEl.querySelector("[data-l-dev-link]").href = devHref;
         devNoteEl.querySelector("[data-l-dev-name]").textContent = dev.name;
         devNoteEl.hidden = false;
@@ -339,11 +346,11 @@
       bindD("location_label", d.location_label || "");
       bindD("developer_line", d.developer_name ? "Developed by " + d.developer_name + "." : "");
 
-      // Bespoke developments (currently just Ongpin Tower) get their own richer
-      // page alongside this dashboard-managed one.
+      // Bespoke developments get their own richer page alongside this
+      // dashboard-managed one.
       var fullSiteNote = document.querySelector("[data-d-full-site]");
-      if (fullSiteNote && d.slug === "ongpin-tower") {
-        fullSiteNote.querySelector("[data-d-full-site-link]").href = "ongpin-tower";
+      if (fullSiteNote && BESPOKE_DEV_PAGES[d.slug]) {
+        fullSiteNote.querySelector("[data-d-full-site-link]").href = BESPOKE_DEV_PAGES[d.slug];
         fullSiteNote.hidden = false;
       }
 
