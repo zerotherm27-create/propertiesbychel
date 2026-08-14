@@ -1,3 +1,4 @@
+import puppeteer from "puppeteer";
 import { stripDashesDeep } from "./style.js";
 
 const DRAFT_MODEL = "gpt-5.6";
@@ -89,15 +90,17 @@ export async function importDevelopmentFromUrl(openai, { url }) {
   }
 
   let html;
+  const browser = await puppeteer.launch({ args: ["--no-sandbox", "--disable-setuid-sandbox"] });
   try {
-    const res = await fetch(parsed.toString(), {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; PropertiesByChelImporter/1.0)" },
-      redirect: "follow"
-    });
-    if (!res.ok) throw new Error("The page responded with " + res.status);
-    html = await res.text();
+    const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (compatible; PropertiesByChelImporter/1.0)");
+    const response = await page.goto(parsed.toString(), { waitUntil: "networkidle2", timeout: 20000 });
+    if (response && !response.ok()) throw new Error("The page responded with " + response.status());
+    html = await page.content();
   } catch (err) {
     throw new Error("Could not fetch that page: " + (err.message || err));
+  } finally {
+    await browser.close();
   }
 
   const images = extractImageUrls(html, parsed);
