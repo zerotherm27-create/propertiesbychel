@@ -26,6 +26,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <style>
   /* page-scoped composition helpers, tokens only — same pattern as development.html */
+  .ot-status-banner { background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin); text-align: center; font-size: var(--text-sm); margin-top: 6.5rem; }
+  .ot-status-banner a { color: var(--brass); text-decoration: underline; }
   .ot-hero { max-width: 44rem; margin-inline: auto; text-align: center; padding-top: var(--space-12); }
   .ot-hero .eyebrow { justify-content: center; margin-inline: auto; }
   .ot-hero .lede { margin-inline: auto; }
@@ -148,6 +150,10 @@
 </div>
 
 <main id="main">
+
+  <div id="ot-status-banner" class="ot-status-banner" hidden role="status">
+    <div class="shell">This development is no longer actively marketed. <a href="presentation?listing=ongpin-tower">Contact us</a> for current availability.</div>
+  </div>
 
   <!-- Hero -->
   <section class="section section--tight ot-hero" aria-labelledby="ot-h">
@@ -587,6 +593,25 @@
 <script>
 (function () {
   "use strict";
+
+  /* — Reflect the dashboard-managed development's published status. The
+     bespoke page is otherwise fully static, so this is the one live signal
+     it pulls from Supabase: if the owner unpublishes Ongpin Tower from the
+     dashboard, this page should say so rather than silently stay stale. */
+  var sb = window.SUPABASE_CONFIG || {};
+  if (sb.url && sb.anonKey) {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.ongpin-tower&limit=1", {
+      headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var d = rows[0];
+        if (d && d.published === false) {
+          document.getElementById("ot-status-banner").hidden = false;
+        }
+      })
+      .catch(function () { /* fail open — page stays as-is if the check can't run */ });
+  }
 
   /* — 360° tours open in a small popup window, not a full new tab — */
   document.querySelectorAll(".unit-row__tour").forEach(function (el) {
