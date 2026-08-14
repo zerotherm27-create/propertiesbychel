@@ -220,7 +220,7 @@
       bind("title", l.title);
       bind("location", l.location_label || "");
       bind("meta", l.meta_line || "");
-      bind("price", l.price_display ? "Guide " + l.price_display : "Price on application");
+      bind("price", l.price_display || "Price on application");
       bind("status", l.status === "lease" ? "For Lease" : l.status === "investment" ? "Investment" : "For Sale");
 
       var hero = document.querySelector("[data-l-img]");
