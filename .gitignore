@@ -3,5 +3,8 @@
 .hallmark/
 .claude/
 .superpowers/
+.agents/
+.impeccable/
 node_modules/
 .vercel
+skills-lock.json
