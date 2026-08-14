@@ -551,6 +551,20 @@
 (function () {
   "use strict";
 
+  /* — 360° tours open in a small popup window, not a full new tab — */
+  document.querySelectorAll(".unit-row__tour").forEach(function (el) {
+    var row = el.closest("a.unit-row");
+    if (!row) return;
+    row.addEventListener("click", function (e) {
+      e.preventDefault();
+      var w = 1100, h = 750;
+      var left = (window.screenX || 0) + Math.max(0, (window.outerWidth - w) / 2);
+      var top = (window.screenY || 0) + Math.max(0, (window.outerHeight - h) / 2);
+      var popup = window.open(row.href, "ongpinTour", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",noopener,noreferrer");
+      if (popup) popup.opener = null;
+    });
+  });
+
   /* — Play the film in place instead of leaving for YouTube — */
   var playBtn = document.getElementById("ot-video-play");
   if (playBtn) {
