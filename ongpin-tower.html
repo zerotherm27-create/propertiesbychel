@@ -75,6 +75,25 @@
   @media (hover: hover) and (pointer: fine) {
     a.unit-row:hover { background-color: color-mix(in oklch, var(--ink) 4%, transparent); }
   }
+  button.link-line { background: none; border: 0; border-bottom: var(--rule) solid var(--line); padding: 0 0 0.35rem; font-family: var(--font-body); cursor: pointer; }
+
+  .ot-lightbox { position: fixed; inset: 0; z-index: 70; background: color-mix(in oklch, var(--espresso) 92%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-8); }
+  .ot-lightbox[hidden] { display: none; }
+  .ot-lightbox__frame { max-width: 42rem; width: 100%; }
+  .ot-lightbox__frame img { width: 100%; max-height: 70vh; object-fit: contain; display: block; }
+  .ot-lightbox__caption { margin-top: var(--space-4); text-align: center; color: var(--on-espresso-soft); font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; }
+  .ot-lightbox__close, .ot-lightbox__nav {
+    background: none; border: var(--rule) solid var(--on-espresso); color: var(--on-espresso);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .ot-lightbox__close { position: absolute; top: var(--space-6); right: var(--space-6); width: 44px; height: 44px; font-size: 1.25rem; }
+  .ot-lightbox__nav { position: absolute; top: 50%; translate: 0 -50%; width: 44px; height: 44px; font-size: 1.5rem; }
+  .ot-lightbox__nav--prev { left: var(--space-6); }
+  .ot-lightbox__nav--next { right: var(--space-6); }
+  @media (max-width: 40rem) {
+    .ot-lightbox__nav--prev { left: var(--space-2); }
+    .ot-lightbox__nav--next { right: var(--space-2); }
+  }
 
   .ot-amenities-media { aspect-ratio: 4/3; }
 
@@ -155,6 +174,7 @@
           <div><p class="ot-tier__stat-label">Floors</p><p class="ot-tier__stat-value">16th – 43rd (26 floors)</p></div>
         </div>
         <a class="btn" href="presentation?listing=ongpin-tower">Private Presentation</a>
+        <button type="button" class="link-line mt-8" data-gallery-open="residences">View Interior Gallery <span class="arr">→</span></button>
       </div>
       <div class="col-span-5 col-start-8" data-reveal>
         <div class="frame frame--corners" style="aspect-ratio:4/3;background:var(--paper)">
@@ -247,6 +267,7 @@
           <div><p class="ot-tier__stat-label">Floors</p><p class="ot-tier__stat-value">45th – 55th (10 floors)</p></div>
         </div>
         <a class="btn" href="presentation?listing=ongpin-tower">Private Presentation</a>
+        <button type="button" class="link-line mt-8" data-gallery-open="estates">View Interior Gallery <span class="arr">→</span></button>
       </div>
       <div class="col-span-5 col-start-8" data-reveal>
         <div class="frame frame--corners" style="aspect-ratio:4/3;background:var(--paper)">
@@ -310,6 +331,7 @@
           <div><p class="ot-tier__stat-label">Floors</p><p class="ot-tier__stat-value">56th – 57th (2 floors)</p></div>
         </div>
         <a class="btn" href="presentation?listing=ongpin-tower">Private Presentation</a>
+        <button type="button" class="link-line mt-8" data-gallery-open="penthouse">View Interior Gallery <span class="arr">→</span></button>
       </div>
       <div class="col-span-5 col-start-8" data-reveal>
         <div class="frame frame--corners" style="aspect-ratio:4/3;background:var(--paper)">
@@ -492,6 +514,16 @@
 
 </main>
 
+<div class="ot-lightbox" id="ot-lightbox" hidden>
+  <button type="button" class="ot-lightbox__close" id="ot-lightbox-close" aria-label="Close gallery">×</button>
+  <button type="button" class="ot-lightbox__nav ot-lightbox__nav--prev" id="ot-lightbox-prev" aria-label="Previous photo">‹</button>
+  <div class="ot-lightbox__frame frame frame--corners">
+    <img id="ot-lightbox-img" src="" alt="">
+  </div>
+  <button type="button" class="ot-lightbox__nav ot-lightbox__nav--next" id="ot-lightbox-next" aria-label="Next photo">›</button>
+  <p class="ot-lightbox__caption" id="ot-lightbox-caption"></p>
+</div>
+
 <footer class="footer">
   <div class="shell">
     <img class="footer__logo" src="images/logo-white.png" alt="Properties by Chel" width="90" height="42">
@@ -568,6 +600,76 @@
       var popup = window.open(row.href, "ongpinTour", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",noopener,noreferrer");
       if (popup) popup.opener = null;
     });
+  });
+
+  /* — Per-tier interior photo galleries, in a lightbox — */
+  var GALLERY_BASE = "https://ongpintower.com/wp-content/uploads/2025/11/";
+  var TIER_GALLERIES = {
+    residences: [
+      { file: "R-Living-Room-scaled.jpg", label: "Living Room" },
+      { file: "R-Kitchen-scaled.jpg", label: "Kitchen" },
+      { file: "R-DIning-Area-scaled.jpg", label: "Dining Area" },
+      { file: "R-Master-Bedroom-scaled.jpg", label: "Master Bedroom" },
+      { file: "R-Common-TB-scaled.jpg", label: "Common Toilet & Bath" }
+    ],
+    estates: [
+      { file: "E-Living-Room-1-scaled.jpg", label: "Living Room" },
+      { file: "E-Kitchen-1-scaled.jpg", label: "Kitchen" },
+      { file: "E-Dining-Area-1-scaled.jpg", label: "Dining Area" },
+      { file: "E-Master-Bedroom-1-scaled.jpg", label: "Master Bedroom" },
+      { file: "E-Kids-Bedroom-1-scaled.jpg", label: "Kids Bedroom" }
+    ],
+    penthouse: [
+      { file: "Penthouse-Living-Room-1-scaled.jpg", label: "Living Room" },
+      { file: "Penthouse-Kitchen-1-scaled.jpg", label: "Kitchen" },
+      { file: "Penthouse-Dining-Area-1-scaled.jpg", label: "Dining Area" },
+      { file: "Penthouse-Master-Bedroom-1-scaled.jpg", label: "Master Bedroom" },
+      { file: "Penthouse-Kids-Room-1-scaled.jpg", label: "Kids Room" }
+    ]
+  };
+
+  var lightbox = document.getElementById("ot-lightbox");
+  var lightboxImg = document.getElementById("ot-lightbox-img");
+  var lightboxCaption = document.getElementById("ot-lightbox-caption");
+  var lightboxClose = document.getElementById("ot-lightbox-close");
+  var lightboxPrev = document.getElementById("ot-lightbox-prev");
+  var lightboxNext = document.getElementById("ot-lightbox-next");
+  var currentGallery = [];
+  var currentIndex = 0;
+  var lastFocused = null;
+
+  function showSlide(i) {
+    currentIndex = (i + currentGallery.length) % currentGallery.length;
+    var slide = currentGallery[currentIndex];
+    lightboxImg.src = GALLERY_BASE + slide.file;
+    lightboxImg.alt = slide.label;
+    lightboxCaption.textContent = slide.label + " · " + (currentIndex + 1) + " / " + currentGallery.length;
+  }
+  function openGallery(tier) {
+    currentGallery = TIER_GALLERIES[tier];
+    if (!currentGallery) return;
+    lastFocused = document.activeElement;
+    showSlide(0);
+    lightbox.hidden = false;
+    lightboxClose.focus();
+  }
+  function closeGallery() {
+    lightbox.hidden = true;
+    lightboxImg.src = "";
+    if (lastFocused) lastFocused.focus();
+  }
+  document.querySelectorAll("[data-gallery-open]").forEach(function (btn) {
+    btn.addEventListener("click", function () { openGallery(btn.getAttribute("data-gallery-open")); });
+  });
+  lightboxClose.addEventListener("click", closeGallery);
+  lightboxPrev.addEventListener("click", function () { showSlide(currentIndex - 1); });
+  lightboxNext.addEventListener("click", function () { showSlide(currentIndex + 1); });
+  lightbox.addEventListener("click", function (e) { if (e.target === lightbox) closeGallery(); });
+  document.addEventListener("keydown", function (e) {
+    if (lightbox.hidden) return;
+    if (e.key === "Escape") closeGallery();
+    if (e.key === "ArrowLeft") showSlide(currentIndex - 1);
+    if (e.key === "ArrowRight") showSlide(currentIndex + 1);
   });
 
   /* — Play the film in place instead of leaving for YouTube — */
