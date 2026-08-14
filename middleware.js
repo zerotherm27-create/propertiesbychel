@@ -36,6 +36,12 @@ export default async function middleware(request) {
   const url = new URL(request.url);
   const path = url.pathname;
 
+  // The generic listing page for Ongpin Tower is superseded by its bespoke
+  // page; send that URL there permanently instead of showing the thinner one.
+  if (path === "/property" && url.searchParams.get("slug") === "ongpin-tower") {
+    return new Response(null, { status: 301, headers: { Location: "/ongpin-tower" } });
+  }
+
   if (
     PASSTHROUGH_PATHS.has(path) ||
     PASSTHROUGH_PREFIXES.some((prefix) => path.startsWith(prefix))
