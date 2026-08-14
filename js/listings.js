@@ -232,7 +232,7 @@
       var galleryGrid = document.getElementById("dyn-gallery-grid");
       if (galleryMount && galleryGrid && galleryImages.length) {
         galleryGrid.innerHTML = galleryImages.map(function (g, i) {
-          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--corners frame--hover">' +
+          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--hover">' +
             '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || l.title) + '" loading="lazy"></div></figure>';
         }).join("");
         galleryMount.hidden = false;
@@ -354,7 +354,7 @@
       var galleryGrid = document.getElementById("dyn-gallery-grid");
       if (galleryMount && galleryGrid && Array.isArray(d.gallery_images) && d.gallery_images.length) {
         galleryGrid.innerHTML = d.gallery_images.map(function (g, i) {
-          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--corners frame--hover">' +
+          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--hover">' +
             '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || d.name) + '" loading="lazy"></div></figure>';
         }).join("");
         galleryMount.hidden = false;

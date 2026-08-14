@@ -197,10 +197,8 @@ figcaption { font-size: var(--text-sm); color: var(--ink-faint); padding-top: va
   background: color-mix(in oklch, var(--espresso) 14%, transparent);
   opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
 }
-.photo-grid .frame--corners::before, .photo-grid .frame--corners::after { transition: opacity var(--dur-fast) var(--ease-out); }
 @media (hover: hover) and (pointer: fine) {
   .photo-grid figure:hover .frame::after { opacity: 1; }
-  .photo-grid figure:hover .frame--corners::before, .photo-grid figure:hover .frame--corners::after { opacity: 1; }
 }
 @media (min-width: 64rem) {
   .photo-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
