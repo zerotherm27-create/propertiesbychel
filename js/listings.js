@@ -25,6 +25,75 @@
     });
   }
 
+  /* — Shared photo-grid lightbox (masonry click-to-view, listing + development detail) — */
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fadeIn(el) {
+    if (reduceMotion) { el.classList.add("is-in"); return; }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("is-in"); });
+    });
+  }
+  var wirePhotoGridLightbox = (function () {
+    var lightbox = document.getElementById("gallery-lightbox");
+    if (!lightbox) return null;
+    var img = document.getElementById("gallery-lightbox-img");
+    var caption = document.getElementById("gallery-lightbox-caption");
+    var closeBtn = document.getElementById("gallery-lightbox-close");
+    var prevBtn = document.getElementById("gallery-lightbox-prev");
+    var nextBtn = document.getElementById("gallery-lightbox-next");
+    var items = [];
+    var index = 0;
+    var lastFocused = null;
+
+    function showSlide(i) {
+      index = (i + items.length) % items.length;
+      var item = items[index];
+      img.src = item.url;
+      img.alt = item.alt;
+      caption.textContent = item.alt + " · " + (index + 1) + " / " + items.length;
+    }
+    function open(list, startIndex) {
+      items = list;
+      lastFocused = document.activeElement;
+      showSlide(startIndex);
+      lightbox.hidden = false;
+      fadeIn(lightbox);
+      closeBtn.focus();
+    }
+    function close() {
+      lightbox.classList.remove("is-in");
+      if (reduceMotion) {
+        lightbox.hidden = true;
+        img.src = "";
+      } else {
+        var onEnd = function (e) {
+          if (e.target !== lightbox) return;
+          lightbox.removeEventListener("transitionend", onEnd);
+          lightbox.hidden = true;
+          img.src = "";
+        };
+        lightbox.addEventListener("transitionend", onEnd);
+      }
+      if (lastFocused) lastFocused.focus();
+    }
+    closeBtn.addEventListener("click", close);
+    prevBtn.addEventListener("click", function () { showSlide(index - 1); });
+    nextBtn.addEventListener("click", function () { showSlide(index + 1); });
+    lightbox.addEventListener("click", function (e) { if (e.target === lightbox) close(); });
+    document.addEventListener("keydown", function (e) {
+      if (lightbox.hidden) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") showSlide(index - 1);
+      if (e.key === "ArrowRight") showSlide(index + 1);
+    });
+
+    return function (gridEl, list) {
+      gridEl.querySelectorAll("figure").forEach(function (fig, i) {
+        fig.addEventListener("click", function () { open(list, i); });
+      });
+    };
+  })();
+
   /* — Brand-styled Google Map (listing detail pages with coordinates set) — */
   var BRAND_MAP_STYLE = [
     { elementType: "geometry", stylers: [{ color: "#f1eee6" }] },
@@ -168,6 +237,9 @@
         }).join("");
         galleryMount.hidden = false;
         document.dispatchEvent(new CustomEvent("listings:rendered"));
+        if (wirePhotoGridLightbox) {
+          wirePhotoGridLightbox(galleryGrid, galleryImages.map(function (g) { return { url: g.url, alt: g.alt || l.title }; }));
+        }
       }
 
       var overview = document.querySelector("[data-l-overview]");
@@ -287,6 +359,9 @@
         }).join("");
         galleryMount.hidden = false;
         document.dispatchEvent(new CustomEvent("listings:rendered"));
+        if (wirePhotoGridLightbox) {
+          wirePhotoGridLightbox(galleryGrid, d.gallery_images.map(function (g) { return { url: g.url, alt: g.alt || d.name }; }));
+        }
       }
 
       var overview = document.querySelector("[data-d-overview]");

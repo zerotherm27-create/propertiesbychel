@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=34">
+<link rel="stylesheet" href="css/site.css?v=35">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -156,6 +156,16 @@
       <div class="photo-grid" id="dyn-gallery-grid"></div>
     </div>
   </section>
+
+  <div class="gallery-lightbox" id="gallery-lightbox" hidden>
+    <button type="button" class="gallery-lightbox__close" id="gallery-lightbox-close" aria-label="Close gallery">×</button>
+    <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--prev" id="gallery-lightbox-prev" aria-label="Previous photo">‹</button>
+    <div class="gallery-lightbox__frame frame frame--corners">
+      <img id="gallery-lightbox-img" src="" alt="">
+    </div>
+    <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--next" id="gallery-lightbox-next" aria-label="Next photo">›</button>
+    <p class="gallery-lightbox__caption" id="gallery-lightbox-caption"></p>
+  </div>
 
   <!-- Image sequence · editorial crops, not a thumbnail wall -->
   <section data-sample-only class="section section--flush-top" aria-label="Photography">
@@ -382,6 +392,6 @@
 <script src="js/site.js?v=20"></script>
 <script src="js/vendor/motion.js?v=1"></script>
 <script src="js/motion-enhance.js?v=1"></script>
-<script src="js/listings.js?v=19"></script>
+<script src="js/listings.js?v=20"></script>
 </body>
 </html>
