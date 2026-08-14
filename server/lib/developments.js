@@ -13,7 +13,7 @@ function extractJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
-const IMAGE_NOISE_PATTERN = /logo|icon|favicon|sprite|avatar|pixel|spacer|blank/i;
+const IMAGE_NOISE_PATTERN = /logo|icon|favicon|sprite|avatar|pixel|spacer|blank|floor-?plan|tagline|swoosh/i;
 const MAX_IMAGES = 24;
 const MIN_IMAGE_DIMENSION = 150;
 

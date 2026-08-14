@@ -652,15 +652,9 @@ async function init(supabase) {
           renderDevGalleryGrid();
           importedPhotos = true;
         }
-        if (!devForm.elements.hero_image_url.value && data.images[0]) {
-          devForm.elements.hero_image_url.value = data.images[0];
-          const prev = $("#development-photo-preview");
-          prev.src = data.images[0];
-          prev.hidden = false;
-        }
       }
       status.textContent = importedPhotos
-        ? "Imported — review every field below before saving, including the photos. Add the map location yourself."
+        ? "Imported — review every field below before saving. Pick a hero photo from the gallery yourself, and add the map location."
         : "Imported — review every field below before saving. Add the hero photo, gallery, and map location yourself.";
     } catch (ex) {
       status.textContent = "Could not import: " + (ex.message || ex);
@@ -702,15 +696,9 @@ async function init(supabase) {
           renderGalleryGrid();
           importedPhotos = true;
         }
-        if (!form.elements.hero_image_url.value && data.images[0]) {
-          form.elements.hero_image_url.value = data.images[0];
-          const prev = $("#listing-photo-preview");
-          prev.src = data.images[0];
-          prev.hidden = false;
-        }
       }
       status.textContent = importedPhotos
-        ? "Imported — review every field below before saving, including the photos. Add the map location yourself."
+        ? "Imported — review every field below before saving. Pick a hero photo from the gallery yourself, and add the map location."
         : "Imported — review every field below before saving. Add the hero photo, gallery, and map location yourself.";
     } catch (ex) {
       status.textContent = "Could not import: " + (ex.message || ex);
