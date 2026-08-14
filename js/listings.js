@@ -114,7 +114,7 @@
   var slug = new URLSearchParams(location.search).get("slug");
   if (detail && slug) {
     detail.setAttribute("data-is-loading", "");
-    api("listings?select=*,development:developments(overview,hero_image_url,image_alt,gallery_images)&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
+    api("listings?select=*,development:developments(name,slug,overview,hero_image_url,image_alt,gallery_images)&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
       detail.removeAttribute("data-is-loading");
       var l = rows[0];
       if (!l) return;
@@ -162,17 +162,28 @@
       var galleryMount = document.getElementById("dyn-gallery");
       var galleryGrid = document.getElementById("dyn-gallery-grid");
       if (galleryMount && galleryGrid && galleryImages.length) {
-        galleryGrid.innerHTML = galleryImages.map(function (g) {
-          return '<figure><div class="frame frame--hover" style="aspect-ratio:4/3">' +
+        galleryGrid.innerHTML = galleryImages.map(function (g, i) {
+          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 5) * 40) + 'ms"><div class="frame frame--corners frame--hover">' +
             '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || l.title) + '" loading="lazy"></div></figure>';
         }).join("");
         galleryMount.hidden = false;
+        document.dispatchEvent(new CustomEvent("listings:rendered"));
       }
 
       var overview = document.querySelector("[data-l-overview]");
       if (overview) {
         overview.innerHTML = "<p>" + esc(l.overview || (dev && dev.overview) ||
           "Full particulars, photography, and diligence materials for this residence are shared within the private presentation.") + "</p>";
+      }
+
+      // Bespoke developments (currently just Ongpin Tower) get their own richer
+      // page; everything else falls back to the generic development template.
+      var devNoteEl = document.querySelector("[data-l-dev-note]");
+      if (devNoteEl && dev && dev.slug) {
+        var devHref = dev.slug === "ongpin-tower" ? "ongpin-tower" : "development?slug=" + encodeURIComponent(dev.slug);
+        devNoteEl.querySelector("[data-l-dev-link]").href = devHref;
+        devNoteEl.querySelector("[data-l-dev-name]").textContent = dev.name;
+        devNoteEl.hidden = false;
       }
 
       var mapSection = document.getElementById("location-map-section");
@@ -256,17 +267,26 @@
       bindD("location_label", d.location_label || "");
       bindD("developer_line", d.developer_name ? "Developed by " + d.developer_name + "." : "");
 
+      // Bespoke developments (currently just Ongpin Tower) get their own richer
+      // page alongside this dashboard-managed one.
+      var fullSiteNote = document.querySelector("[data-d-full-site]");
+      if (fullSiteNote && d.slug === "ongpin-tower") {
+        fullSiteNote.querySelector("[data-d-full-site-link]").href = "ongpin-tower";
+        fullSiteNote.hidden = false;
+      }
+
       var hero = document.querySelector("[data-d-img]");
       if (hero && d.hero_image_url) { hero.src = d.hero_image_url; hero.alt = d.image_alt || d.name; }
 
       var galleryMount = document.getElementById("dyn-gallery");
       var galleryGrid = document.getElementById("dyn-gallery-grid");
       if (galleryMount && galleryGrid && Array.isArray(d.gallery_images) && d.gallery_images.length) {
-        galleryGrid.innerHTML = d.gallery_images.map(function (g) {
-          return '<figure><div class="frame frame--hover" style="aspect-ratio:4/3">' +
+        galleryGrid.innerHTML = d.gallery_images.map(function (g, i) {
+          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 5) * 40) + 'ms"><div class="frame frame--corners frame--hover">' +
             '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || d.name) + '" loading="lazy"></div></figure>';
         }).join("");
         galleryMount.hidden = false;
+        document.dispatchEvent(new CustomEvent("listings:rendered"));
       }
 
       var overview = document.querySelector("[data-d-overview]");
