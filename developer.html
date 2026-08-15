@@ -87,7 +87,7 @@
     </div>
   </section>
 
-  <section class="section" aria-label="Developers" data-is-loading>
+  <section class="section" aria-label="Developers" id="dev-section" data-is-loading>
     <div class="shell" id="dev-groups">
       <div class="dev-block" data-sample-only data-reveal>
         <div class="dev-block__head">
@@ -210,7 +210,8 @@
 (function () {
   "use strict";
   var SB = window.SUPABASE_CONFIG || {};
-  if (!SB.url || !SB.anonKey) return;
+  var section = document.getElementById("dev-section");
+  if (!SB.url || !SB.anonKey) { if (section) section.removeAttribute("data-is-loading"); return; }
 
   var BESPOKE_DEV_PAGES = {
     "ongpin-tower": "ongpin-tower",
@@ -228,7 +229,7 @@
   })
     .then(function (r) { return r.ok ? r.json() : []; })
     .then(function (rows) {
-      if (!rows.length) return;
+      if (!rows.length) { if (section) section.removeAttribute("data-is-loading"); return; }
 
       var groups = {};
       var order = [];
@@ -264,8 +265,9 @@
       mount.innerHTML = html;
       document.querySelectorAll("[data-sample-only]").forEach(function (el) { el.hidden = true; });
       document.dispatchEvent(new CustomEvent("listings:rendered"));
+      if (section) section.removeAttribute("data-is-loading");
     })
-    .catch(function () { /* fail open — static sample stands */ });
+    .catch(function () { if (section) section.removeAttribute("data-is-loading"); /* fail open — static sample stands */ });
 })();
 </script>
 </body>
