@@ -446,11 +446,8 @@
       if (img && l.hero_image_url) { img.src = l.hero_image_url; img.alt = l.image_alt || l.title; }
       if (link) link.href = "property?slug=" + encodeURIComponent(l.slug);
       if (ov && l.overview) ov.textContent = l.overview;
-      // the sample spec table only describes the original featured residence
-      if (l.slug !== "the-zenith-penthouse") {
-        var sample = spot.querySelector("[data-sample-only]");
-        if (sample) sample.hidden = true;
-      }
+      var sample = spot.querySelector("[data-sample-only]");
+      if (sample) sample.hidden = true;
     }).catch(function () { spot.removeAttribute("data-is-loading"); /* static spotlight stands */ });
   }
 })();
