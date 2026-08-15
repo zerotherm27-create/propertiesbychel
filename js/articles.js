@@ -36,10 +36,9 @@ if (SB.url && SB.anonKey) {
   if (document.getElementById("article-content") && slug) {
     renderSingleArticle(supabase, slug);
   }
-  const journalIndex = document.getElementById("journal-index");
-  const intelIndex = document.getElementById("intel-index");
-  if (journalIndex) renderIndex(supabase, "journal", journalIndex);
-  if (intelIndex) renderIndex(supabase, "intelligence", intelIndex);
+  // Insights hub: one combined Journal + Intelligence feed, no section filter.
+  const insightsIndex = document.getElementById("insights-articles");
+  if (insightsIndex) renderIndex(supabase, null, insightsIndex);
 
   async function renderSingleArticle(supabase, slug) {
     const { data: article, error } = await supabase.from("articles").select("*").eq("slug", slug).eq("status", "published").maybeSingle();
@@ -50,8 +49,7 @@ if (SB.url && SB.anonKey) {
     if (article.meta_description) document.getElementById("doc-description").setAttribute("content", article.meta_description);
 
     const isJournal = article.section === "journal";
-    document.getElementById("nav-journal").setAttribute("aria-current", isJournal ? "page" : "false");
-    document.getElementById("nav-intelligence").setAttribute("aria-current", isJournal ? "false" : "page");
+    document.getElementById("nav-insights").setAttribute("aria-current", "page");
     document.getElementById("art-eyebrow").textContent = isJournal ? "Journal" : "Market Intelligence · Note";
     document.getElementById("art-h").textContent = article.title;
     document.getElementById("art-meta").textContent = article.dek || (isJournal ? "From the Journal" : "A market note");
@@ -92,24 +90,32 @@ if (SB.url && SB.anonKey) {
       mount.appendChild(section);
     }
 
-    document.getElementById("art-more-label").textContent = isJournal ? "More from the Journal" : "More from the Desk";
-    document.getElementById("art-more-link").href = isJournal ? "journal" : "intelligence#notes-h";
-    document.getElementById("art-more-title").textContent = isJournal ? "See the full archive" : "See recent observations";
+    document.getElementById("art-more-label").textContent = "More";
+    document.getElementById("art-more-link").href = "insights#journal-h";
+    document.getElementById("art-more-title").textContent = "See the full archive";
 
     document.getElementById("article-content").hidden = false;
     document.dispatchEvent(new Event("listings:rendered"));
   }
 
   async function renderIndex(supabase, section, container) {
-    const { data, error } = await supabase.from("articles").select("*").eq("section", section).eq("status", "published").order("published_at", { ascending: false }).limit(8);
+    let query = supabase.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }).limit(8);
+    if (section) query = query.eq("section", section);
+    const { data, error } = await query;
     if (error || !data || !data.length) return;
-    const prefix = section === "journal" ? "J" : "N";
-    container.innerHTML = data.map((a, i) => `
+    container.innerHTML = data.map((a, i) => {
+      const isJournal = a.section === "journal";
+      const prefix = isJournal ? "J" : "N";
+      const label = isJournal ? "Journal" : "Intelligence";
+      const meta = a.dek ? label + " · " + esc(a.dek) : label;
+      return `
       <a class="index-row" href="article?slug=${encodeURIComponent(a.slug)}" data-reveal>
         <span class="index-row__no">${prefix}·${String(i + 1).padStart(2, "0")}</span>
         <span class="index-row__title">${esc(a.title)}</span>
-        <span class="index-row__meta">${esc(a.dek || "")}</span>
-      </a>`).join("") + container.innerHTML;
+        <span class="index-row__meta">${meta}</span>
+      </a>`;
+    }).join("");
+    document.querySelectorAll("[data-sample-only]").forEach((el) => { el.hidden = true; });
     document.dispatchEvent(new Event("listings:rendered"));
   }
 }

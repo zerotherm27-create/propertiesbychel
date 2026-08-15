@@ -49,6 +49,13 @@ export default async function middleware(request) {
     }
   }
 
+  // Districts, Intelligence, and Journal used to be separate top-level pages;
+  // they're now sections within the combined Insights hub.
+  const RETIRED_INDEX_PAGES = new Set(["/districts", "/intelligence", "/journal"]);
+  if (RETIRED_INDEX_PAGES.has(path)) {
+    return new Response(null, { status: 301, headers: { Location: "/insights" } });
+  }
+
   if (
     PASSTHROUGH_PATHS.has(path) ||
     PASSTHROUGH_PREFIXES.some((prefix) => path.startsWith(prefix))
