@@ -428,24 +428,34 @@
     }).catch(function () { devDetail.removeAttribute("data-is-loading"); });
   }
 
-  /* — Home spotlight (featured listing) — */
+  /* — Home spotlight (featured listing OR featured development — whichever
+     has the lower sort_order wins the single slot; a tie favors the listing,
+     matching this section's original listing-only behavior). — */
   var spot = document.querySelector("[data-featured-spotlight]");
   if (spot) {
     spot.setAttribute("data-is-loading", "");
-    api("listings?select=*&published=eq.true&featured=eq.true&order=sort_order.asc&limit=1").then(function (rows) {
+    Promise.all([
+      api("listings?select=*&published=eq.true&featured=eq.true&order=sort_order.asc&limit=1").catch(function () { return []; }),
+      api("developments?select=*&published=eq.true&featured=eq.true&order=sort_order.asc&limit=1").catch(function () { return []; })
+    ]).then(function (results) {
       spot.removeAttribute("data-is-loading");
-      var l = rows[0];
-      if (!l) return;
+      var l = results[0][0];
+      var d = results[1][0];
+      var winner = l;
+      var isDev = false;
+      if (d && (!l || (d.sort_order || 100) < (l.sort_order || 100))) { winner = d; isDev = true; }
+      if (!winner) return;
+
       var t = spot.querySelector("[data-f-title]");
       var m = spot.querySelector("[data-f-meta]");
       var img = spot.querySelector("[data-f-img]");
       var link = spot.querySelector("[data-f-link]");
       var ov = spot.querySelector("[data-f-overview]");
-      if (t) t.textContent = l.title;
-      if (m) m.textContent = l.meta_line || l.location_label || "";
-      if (img && l.hero_image_url) { img.src = l.hero_image_url; img.alt = l.image_alt || l.title; }
-      if (link) link.href = "property?slug=" + encodeURIComponent(l.slug);
-      if (ov && l.overview) ov.textContent = l.overview;
+      if (t) t.textContent = isDev ? winner.name : winner.title;
+      if (m) m.textContent = winner.meta_line || winner.location_label || "";
+      if (img && winner.hero_image_url) { img.src = winner.hero_image_url; img.alt = winner.image_alt || (isDev ? winner.name : winner.title); }
+      if (link) link.href = isDev ? (BESPOKE_DEV_PAGES[winner.slug] || "development?slug=" + encodeURIComponent(winner.slug)) : "property?slug=" + encodeURIComponent(winner.slug);
+      if (ov && winner.overview) ov.textContent = winner.overview;
       var sample = spot.querySelector("[data-sample-only]");
       if (sample) sample.hidden = true;
     }).catch(function () { spot.removeAttribute("data-is-loading"); /* static spotlight stands */ });
