@@ -526,6 +526,7 @@ async function init(supabase) {
       }
     }
     updateDevMetaCount();
+    devForm.elements.hero_image_url.value = (d && d.hero_image_url) || "";
     const prev = $("#development-photo-preview");
     prev.hidden = !(d && d.hero_image_url);
     if (d && d.hero_image_url) prev.src = d.hero_image_url;
