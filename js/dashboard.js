@@ -483,7 +483,7 @@ async function init(supabase) {
     $("#listing-ai-status").textContent = "";
     form.elements.id.value = l ? l.id : "";
     if (l) {
-      ["title", "slug", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description", "development_id"].forEach((k) => { form.elements[k].value = l[k] || ""; });
+      ["title", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description", "development_id"].forEach((k) => { form.elements[k].value = l[k] || ""; });
       form.elements.status.value = l.status;
       form.elements.aspect.value = l.aspect || "4/3";
       form.elements.sort_order.value = l.sort_order;
@@ -1094,7 +1094,7 @@ async function init(supabase) {
       };
       payload.map_lat = form.elements.map_lat.value !== "" ? Number(form.elements.map_lat.value) : null;
       payload.map_lng = form.elements.map_lng.value !== "" ? Number(form.elements.map_lng.value) : null;
-      payload.slug = form.elements.slug.value.trim() ? slugify(form.elements.slug.value.trim()) : slugify(payload.title);
+      if (!isEdit) payload.slug = slugify(payload.title);
       const q = isEdit
         ? supabase.from("listings").update(payload).eq("id", form.elements.id.value)
         : supabase.from("listings").insert(payload);
