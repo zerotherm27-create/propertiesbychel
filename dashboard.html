@@ -228,6 +228,7 @@
   <div class="dash-toast" id="dash-toast" role="status" aria-live="polite"></div>
   <nav class="dash-tabs" aria-label="Dashboard sections">
     <button class="chip" data-tab="leads" aria-pressed="true">Leads</button>
+    <button class="chip" data-tab="developments" aria-pressed="false">Developments</button>
     <button class="chip" data-tab="listings" aria-pressed="false">Listings</button>
     <button class="chip" data-tab="photos" aria-pressed="false">Site Photos</button>
     <button class="chip" data-tab="content" aria-pressed="false">Content</button>
@@ -288,8 +289,8 @@
     </div>
   </section>
 
-  <!-- Listings -->
-  <section id="tab-listings" class="dash-tab" hidden>
+  <!-- Developments -->
+  <section id="tab-developments" class="dash-tab" hidden>
     <div class="dash-panel">
       <div class="dash-panel__head">
         <h2 class="h3">Developments</h2>
@@ -316,7 +317,13 @@
         </div>
         <div class="field"><label>Name</label><input name="name" required placeholder="e.g. Ongpin Tower"></div>
         <div class="dash-form__row">
-          <div class="field"><label>Developer</label><input name="developer_name" placeholder="e.g. Keen &amp; Worth Property Developers"></div>
+          <div class="field"><label>Developer</label>
+            <select name="developer_id"><option value="">— Select developer —</option></select>
+            <div class="dash-form__row">
+              <input type="text" id="dev-new-developer-name" placeholder="New developer name">
+              <button class="btn" type="button" id="dev-new-developer-btn">+ Add developer</button>
+            </div>
+          </div>
           <div class="field"><label>Tagline</label><input name="tagline" placeholder="e.g. Redefining Chinatown Living"></div>
         </div>
         <div class="dash-form__row">
@@ -393,7 +400,10 @@
         <p class="field__error" id="development-error" role="alert"></p>
       </form>
     </div>
+  </section>
 
+  <!-- Listings -->
+  <section id="tab-listings" class="dash-tab" hidden>
     <div class="dash-panel">
       <div class="dash-panel__head">
         <h2 class="h3">Listings</h2>
@@ -649,7 +659,7 @@
 
 <script src="js/supabase-config.js?v=17"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=27"></script>
+<script type="module" src="js/dashboard.js?v=28"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

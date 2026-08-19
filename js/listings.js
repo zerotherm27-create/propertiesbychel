@@ -175,14 +175,43 @@
     );
   }
 
-  /* — Collection gallery — */
+  /* — Development card partial — same visual shape as listingCardHTML so
+   * css/site.css needs no new styles; a "Development" corner tag stands in
+   * for the price tag since a whole building has no single price. */
+  function developmentCardHTML(d, i) {
+    var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
+    var href = BESPOKE_DEV_PAGES[d.slug] || "development?slug=" + encodeURIComponent(d.slug);
+    return (
+      '<a class="plisting is-in" href="' + href + '"' +
+      ' data-status="development" data-collection="">' +
+        '<div class="frame frame--hover" style="aspect-ratio:' + esc(d.aspect || "4/3") + ';position:relative">' +
+          '<span class="plisting__tag">Development</span>' +
+          '<img src="' + esc(d.hero_image_url || "") + '" alt="' + esc(d.image_alt || d.name) + '" ' + imgAttrs + '>' +
+        "</div>" +
+        '<div class="plisting__head"><span class="plisting__title">' + esc(d.name) + "</span></div>" +
+        '<p class="plisting__meta">' + esc(d.meta_line || d.location_label || "") + "</p>" +
+      "</a>"
+    );
+  }
+
+  /* — Collection gallery — merges published listings and published
+   * developments into one sorted grid, so a development no longer needs a
+   * manually-created duplicate listing row just to appear in Collections. */
   var gallery = document.querySelector(".gallery[data-listings]");
   if (gallery) {
     gallery.setAttribute("data-is-loading", "");
-    api("listings?select=*,development:developments(name,slug,hero_image_url)&published=eq.true&order=sort_order.asc").then(function (rows) {
+    Promise.all([
+      api("listings?select=*,development:developments(name,slug,hero_image_url)&published=eq.true&order=sort_order.asc"),
+      api("developments?select=*&published=eq.true&order=sort_order.asc")
+    ]).then(function (results) {
       gallery.removeAttribute("data-is-loading");
-      if (!rows.length) return;
-      gallery.innerHTML = rows.map(listingCardHTML).join("");
+      var combined = results[0].map(function (l) { return { kind: "listing", row: l, sort_order: l.sort_order || 100 }; })
+        .concat(results[1].map(function (d) { return { kind: "development", row: d, sort_order: d.sort_order || 100 }; }));
+      if (!combined.length) return;
+      combined.sort(function (a, b) { return a.sort_order - b.sort_order; });
+      gallery.innerHTML = combined.map(function (item, i) {
+        return item.kind === "listing" ? listingCardHTML(item.row, i) : developmentCardHTML(item.row, i);
+      }).join("");
       document.dispatchEvent(new CustomEvent("listings:rendered"));
     }).catch(function () { gallery.removeAttribute("data-is-loading"); /* static sample gallery stands */ });
   }

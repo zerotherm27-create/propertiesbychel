@@ -103,6 +103,7 @@ async function init(supabase) {
   function enter() {
     show("app");
     loadLeads();
+    loadDevelopers();
     loadDevelopments();
     loadListings();
     loadPhotos();
@@ -114,7 +115,7 @@ async function init(supabase) {
     chip.addEventListener("click", () => {
       $$(".dash-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       chip.setAttribute("aria-pressed", "true");
-      ["leads", "listings", "photos", "content", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
+      ["leads", "developments", "listings", "photos", "content", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
     });
   });
 
@@ -406,11 +407,29 @@ async function init(supabase) {
       </div>`).join("");
   }
 
+  /* ————— developers ————— */
+  let developers = [];
+
+  async function loadDevelopers() {
+    const { data, error } = await supabase.from("developers").select("*").order("sort_order", { ascending: true });
+    if (error) return; // developers table may not exist yet until the migration runs — fail quiet
+    developers = data;
+    populateDeveloperPicker();
+  }
+
+  function populateDeveloperPicker() {
+    const select = devForm.elements.developer_id;
+    const current = select.value;
+    select.innerHTML = '<option value="">— Select developer —</option>' +
+      developers.map((dv) => `<option value="${dv.id}">${esc(dv.name)}</option>`).join("");
+    select.value = current;
+  }
+
   /* ————— developments ————— */
   let developments = [];
 
   async function loadDevelopments() {
-    const { data, error } = await supabase.from("developments").select("*").order("sort_order", { ascending: true });
+    const { data, error } = await supabase.from("developments").select("*, developer:developers(name)").order("sort_order", { ascending: true });
     if (error) { $("#developments-list").innerHTML = '<p class="dash-empty">Could not load developments: ' + esc(error.message) + "</p>"; return; }
     developments = data;
     renderDevelopments();
@@ -423,7 +442,7 @@ async function init(supabase) {
       <div class="dash-row" data-id="${d.id}">
         <div class="dash-row__line">
           <span class="dash-row__name">${esc(d.name)}</span>
-          <span class="dash-row__meta">${esc(d.developer_name || "")}</span>
+          <span class="dash-row__meta">${esc((d.developer && d.developer.name) || d.developer_name || "")}</span>
           <span class="dash-row__spacer"></span>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-pub ${d.published ? "checked" : ""}> Published</label>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-feat ${d.featured ? "checked" : ""}> Featured</label>
@@ -459,6 +478,15 @@ async function init(supabase) {
 
   $("#development-new-btn").addEventListener("click", () => openDevelopmentEditor(null));
   $("#dev-editor-close").addEventListener("click", () => { devEditor.hidden = true; });
+  $("#dev-new-developer-btn").addEventListener("click", async () => {
+    const name = $("#dev-new-developer-name").value.trim();
+    if (!name) return;
+    const { data, error } = await supabase.from("developers").insert({ name, slug: slugify(name) }).select().single();
+    if (error) { showToast("Could not add developer: " + error.message, true); return; }
+    await loadDevelopers();
+    devForm.elements.developer_id.value = data.id;
+    $("#dev-new-developer-name").value = "";
+  });
 
   function renderGalleryGrid() {
     $("#listing-gallery-grid").innerHTML = galleryImages.map((g, i) => `
@@ -514,7 +542,8 @@ async function init(supabase) {
     devForm.reset();
     devForm.elements.id.value = d ? d.id : "";
     if (d) {
-      ["name", "developer_name", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
+      ["name", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
+      devForm.elements.developer_id.value = d.developer_id || "";
       devForm.elements.sort_order.value = d.sort_order;
       devForm.elements.published.checked = d.published;
       devForm.elements.featured.checked = d.featured;
@@ -631,7 +660,11 @@ async function init(supabase) {
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || "Import failed");
       if (data.name) devForm.elements.name.value = data.name;
-      if (data.developer_name) devForm.elements.developer_name.value = data.developer_name;
+      if (data.developer_name) {
+        const match = developers.find((dv) => dv.name.toLowerCase() === data.developer_name.toLowerCase());
+        if (match) devForm.elements.developer_id.value = match.id;
+        else $("#dev-new-developer-name").value = data.developer_name;
+      }
       if (data.tagline) devForm.elements.tagline.value = data.tagline;
       if (data.location_label) devForm.elements.location_label.value = data.location_label;
       if (data.meta_line) devForm.elements.meta_line.value = data.meta_line;
@@ -1147,7 +1180,7 @@ async function init(supabase) {
       const isEdit = !!devForm.elements.id.value;
       const payload = {
         name: devForm.elements.name.value.trim(),
-        developer_name: devForm.elements.developer_name.value.trim() || null,
+        developer_id: devForm.elements.developer_id.value || null,
         tagline: devForm.elements.tagline.value.trim() || null,
         location_label: devForm.elements.location_label.value.trim() || null,
         meta_line: devForm.elements.meta_line.value.trim() || null,

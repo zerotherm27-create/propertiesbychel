@@ -226,7 +226,7 @@
     });
   }
 
-  fetch(SB.url + "/rest/v1/developments?select=*&published=eq.true&order=sort_order.asc", {
+  fetch(SB.url + "/rest/v1/developments?select=*,developer:developers(id,name,slug)&published=eq.true&order=sort_order.asc", {
     headers: { apikey: SB.anonKey, Authorization: "Bearer " + SB.anonKey }
   })
     .then(function (r) { return r.ok ? r.json() : []; })
@@ -236,13 +236,15 @@
       var groups = {};
       var order = [];
       rows.forEach(function (d) {
-        var key = d.developer_name || "Independent";
-        if (!groups[key]) { groups[key] = []; order.push(key); }
-        groups[key].push(d);
+        var key = d.developer ? d.developer.id : "independent";
+        var label = d.developer ? d.developer.name : (d.developer_name || "Independent");
+        if (!groups[key]) { groups[key] = { label: label, items: [] }; order.push(key); }
+        groups[key].items.push(d);
       });
 
-      var html = order.map(function (developerName) {
-        var projects = groups[developerName].map(function (d) {
+      var html = order.map(function (key) {
+        var g = groups[key];
+        var projects = g.items.map(function (d) {
           var href = BESPOKE_DEV_PAGES[d.slug] || "development?slug=" + encodeURIComponent(d.slug);
           var img = d.hero_image_url
             ? '<img src="' + esc(d.hero_image_url) + '" alt="' + esc(d.image_alt || d.name) + '" loading="lazy">'
@@ -257,7 +259,7 @@
         }).join("");
         return (
           '<div class="dev-block" data-reveal>' +
-            '<div class="dev-block__head"><h2 class="h2">' + esc(developerName) + "</h2></div>" +
+            '<div class="dev-block__head"><h2 class="h2">' + esc(g.label) + "</h2></div>" +
             '<div class="dev-projects">' + projects + "</div>" +
           "</div>"
         );
