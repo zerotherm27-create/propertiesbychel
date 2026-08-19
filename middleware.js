@@ -41,6 +41,7 @@ export default async function middleware(request) {
   const BESPOKE_DEV_PAGES = {
     "ongpin-tower": "/ongpin-tower",
     "laya-by-shang-properties": "/laya-by-shang",
+    "botanika-tower-one": "/botanika-tower-one",
   };
   if (path === "/property") {
     const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
