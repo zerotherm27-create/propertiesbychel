@@ -343,7 +343,7 @@
   /* — Reflect the dashboard-managed development's published status — */
   var sb = window.SUPABASE_CONFIG || {};
   if (sb.url && sb.anonKey) {
-    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.botanika-tower-one&limit=1", {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.botanika-nature-residences&limit=1", {
       headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
     })
       .then(function (r) { return r.ok ? r.json() : []; })

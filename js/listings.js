@@ -30,7 +30,7 @@
   var BESPOKE_DEV_PAGES = {
     "ongpin-tower": "ongpin-tower",
     "laya-by-shang-properties": "laya-by-shang",
-    "botanika-tower-one": "botanika-tower-one"
+    "botanika-nature-residences": "botanika-tower-one"
   };
 
   /* — Shared photo-grid lightbox (masonry click-to-view, listing + development detail) — */
