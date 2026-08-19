@@ -42,7 +42,7 @@ export default async function middleware(request) {
     "ongpin-tower": "/ongpin-tower",
     "laya-by-shang-properties": "/laya-by-shang",
     "botanika-nature-residences": "/botanika-tower-one",
-    "two-botanika": "/two-botanika",
+    "two-botanika-nature-residences": "/two-botanika",
   };
   if (path === "/property") {
     const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
