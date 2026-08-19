@@ -31,7 +31,8 @@
     "ongpin-tower": "ongpin-tower",
     "laya-by-shang-properties": "laya-by-shang",
     "botanika-nature-residences": "botanika-tower-one",
-    "two-botanika-nature-residences": "two-botanika"
+    "two-botanika-nature-residences": "two-botanika",
+    "1001-parkway": "1001-parkway"
   };
 
   /* — Shared photo-grid lightbox (masonry click-to-view, listing + development detail) — */
