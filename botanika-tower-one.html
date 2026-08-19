@@ -55,7 +55,16 @@
     .unit-row__meta { grid-column: 1 / -1; align-items: flex-start; text-align: left; white-space: normal; }
   }
 
-  .bt-amenities-media { aspect-ratio: 4/3; }
+  .bt-amenities-media { aspect-ratio: 21/9; }
+  .bt-features-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-8) var(--space-4);
+    margin-top: var(--space-12);
+  }
+  .bt-feature { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); }
+  .bt-feature svg { width: 1.75rem; height: 1.75rem; color: var(--brass); flex-shrink: 0; }
+  .bt-feature span { font-size: var(--text-sm); color: var(--ink-faint); line-height: 1.3; }
+  @media (max-width: 48rem) { .bt-features-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 30rem) { .bt-features-grid { grid-template-columns: repeat(2, 1fr); } }
   .bt-certs { display: flex; align-items: center; justify-content: center; gap: var(--space-10); flex-wrap: wrap; }
   .bt-certs img { height: 3.5rem; width: auto; filter: grayscale(1); opacity: .8; }
 </style>
@@ -165,27 +174,27 @@
 
   <!-- Amenities -->
   <section id="amenities" class="section band-parchment" aria-labelledby="bt-amenities-h">
-    <div class="shell grid-12">
-      <div class="col-span-5" data-reveal>
-        <div class="frame frame--corners bt-amenities-media">
-          <img src="https://filigree.com.ph/wp-content/uploads/2025/11/5M4A2622-2048x1365.jpg" alt="Amenity area at Botanika Tower One" loading="lazy">
-        </div>
+    <div class="shell" style="text-align:center;max-width:40rem;margin-inline:auto" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Building Features</p>
+      <h2 class="h2 mt-8" id="bt-amenities-h">Every Essential, Considered</h2>
+    </div>
+    <div class="shell mt-12" data-reveal>
+      <div class="frame frame--corners bt-amenities-media" style="max-width:44rem;margin-inline:auto">
+        <img src="https://filigree.com.ph/wp-content/uploads/2025/11/5M4A2622-2048x1365.jpg" alt="Amenity area at Botanika Tower One" loading="lazy">
       </div>
-      <div class="col-span-6 col-start-7" data-reveal>
-        <p class="eyebrow">Building Features</p>
-        <h2 class="h2 mt-8" id="bt-amenities-h">Every Essential, Considered</h2>
-        <div class="mt-12">
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Sun-roofed central atrium</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Roof decks</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Grand lobby &amp; reception</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Mail room</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Administration office</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">2 scenic elevators &amp; service elevator</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">24/7 security and CCTV</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Key card access for floor access</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Fire safety features</span></div>
-          <div class="index-row"><span class="index-row__title" style="font-size:1.125rem">Underground parking</span></div>
-        </div>
+    </div>
+    <div class="shell">
+      <div class="bt-features-grid">
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span>Sun-roofed central atrium</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v9h14v-9"/><path d="M9 19v-5h6v5"/></svg><span>Roof decks</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17"/><path d="M8 21V4M16 21V4M3 9h18M3 14h18"/></svg><span>Grand lobby &amp; reception</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 6 9 7 9-7"/></svg><span>Mail room</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="1"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg><span>Administration office</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M10 9l2-2 2 2M10 15l2 2 2-2"/></svg><span>2 scenic elevators &amp; service elevator</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="m9 12 2 2 4-4"/></svg><span>24/7 security &amp; CCTV</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="8" cy="12" r="1.75"/><path d="M12 12h6M14 12v2M17 12v2"/></svg><span>Key card floor access</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3-2 4-2 7a4 4 0 1 0 8 0c0-1-.5-2-1-2 .5 2-1 3-2 2 1-2-.5-4-3-7z"/></svg><span>Fire safety features</span></div>
+        <div class="bt-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8v8M10 8h3a2.5 2.5 0 0 1 0 5h-3"/></svg><span>Underground parking</span></div>
       </div>
     </div>
     <div class="shell mt-16 bt-certs">
