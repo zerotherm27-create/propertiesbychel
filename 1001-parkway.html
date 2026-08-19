@@ -364,7 +364,7 @@
   /* — Reflect the dashboard-managed development's published status — */
   var sb = window.SUPABASE_CONFIG || {};
   if (sb.url && sb.anonKey) {
-    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.1001-parkway&limit=1", {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.1001-parkway-residences&limit=1", {
       headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
     })
       .then(function (r) { return r.ok ? r.json() : []; })

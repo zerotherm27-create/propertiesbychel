@@ -32,7 +32,7 @@
     "laya-by-shang-properties": "laya-by-shang",
     "botanika-nature-residences": "botanika-tower-one",
     "two-botanika-nature-residences": "two-botanika",
-    "1001-parkway": "1001-parkway"
+    "1001-parkway-residences": "1001-parkway"
   };
 
   /* — Shared photo-grid lightbox (masonry click-to-view, listing + development detail) — */

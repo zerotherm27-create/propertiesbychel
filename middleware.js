@@ -43,7 +43,7 @@ export default async function middleware(request) {
     "laya-by-shang-properties": "/laya-by-shang",
     "botanika-nature-residences": "/botanika-tower-one",
     "two-botanika-nature-residences": "/two-botanika",
-    "1001-parkway": "/1001-parkway",
+    "1001-parkway-residences": "/1001-parkway",
   };
   if (path === "/property") {
     const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
