@@ -123,6 +123,9 @@
     <div class="tb-hero__media frame frame--corners" data-reveal>
       <img src="https://filigree.com.ph/wp-content/uploads/2026/02/Two-Botanika-copy.webp" alt="Two Botanika exterior render" loading="lazy">
     </div>
+    <p class="mt-8">
+      <a href="https://tours.exsight360.com/filinvest/botanika-tower-2/index.html?startscene=70" id="tb-tour-link" class="link-line link-line--brass" target="_blank" rel="noopener">View the 360° tour <span class="arr">→</span></a>
+    </p>
   </section>
 
   <!-- Units -->
@@ -415,6 +418,19 @@
     if (e.key === "ArrowLeft") showSlide(currentIndex - 1);
     if (e.key === "ArrowRight") showSlide(currentIndex + 1);
   });
+
+  /* — 360° tour opens in a small popup window, not a full new tab — */
+  var tourLink = document.getElementById("tb-tour-link");
+  if (tourLink) {
+    tourLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      var w = 1100, h = 750;
+      var left = (window.screenX || 0) + Math.max(0, (window.outerWidth - w) / 2);
+      var top = (window.screenY || 0) + Math.max(0, (window.outerHeight - h) / 2);
+      var popup = window.open(tourLink.href, "twoBotanikaTour", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",noopener,noreferrer");
+      if (popup) popup.opener = null;
+    });
+  }
 
   /* — Brand-styled map, same treatment as the dashboard-managed development pages — */
   var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
