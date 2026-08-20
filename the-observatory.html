@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Observatory · Properties by Chel</title>
+<meta name="description" content="The Observatory — a Japanese-inspired high-rise condominium by FNG (Federal Land &amp; Nomura Real Estate) on Pioneer Street, Mandaluyong City, across from BGC. Studio to Penthouse residences.">
+<link rel="canonical" href="https://www.propertiesbychel.com/the-observatory">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.propertiesbychel.com/the-observatory">
+<meta property="og:site_name" content="Properties by Chel">
+<meta property="og:title" content="The Observatory · Properties by Chel">
+<meta property="og:description" content="A Japanese-inspired high-rise condominium by FNG (Federal Land &amp; Nomura Real Estate) on Pioneer Street, Mandaluyong City, across from BGC. Studio to Penthouse residences.">
+<meta property="og:image" content="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_1.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Observatory · Properties by Chel">
+<meta name="twitter:description" content="A Japanese-inspired high-rise condominium by FNG (Federal Land &amp; Nomura Real Estate) on Pioneer Street, Mandaluyong City, across from BGC. Studio to Penthouse residences.">
+<meta name="twitter:image" content="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_1.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=44">
+<link rel="icon" href="images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<style>
+  /* page-scoped composition helpers, tokens only — same pattern as 1001-parkway.html / two-botanika.html */
+  .obs-status-banner {
+    background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin);
+    text-align: center; font-size: var(--text-sm); margin-top: 6.5rem;
+    opacity: 0; transition: opacity var(--dur) var(--ease-out);
+  }
+  .obs-status-banner.is-in { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .obs-status-banner { transition: none; } }
+  .obs-status-banner a { color: var(--brass); text-decoration: underline; }
+  .obs-hero { max-width: 44rem; margin-inline: auto; text-align: center; padding-top: var(--space-12); }
+  .obs-hero .eyebrow { justify-content: center; margin-inline: auto; }
+  .obs-hero .lede { margin-inline: auto; }
+  .obs-hero__media { max-width: 52rem; margin: var(--space-12) auto 0; aspect-ratio: 16/9; }
+  .obs-hero__links { display: flex; gap: var(--space-6); justify-content: center; flex-wrap: wrap; }
+
+  .obs-amenities-media { aspect-ratio: 21/9; }
+  .obs-features-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-8) var(--space-4);
+    margin-top: var(--space-12);
+  }
+  .obs-feature { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); }
+  .obs-feature svg { width: 1.75rem; height: 1.75rem; color: var(--brass); flex-shrink: 0; }
+  .obs-feature span { font-size: var(--text-sm); color: var(--ink-faint); line-height: 1.3; }
+  .obs-feature small { display: block; font-size: 0.75rem; color: var(--ink-faint); opacity: 0.8; margin-top: var(--space-1); }
+  @media (max-width: 48rem) { .obs-features-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 30rem) { .obs-features-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .obs-amenity-group + .obs-amenity-group { margin-top: var(--space-16); }
+  .obs-amenity-group h3 { text-align: center; font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<a class="visually-hidden" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="masthead__inner shell">
+    <a class="masthead__mark" href="/">
+      <img class="masthead__logo masthead__logo--navy" src="images/logo-navy.png" alt="Properties by Chel" width="73" height="34">
+      <img class="masthead__logo masthead__logo--white" src="images/logo-white.png" alt="Properties by Chel" width="73" height="34">
+    </a>
+    <nav class="masthead__nav" aria-label="Primary">
+      <a href="properties">Collections</a>
+      <a href="developer">Developer</a>
+      <a href="insights">Insights</a>
+      <a href="about">About</a>
+      <a class="masthead__cta" href="presentation">Private Presentation</a>
+    </nav>
+    <button class="masthead__toggle" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menu" tabindex="-1">
+  <div class="menu-overlay__head">
+    <img class="menu-overlay__logo" src="images/logo-white.png" alt="Properties by Chel" width="60" height="28">
+    <button class="masthead__toggle" data-menu-close>Close</button>
+  </div>
+  <ul class="menu-overlay__list">
+    <li><a href="/">Home</a></li>
+    <li><a href="properties">Collections</a></li>
+    <li><a href="developer">Developer</a></li>
+    <li><a href="insights">Insights</a></li>
+    <li><a href="sellers">For Sellers</a></li>
+    <li><a href="foreign-buyers">Foreign Buyer Guidance</a></li>
+    <li><a href="about">About Chel</a></li>
+    <li><a href="presentation">Private Presentation</a></li>
+    <li><a href="contact">Contact</a></li>
+  </ul>
+  <div class="menu-overlay__foot">
+    <span>Makati City, Philippines</span>
+    <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a>
+  </div>
+</div>
+
+<main id="main">
+
+  <div id="obs-status-banner" class="obs-status-banner" hidden role="status">
+    <div class="shell">This development is no longer actively marketed. <a href="presentation?listing=the-observatory">Contact us</a> for current availability.</div>
+  </div>
+
+  <!-- Hero -->
+  <section class="section section--tight obs-hero" aria-labelledby="obs-h">
+    <p class="eyebrow">Pioneer St., Mandaluyong City</p>
+    <h1 class="display mt-8" id="obs-h">The Observatory</h1>
+    <p class="lede mt-8"><strong style="color:var(--ink);font-weight:500">The Observatory, rising in Mandaluyong City across from BGC,</strong> provides a modern haven with breathtaking views of Metro Manila — where convenience and comfort intertwine to create an unparalleled urban living experience.</p>
+    <div class="obs-hero__media frame frame--corners" data-reveal>
+      <img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_1.jpg" alt="The Observatory exterior render" loading="lazy">
+    </div>
+    <p class="mt-8 obs-hero__links">
+      <a href="https://storage.net-fs.com/hosting/6446002/23/" id="obs-tour-link" class="link-line link-line--brass" target="_blank" rel="noopener">View the 360° tour <span class="arr">→</span></a>
+      <a href="https://www.flipsnack.com/federallandinc/the-observatory-full-brochure/full-view.html" class="link-line link-line--brass" target="_blank" rel="noopener">View brochure <span class="arr">→</span></a>
+    </p>
+  </section>
+
+  <!-- Units -->
+  <section id="units" class="section" aria-labelledby="obs-units-h">
+    <div class="shell" style="max-width:52rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">Our Units</p>
+        <h2 class="h2 mt-8" id="obs-units-h">Residence Types</h2>
+        <p class="lede mt-8" style="margin-inline:auto">706 units across five residence types · High-rise Condominium · DHSUD TLTS NCR-026 · Est. completion 31 December 2030.</p>
+      </div>
+      <div class="mt-16">
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Studio</span><span class="index-row__meta">392 units · 28–33.5 sqm</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">One-Bedroom</span><span class="index-row__meta">240 units · 45.5–61.5 sqm</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Two-Bedroom</span><span class="index-row__meta">52 units · 65–87 sqm</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Three-Bedroom</span><span class="index-row__meta">16 units · 137–148 sqm</span></div>
+        <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Penthouse</span><span class="index-row__meta">6 units · 155.5–205 sqm</span></div>
+      </div>
+      <p class="mt-12" style="text-align:center"><a class="btn" href="presentation?listing=the-observatory">Private Presentation</a></p>
+    </div>
+  </section>
+
+  <!-- Facilities & Services -->
+  <section id="facilities" class="section band-parchment" aria-labelledby="obs-facilities-h">
+    <div class="shell" style="text-align:center;max-width:40rem;margin-inline:auto" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Facilities &amp; Services</p>
+      <h2 class="h2 mt-8" id="obs-facilities-h">Japanese-Inspired Fittings</h2>
+    </div>
+    <div class="shell">
+      <div class="obs-features-grid">
+        <div class="obs-feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="7" height="18"/><rect x="13" y="3" width="7" height="18"/><circle cx="9" cy="12" r="0.6" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="0.6" fill="currentColor" stroke="none"/></svg>
+          <span>Storage Solutions</span>
+          <small>Genkan · Adjustable Kitchen Cabinets · Modular Closets</small>
+        </div>
+        <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h6l1 4H6l1-4z"/><path d="M6 8h8v3a4 4 0 0 1-4 4 4 4 0 0 1-4-4V8z"/><path d="M8 19h4"/></svg><span>Japanese-branded Water Closet</span></div>
+        <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-2z"/><path d="M6 12V7a2 2 0 0 1 4 0"/><path d="M12 4c0 1-1 1-1 2s1 1 1 2"/></svg><span>Spalet for Master T&amp;B</span></div>
+        <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l2-5h10l2 5"/><rect x="4" y="9" width="16" height="4" rx="1"/><path d="M12 13v3M9 20l1-4M15 20l-1-4"/></svg><span>Rangehood</span></div>
+        <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3v3M12 2v4M15 3v3"/><path d="M6 8h12"/><path d="M7 8c0 6-2 8-2 11h14c0-3-2-5-2-11"/></svg><span>Separate Shower &amp; Bathtub in Master Bedroom T&amp;B*</span></div>
+        <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16"/><path d="M5 12a1 1 0 0 1-1-1 5 5 0 0 1 5-5h4a5 5 0 0 1 5 5 1 1 0 0 1-1 1"/><path d="M6 12v2a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2"/><path d="M12 6V4"/></svg><span>Multi-functional &amp; Space-saving Sink</span></div>
+        <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><rect x="8" y="6" width="8" height="5" rx="0.5"/><circle cx="12" cy="16" r="1.2"/></svg><span>Elevator &amp; Main Door Key Card Access</span></div>
+      </div>
+      <p class="mt-8" style="text-align:center;font-size:var(--text-sm);color:var(--ink-faint)">* select units</p>
+    </div>
+  </section>
+
+  <!-- Amenities -->
+  <section id="amenities" class="section" aria-labelledby="obs-amenities-h">
+    <div class="shell" style="text-align:center;max-width:40rem;margin-inline:auto" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Our Amenities</p>
+      <h2 class="h2 mt-8" id="obs-amenities-h">Indoor &amp; Outdoor Living</h2>
+    </div>
+    <div class="shell mt-12" data-reveal>
+      <div class="frame frame--corners obs-amenities-media" style="max-width:44rem;margin-inline:auto">
+        <img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_6.jpg" alt="The Observatory amenity area" loading="lazy">
+      </div>
+    </div>
+    <div class="shell">
+      <div class="obs-amenity-group mt-16">
+        <h3>Indoor</h3>
+        <div class="obs-features-grid">
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18v-4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M4 18h16M4 14V9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v3M17 14V9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v5"/></svg><span>Garden Lobby</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="10" width="7" height="7"/><rect x="14" y="10" width="7" height="7"/><rect x="8" y="3" width="7" height="7"/></svg><span>Children's Playroom</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="1"/><path d="M2 19h20M9 9h6M9 12h4"/></svg><span>Co-working Space or Business Lounge</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></svg><span>Yoga Studio</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M4 9l5-5 2 2-5 5-2-2zM13 18l5-5 2 2-5 5-2-2z"/></svg><span>Fitness Gym</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M9 20h6M12 16v4"/><path d="M8 9l3 2 5-4"/></svg><span>Entertainment Room</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17"/><path d="M8 21V4M16 21V4M3 9h18M3 14h18"/></svg><span>Function Room</span></div>
+        </div>
+      </div>
+      <div class="obs-amenity-group">
+        <h3>Outdoor</h3>
+        <div class="obs-features-grid">
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg><span>Swimming Pool and Pool Deck</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg><span>Children's Pool</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4v16M20 4v16M4 4h16"/><path d="M12 8v10"/><circle cx="12" cy="19" r="1.2"/></svg><span>Children's Play Area</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="8" r="1.5"/><circle cx="12" cy="6" r="1.5"/><circle cx="17" cy="8" r="1.5"/><circle cx="19" cy="12.5" r="1.5"/><path d="M12 20c-3 0-4.5-1.8-4.5-3.5C7.5 14.5 9.5 13 12 13s4.5 1.5 4.5 3.5c0 1.7-1.5 3.5-4.5 3.5z"/></svg><span>Pet Park</span></div>
+          <div class="obs-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v11"/><path d="M4 9a8 8 0 0 1 16 0z"/><path d="M8 21l4-4 4 4"/></svg><span>Outdoor Lounge</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location -->
+  <section id="location" class="section band-parchment" aria-labelledby="obs-location-h">
+    <div class="shell">
+      <div style="text-align:center;max-width:48rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">Vibrant City Living</p>
+        <h2 class="h2 mt-8" id="obs-location-h">Pioneer Street, Mandaluyong</h2>
+        <p class="lede mt-8" style="margin-inline:auto">Rising across from BGC in Barangay Barangka Ilaya, Mandaluyong City — at the center of Metro Manila's progress, with breathtaking views of the skyline.</p>
+      </div>
+      <div class="grid-12 mt-16">
+        <div class="col-span-6">
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Showroom</span><span class="index-row__meta">The Observatory Sales Pavilion</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Address</span><span class="index-row__meta">Pioneer St., Brgy. Barangka Ilaya</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Property Type</span><span class="index-row__meta">Residential, High-rise Condominium</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">DHSUD License</span><span class="index-row__meta">TLTS NCR-026</span></div>
+          <div class="mt-8">
+            <a class="link-line link-line--brass" href="https://www.google.com/maps/dir//The+Observatory,+Pioneer+St.,+Barangay+Barangka+Ilaya,+Mandaluyong+City" target="_blank" rel="noopener">Get directions <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="col-span-5 col-start-8">
+          <div id="obs-map" style="height:360px;border:var(--rule) solid var(--line)"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="gallery" class="section" aria-labelledby="obs-gallery-h">
+    <div class="shell">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">Photos</p>
+        <h2 class="h2 mt-8" id="obs-gallery-h">The Observatory</h2>
+      </div>
+      <div class="photo-grid mt-16" data-reveal-stagger id="obs-gallery-grid">
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_1.jpg" alt="The Observatory render 1" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_2.jpg" alt="The Observatory render 2" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_4.jpg" alt="The Observatory render 4" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_5.jpg" alt="The Observatory render 5" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_6.jpg" alt="The Observatory render 6" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_7.jpg" alt="The Observatory render 7" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_8.jpg" alt="The Observatory render 8" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_9.jpg" alt="The Observatory render 9" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_10.jpg" alt="The Observatory render 10" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://fng.ph/wp-content/uploads/2024/08/Obs_Render_11.jpg" alt="The Observatory render 11" loading="lazy"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section band text-center" aria-labelledby="obs-about-h">
+    <div class="shell" style="max-width:44rem" data-reveal>
+      <p class="eyebrow eyebrow--bare" style="justify-content:center">The Developer</p>
+      <h2 class="h2 mt-8" id="obs-about-h">FNG (Federal Land &amp; Nomura Real Estate)</h2>
+      <p class="lede mt-8" style="margin-inline:auto">Federal Land NRE Global, Inc. — operating under the FNG joint venture between Federal Land and Nomura Real Estate — is the owner and developer of The Observatory. The partnership brings a considered, Japanese-inflected approach to condominium living to Pioneer Street, Mandaluyong, from genkan entryways to Japanese-branded fixtures, set within a full-service residential tower.</p>
+      <div class="mt-12" style="display:flex;gap:var(--space-6);justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--on-dark" href="presentation">Request a private presentation</a>
+        <a class="link-line link-line--on-dark" href="properties">Back to the collection <span class="arr">→</span></a>
+      </div>
+      <hr class="rule rule--brass mt-16" style="max-width:2.5rem;margin-inline:auto">
+    </div>
+  </section>
+
+</main>
+
+<div class="gallery-lightbox" id="gallery-lightbox" hidden>
+  <button type="button" class="gallery-lightbox__close" id="gallery-lightbox-close" aria-label="Close gallery">×</button>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--prev" id="gallery-lightbox-prev" aria-label="Previous photo">‹</button>
+  <div class="gallery-lightbox__frame frame frame--corners">
+    <img id="gallery-lightbox-img" src="" alt="">
+  </div>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--next" id="gallery-lightbox-next" aria-label="Next photo">›</button>
+  <p class="gallery-lightbox__caption" id="gallery-lightbox-caption"></p>
+</div>
+
+<footer class="footer">
+  <div class="shell">
+    <img class="footer__logo" src="images/logo-white.png" alt="Properties by Chel" width="90" height="42">
+    <p class="footer__statement">Considered advice for <em>considered</em> property.</p>
+    <div class="footer__grid">
+      <div>
+        <h4>The Practice</h4>
+        <address>
+          Properties by Chel, Private Real Estate Advisory<br>
+          Makati City, Metro Manila, Philippines<br>
+          PRC-licensed real estate broker<br>
+          License details furnished on enquiry
+        </address>
+      </div>
+      <div>
+        <h4>Portfolio</h4>
+        <ul>
+          <li><a href="properties">Collections</a></li>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="sellers">For Sellers</a></li>
+          <li><a href="foreign-buyers">Foreign Buyers</a></li>
+          <li><a href="https://allabodeph.com" target="_blank" rel="noopener">All Abode PH ↗</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Advisory</h4>
+        <ul>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="about">About Chel</a></li>
+          <li><a href="contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Enquiries</h4>
+        <address>
+          <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a><br>
+          Direct line shared upon introduction<br>
+          <a href="presentation">Request a private presentation</a>
+        </address>
+        <div class="footer__social">
+          <a href="https://www.linkedin.com/in/aremchelcruzado/" target="_blank" rel="noopener" aria-label="Chel Cruzado on LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7.5" y1="10.5" x2="7.5" y2="16.5"/><circle cx="7.5" cy="7" r="0.75" fill="currentColor" stroke="none"/><path d="M11.5 16.5v-4c0-1.4.9-2.3 2.2-2.3s2.3 1 2.3 2.3v4"/><line x1="11.5" y1="10.5" x2="11.5" y2="16.5"/></svg>
+          </a>
+          <a href="https://www.facebook.com/propertiesbychelcruzado" target="_blank" rel="noopener" aria-label="Properties by Chel on Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M14 21v-6.5h2.2l.3-2.7H14V10c0-.8.2-1.3 1.4-1.3H16.5V6.3C16.1 6.2 15.2 6 14.2 6c-2.1 0-3.5 1.3-3.5 3.6v2.2H8.5v2.7h2.2V21"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <span>© 2026 Properties by Chel · All rights reserved</span>
+      <span><a href="legal#privacy">Privacy</a> &nbsp;·&nbsp; <a href="legal#terms">Terms</a> &nbsp;·&nbsp; <a href="contact">Contact</a></span>
+    </div>
+  </div>
+</footer>
+<script src="js/supabase-config.js?v=17"></script>
+<script src="js/site.js?v=20"></script>
+<script src="js/vendor/motion.js?v=1"></script>
+<script src="js/motion-enhance.js?v=4"></script>
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fadeIn(el) {
+    if (reduceMotion) { el.classList.add("is-in"); return; }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("is-in"); });
+    });
+  }
+
+  /* — Reflect the dashboard-managed development's published status — */
+  var sb = window.SUPABASE_CONFIG || {};
+  if (sb.url && sb.anonKey) {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.the-observatory&limit=1", {
+      headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var d = rows[0];
+        if (d && d.published === false) {
+          var banner = document.getElementById("obs-status-banner");
+          banner.hidden = false;
+          fadeIn(banner);
+        }
+      })
+      .catch(function () { /* fail open — page stays as-is if the check can't run */ });
+  }
+
+  /* — Gallery lightbox — reuses the shared .photo-grid / .gallery-lightbox
+     visual pattern from the site's generic listing/development pages, wired locally
+     since this static page doesn't run through js/listings.js's Supabase-driven flow. */
+  var grid = document.getElementById("obs-gallery-grid");
+  var items = Array.prototype.map.call(grid.querySelectorAll("img"), function (img) {
+    return { url: img.src, alt: img.alt };
+  });
+  var lightbox = document.getElementById("gallery-lightbox");
+  var lightboxImg = document.getElementById("gallery-lightbox-img");
+  var lightboxCaption = document.getElementById("gallery-lightbox-caption");
+  var lightboxClose = document.getElementById("gallery-lightbox-close");
+  var lightboxPrev = document.getElementById("gallery-lightbox-prev");
+  var lightboxNext = document.getElementById("gallery-lightbox-next");
+  var currentIndex = 0;
+  var lastFocused = null;
+
+  function showSlide(i) {
+    currentIndex = (i + items.length) % items.length;
+    var item = items[currentIndex];
+    lightboxImg.src = item.url;
+    lightboxImg.alt = item.alt;
+    lightboxCaption.textContent = item.alt + " · " + (currentIndex + 1) + " / " + items.length;
+  }
+  function openGallery(index) {
+    lastFocused = document.activeElement;
+    showSlide(index);
+    lightbox.hidden = false;
+    fadeIn(lightbox);
+    lightboxClose.focus();
+  }
+  function closeGallery() {
+    lightbox.classList.remove("is-in");
+    if (reduceMotion) {
+      lightbox.hidden = true;
+      lightboxImg.src = "";
+    } else {
+      var onEnd = function (e) {
+        if (e.target !== lightbox) return;
+        lightbox.removeEventListener("transitionend", onEnd);
+        lightbox.hidden = true;
+        lightboxImg.src = "";
+      };
+      lightbox.addEventListener("transitionend", onEnd);
+    }
+    if (lastFocused) lastFocused.focus();
+  }
+  grid.querySelectorAll("figure").forEach(function (fig, i) {
+    fig.addEventListener("click", function () { openGallery(i); });
+  });
+  lightboxClose.addEventListener("click", closeGallery);
+  lightboxPrev.addEventListener("click", function () { showSlide(currentIndex - 1); });
+  lightboxNext.addEventListener("click", function () { showSlide(currentIndex + 1); });
+  lightbox.addEventListener("click", function (e) { if (e.target === lightbox) closeGallery(); });
+  document.addEventListener("keydown", function (e) {
+    if (lightbox.hidden) return;
+    if (e.key === "Escape") closeGallery();
+    if (e.key === "ArrowLeft") showSlide(currentIndex - 1);
+    if (e.key === "ArrowRight") showSlide(currentIndex + 1);
+  });
+
+  /* — 360° tour opens in a small popup window, not a full new tab — */
+  var tourLink = document.getElementById("obs-tour-link");
+  if (tourLink) {
+    tourLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      var w = 1100, h = 750;
+      var left = (window.screenX || 0) + Math.max(0, (window.outerWidth - w) / 2);
+      var top = (window.screenY || 0) + Math.max(0, (window.outerHeight - h) / 2);
+      var popup = window.open(tourLink.href, "observatoryTour", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",noopener,noreferrer");
+      if (popup) popup.opener = null;
+    });
+  }
+
+  /* — Brand-styled map, same treatment as the dashboard-managed development pages — */
+  var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
+  var mapEl = document.getElementById("obs-map");
+  if (mapEl && mapConfig.apiKey) {
+    var BRAND_MAP_STYLE = [
+      { elementType: "geometry", stylers: [{ color: "#f1eee6" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#5f5e5a" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#faf8f4" }] },
+      { featureType: "poi", stylers: [{ visibility: "off" }] },
+      { featureType: "transit", stylers: [{ visibility: "off" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#e3ded1" }] },
+      { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a6b14" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#d4c9a8" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9d3d9" }] },
+      { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9c4b5" }] }
+    ];
+    var BRAND_PIN_ICON = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">' +
+      '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.7 23.3 0 15 0z" fill="#8A6B14"/>' +
+      '<circle cx="15" cy="15" r="5.5" fill="#FAF8F4"/></svg>'
+    );
+    var center = { lat: 14.5675216, lng: 121.0494294 };
+    var cbName = "__initObsMap";
+    window[cbName] = function () {
+      var map = new google.maps.Map(mapEl, {
+        center: center, zoom: 16, disableDefaultUI: true, zoomControl: true, styles: BRAND_MAP_STYLE
+      });
+      new google.maps.Marker({ position: center, map: map, icon: BRAND_PIN_ICON });
+    };
+    var script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapConfig.apiKey) + "&callback=" + cbName;
+    script.async = true;
+    document.head.appendChild(script);
+  }
+})();
+</script>
+</body>
+</html>
