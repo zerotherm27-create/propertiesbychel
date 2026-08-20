@@ -184,7 +184,7 @@
     var href = BESPOKE_DEV_PAGES[d.slug] || "development?slug=" + encodeURIComponent(d.slug);
     return (
       '<a class="plisting is-in" href="' + href + '"' +
-      ' data-status="development" data-collection="">' +
+      ' data-status="development" data-collection="' + esc((d.collections || []).join(" ")) + '">' +
         '<div class="frame frame--hover" style="aspect-ratio:' + esc(d.aspect || "4/3") + ';position:relative">' +
           '<span class="plisting__tag">Development</span>' +
           '<img src="' + esc(d.hero_image_url || "") + '" alt="' + esc(d.image_alt || d.name) + '" ' + imgAttrs + '>' +

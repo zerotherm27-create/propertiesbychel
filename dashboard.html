@@ -330,6 +330,16 @@
           <div class="field"><label>Location label</label><input name="location_label" placeholder="e.g. Ongpin St, Binondo, Manila"></div>
           <div class="field"><label>Card meta line</label><input name="meta_line" placeholder="e.g. 57 floors · Residences, Estates &amp; Penthouse"></div>
         </div>
+        <fieldset class="field" style="border:0;padding:0">
+          <label>Collections</label>
+          <div class="dash-checks">
+            <label><input type="checkbox" name="collections" value="skyline"> Skyline residences</label>
+            <label><input type="checkbox" name="collections" value="estate"> Estate lots &amp; villas</label>
+            <label><input type="checkbox" name="collections" value="branded"> Branded residences</label>
+            <label><input type="checkbox" name="collections" value="legacy"> Legacy family homes</label>
+            <label><input type="checkbox" name="collections" value="investment-grade"> Investment-grade units</label>
+          </div>
+        </fieldset>
         <div class="field"><label>Overview (shown on the development page)</label><textarea name="overview" rows="4" placeholder="Two or three considered sentences on the building and its positioning."></textarea></div>
         <div class="field"><label>Meta description (for search results)</label>
           <textarea name="meta_description" rows="2" placeholder="One sentence for search results, 120 to 155 characters."></textarea>
@@ -659,7 +669,7 @@
 
 <script src="js/supabase-config.js?v=17"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=28"></script>
+<script type="module" src="js/dashboard.js?v=29"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

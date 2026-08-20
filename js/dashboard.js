@@ -544,6 +544,7 @@ async function init(supabase) {
     if (d) {
       ["name", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
       devForm.elements.developer_id.value = d.developer_id || "";
+      $$('input[name="collections"]', devForm).forEach((cb) => { cb.checked = (d.collections || []).includes(cb.value); });
       devForm.elements.sort_order.value = d.sort_order;
       devForm.elements.published.checked = d.published;
       devForm.elements.featured.checked = d.featured;
@@ -1181,6 +1182,7 @@ async function init(supabase) {
       const payload = {
         name: devForm.elements.name.value.trim(),
         developer_id: devForm.elements.developer_id.value || null,
+        collections: $$('input[name="collections"]:checked', devForm).map((c) => c.value),
         tagline: devForm.elements.tagline.value.trim() || null,
         location_label: devForm.elements.location_label.value.trim() || null,
         meta_line: devForm.elements.meta_line.value.trim() || null,

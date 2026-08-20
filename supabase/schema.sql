@@ -283,6 +283,9 @@ create trigger developers_touch before update on public.developers
 alter table public.developments
   add column if not exists developer_id uuid references public.developers(id) on delete set null;
 
+alter table public.developments
+  add column if not exists collections text[] not null default '{}';
+
 -- ————————————————————————————— listings ↔ developments —————————————————————————————
 alter table public.listings
   add column if not exists development_id uuid references public.developments(id) on delete set null;
