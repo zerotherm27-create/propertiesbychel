@@ -151,6 +151,9 @@
   .field__error { font-size: 12px; color: var(--a-danger-text); }
   .dash-form__row { gap: 0 16px; }
   .dash-checks, .dash-switch { color: var(--a-text-2); font-size: 13px; }
+  .dash-checks { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; }
+  .dash-checks label, .dash-switch { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .dash-checks input[type="checkbox"], .dash-switch input[type="checkbox"] { width: 14px; height: 14px; margin: 0; accent-color: var(--a-accent); }
   .dash-note-field { border: 1px solid var(--a-border-strong); border-radius: var(--a-radius-sm); background: var(--a-surface); font-family: inherit; }
   .dash-linkbtn { color: var(--a-accent-text); }
   .funnel-back { color: var(--a-text-2); font-family: inherit; font-size: 13px; font-weight: 500; letter-spacing: normal; text-transform: none; }
