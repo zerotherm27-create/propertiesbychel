@@ -452,6 +452,9 @@
           <p class="field__note" id="listing-import-status">Fills in the text fields below from what the page states. Review everything before saving — nothing is invented, but always double-check facts and figures. Check the box above to also pull in photos from the page — only for pages you actually have permission to use images from.</p>
         </div>
         <div class="field"><label>Title</label><input name="title" required placeholder="e.g. The Meridian Penthouse"></div>
+        <div class="field"><label>Slug</label><input name="slug" placeholder="auto-generated from title">
+          <p class="field__note">Used in the listing's URL (property?slug=…). Changing this on an already-published listing breaks any links or bookmarks pointing at the old slug.</p>
+        </div>
         <div class="dash-form__row">
           <div class="field"><label>Availability</label>
             <select name="status"><option value="sale">For sale</option><option value="lease">For lease</option><option value="investment">Investment</option></select>
