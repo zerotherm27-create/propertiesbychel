@@ -545,6 +545,11 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .band { background: var(--espresso); color: var(--on-espresso); }
 .band .lede, .band p { color: var(--on-espresso-soft); }
 .band .eyebrow { color: var(--brass); }
+/* Photo-hero eyebrows (district/property/development pages) sit over a dark
+   veiled hero image, not light paper -- brass-deep (tuned for paper) reads
+   muted and inconsistently visible depending on the photo. Bump to full-
+   brightness brass, same fix as .band above. */
+.dh__inner .eyebrow, .ph-hero__inner .eyebrow { color: var(--brass); }
 .band .meta { color: var(--on-espresso-soft); }
 .band-parchment { background: var(--paper-2); }
 .band-stone { background: var(--stone); }
