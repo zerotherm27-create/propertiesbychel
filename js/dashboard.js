@@ -436,13 +436,14 @@ async function init(supabase) {
     populateDevelopmentPicker();
   }
 
+  const DEV_AVAILABILITY_LABELS = { "pre-selling": "Pre-selling", selling: "Selling", "sold-out": "Sold Out", rfo: "RFO" };
   function renderDevelopments() {
     if (!developments.length) { $("#developments-list").innerHTML = '<p class="dash-empty">No developments yet. Add the first one.</p>'; return; }
     $("#developments-list").innerHTML = developments.map((d) => `
       <div class="dash-row" data-id="${d.id}">
         <div class="dash-row__line">
           <span class="dash-row__name">${esc(d.name)}</span>
-          <span class="dash-row__meta">${esc((d.developer && d.developer.name) || d.developer_name || "")}</span>
+          <span class="dash-row__meta">${esc((d.developer && d.developer.name) || d.developer_name || "")} · ${esc(DEV_AVAILABILITY_LABELS[d.availability] || "Selling")}</span>
           <span class="dash-row__spacer"></span>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-pub ${d.published ? "checked" : ""}> Published</label>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-feat ${d.featured ? "checked" : ""}> Featured</label>
@@ -546,6 +547,7 @@ async function init(supabase) {
       devForm.elements.developer_id.value = d.developer_id || "";
       $$('input[name="collections"]', devForm).forEach((cb) => { cb.checked = (d.collections || []).includes(cb.value); });
       devForm.elements.sort_order.value = d.sort_order;
+      devForm.elements.availability.value = d.availability || "selling";
       devForm.elements.published.checked = d.published;
       devForm.elements.featured.checked = d.featured;
       devForm.elements.amenities_text.value = (d.amenities || []).join("\n");
@@ -1191,6 +1193,7 @@ async function init(supabase) {
         hero_image_url: devForm.elements.hero_image_url.value || null,
         gallery_images: devGalleryImages,
         amenities: devForm.elements.amenities_text.value.split("\n").map((s) => s.trim()).filter(Boolean),
+        availability: devForm.elements.availability.value,
         sort_order: Number(devForm.elements.sort_order.value) || 100,
         published: devForm.elements.published.checked,
         featured: devForm.elements.featured.checked,

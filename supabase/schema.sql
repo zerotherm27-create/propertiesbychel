@@ -239,6 +239,8 @@ create table if not exists public.developments (
   map_lat           double precision,
   map_lng           double precision,
   location_features jsonb not null default '[]'::jsonb,
+  availability      text not null default 'selling'
+                      check (availability in ('pre-selling','selling','sold-out','rfo')),
   featured          boolean not null default false,
   published         boolean not null default true,
   sort_order        integer not null default 100,

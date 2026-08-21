@@ -32,8 +32,12 @@
     "laya-by-shang-properties": "laya-by-shang",
     "botanika-nature-residences": "botanika-tower-one",
     "two-botanika-nature-residences": "two-botanika",
-    "1001-parkway-residences": "1001-parkway"
+    "1001-parkway-residences": "1001-parkway",
+    "the-observatory": "the-observatory",
+    "yume-at-riverpark": "yume-at-riverpark"
   };
+
+  var DEV_AVAILABILITY_LABELS = { "pre-selling": "Pre-selling", selling: "Selling", "sold-out": "Sold Out", rfo: "RFO" };
 
   /* — Shared photo-grid lightbox (masonry click-to-view, listing + development detail) — */
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -190,7 +194,7 @@
           '<img src="' + esc(d.hero_image_url || "") + '" alt="' + esc(d.image_alt || d.name) + '" ' + imgAttrs + '>' +
         "</div>" +
         '<div class="plisting__head"><span class="plisting__title">' + esc(d.name) + "</span></div>" +
-        '<p class="plisting__meta">' + esc(d.meta_line || d.location_label || "") + "</p>" +
+        '<p class="plisting__meta">' + [d.meta_line || d.location_label, DEV_AVAILABILITY_LABELS[d.availability] || "Selling"].filter(Boolean).map(esc).join(" · ") + "</p>" +
       "</a>"
     );
   }
@@ -376,6 +380,7 @@
       bindD("tagline", d.tagline || "A considered building.");
       bindD("meta_line", d.meta_line || "");
       bindD("location_label", d.location_label || "");
+      bindD("availability", DEV_AVAILABILITY_LABELS[d.availability] || "Selling");
       bindD("developer_line", d.developer_name ? "Developed by " + d.developer_name + "." : "");
 
       // Bespoke developments get their own richer page alongside this

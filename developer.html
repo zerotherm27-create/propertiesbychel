@@ -229,6 +229,8 @@
     });
   }
 
+  var DEV_AVAILABILITY_LABELS = { "pre-selling": "Pre-selling", selling: "Selling", "sold-out": "Sold Out", rfo: "RFO" };
+
   fetch(SB.url + "/rest/v1/developments?select=*,developer:developers(id,name,slug)&published=eq.true&order=sort_order.asc", {
     headers: { apikey: SB.anonKey, Authorization: "Bearer " + SB.anonKey }
   })
@@ -256,7 +258,7 @@
             '<a class="dev-card" href="' + href + '">' +
               '<div class="frame frame--hover frame--corners dev-card__media">' + img + "</div>" +
               '<span class="dev-card__name">' + esc(d.name) + "</span>" +
-              '<p class="dev-card__meta">' + esc(d.location_label || "") + "</p>" +
+              '<p class="dev-card__meta">' + [d.location_label, DEV_AVAILABILITY_LABELS[d.availability] || "Selling"].filter(Boolean).map(esc).join(" · ") + "</p>" +
             "</a>"
           );
         }).join("");
