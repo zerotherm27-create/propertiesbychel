@@ -115,7 +115,7 @@ a { color: inherit; text-decoration: none; }
   transition: border-color var(--dur) var(--ease-out), background var(--dur) var(--ease-out);
 }
 .masthead.is-scrolled { border-bottom-color: var(--line); background: color-mix(in oklch, var(--paper) 96%, transparent); }
-.masthead--dark:not(.is-scrolled) { background: transparent; color: var(--on-espresso); }
+.masthead--dark:not(.is-scrolled) { background: color-mix(in oklch, var(--espresso) 42%, transparent); color: var(--on-espresso); }
 .masthead__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding-block: var(--space-6); transition: padding var(--dur-fast) var(--ease-out); }
 .masthead.is-scrolled .masthead__inner { padding-block: var(--space-4); }
 .masthead__mark { display: flex; align-items: center; white-space: nowrap; }
