@@ -254,4 +254,16 @@
       });
     });
   });
+
+  /* — Discourage casual image saving (right-click / drag / long-press).
+     This is a deterrent, not real protection: it stops the average visitor's
+     "Save image as" and drag-to-desktop, but anyone using dev tools, view-source,
+     or a screenshot can still get the pixels, and hotlinked photos are served
+     from the developer's own domain regardless of what runs here. — */
+  document.addEventListener("contextmenu", function (e) {
+    if (e.target.tagName === "IMG") e.preventDefault();
+  });
+  document.addEventListener("dragstart", function (e) {
+    if (e.target.tagName === "IMG") e.preventDefault();
+  });
 })();
