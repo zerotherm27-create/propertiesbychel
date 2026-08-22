@@ -649,6 +649,37 @@ async function init(supabase) {
     }
   });
 
+  $("#dev-meta-ai-btn").addEventListener("click", async () => {
+    const name = devForm.elements.name.value.trim();
+    const status = $("#dev-meta-ai-status");
+    if (!name) { status.textContent = "Enter a name first."; return; }
+    if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+    status.textContent = "Drafting…";
+    $("#dev-meta-ai-btn").disabled = true;
+    try {
+      const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+      const dev = developers.find((d) => d.id === devForm.elements.developer_id.value);
+      const body = JSON.stringify({
+        name,
+        developer_name: dev ? dev.name : "",
+        tagline: devForm.elements.tagline.value.trim(),
+        location_label: devForm.elements.location_label.value.trim(),
+        overview: devForm.elements.overview.value.trim(),
+        amenities_text: devForm.elements.amenities_text.value
+      });
+      const r = await fetch(AGENT_URL + "/generate-development-meta", { method: "POST", headers, body });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Draft failed");
+      devForm.elements.meta_description.value = data.meta_description || "";
+      updateDevMetaCount();
+      status.textContent = "Draft ready. Review below, then save.";
+    } catch (ex) {
+      status.textContent = "Could not draft: " + (ex.message || ex);
+    } finally {
+      $("#dev-meta-ai-btn").disabled = false;
+    }
+  });
+
   $("#dev-import-btn").addEventListener("click", async () => {
     const url = $("#dev-import-url").value.trim();
     const status = $("#dev-import-status");

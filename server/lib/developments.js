@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import { stripDashesDeep } from "./style.js";
+import { STYLE_GUIDE, DEVELOPMENT_META_VOICE, stripDashesDeep } from "./style.js";
 
 const DRAFT_MODEL = "gpt-5.6";
 const MAX_TEXT_CHARS = 60000;
@@ -148,5 +148,40 @@ Include at most 5 nearby_landmarks, only ones the page explicitly names with a d
           .slice(0, 5)
       : [],
     images
+  });
+}
+
+function amenitiesBlock(text) {
+  const items = String(text || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  return items.length ? items.join(", ") : "(none given)";
+}
+
+export async function draftDevelopmentMeta(openai, { name, developer_name, tagline, location_label, overview, amenities_text }) {
+  const prompt = `${STYLE_GUIDE}
+
+${DEVELOPMENT_META_VOICE}
+
+Write the meta description for this specific development. Use only the facts given below.
+
+Name: ${name}
+Developer: ${developer_name || "(not given)"}
+Tagline: ${tagline || "(not given)"}
+Location: ${location_label || "(not given)"}
+Overview: ${overview || "(not given)"}
+Amenities: ${amenitiesBlock(amenities_text)}
+
+Return ONLY a single JSON object, no other text, with exactly this key:
+{
+  "meta_description": "one plain sentence, 120 to 155 characters, written for a search-results snippet"
+}`;
+
+  const response = await openai.responses.create({
+    model: DRAFT_MODEL,
+    input: prompt
+  });
+
+  const draft = extractJson(response.output_text);
+  return stripDashesDeep({
+    meta_description: draft.meta_description || ""
   });
 }

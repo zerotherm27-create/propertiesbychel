@@ -20,6 +20,8 @@ export function sectionVoice(section) {
 
 export const LISTING_VOICE = `Section voice: Listing description. Two distinct outputs, both grounded strictly in the facts supplied below, nothing invented (no addresses, amenities, or history not stated). Write connected prose the way a considered advisory writes about a residence, never a listicle or a specs dump ("4BR, 2CR, 1 parking"). The overview and the meta description must not read as the same sentence twice.`;
 
+export const DEVELOPMENT_META_VOICE = `Section voice: Search-results meta description for a whole development (a building or master-planned project, not a single unit). Grounded strictly in the facts supplied below, nothing invented (no unit counts, amenities, price ranges, or claims not stated). This is what a searcher reads under the blue link in Google before they click, so it must earn the click on its own: lead with the development name and its most concrete, differentiating fact (developer, district, defining feature), never a generic opener like "Discover" or "Explore". One sentence, plain prose, 120 to 155 characters counting spaces. No keyword stuffing, no ALL CAPS, no exclamation points, no quotation marks around the sentence itself. A meta description influences click-through rate from a result that is already ranking, not ranking itself, so do not promise or imply search-ranking outcomes anywhere in the text.`;
+
 export function slugify(title) {
   return String(title || "")
     .toLowerCase()
