@@ -543,7 +543,7 @@ async function init(supabase) {
     devForm.reset();
     devForm.elements.id.value = d ? d.id : "";
     if (d) {
-      ["name", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
+      ["name", "slug", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
       devForm.elements.developer_id.value = d.developer_id || "";
       $$('input[name="collections"]', devForm).forEach((cb) => { cb.checked = (d.collections || []).includes(cb.value); });
       devForm.elements.sort_order.value = d.sort_order;
@@ -1201,7 +1201,7 @@ async function init(supabase) {
       };
       payload.map_lat = devForm.elements.map_lat.value !== "" ? Number(devForm.elements.map_lat.value) : null;
       payload.map_lng = devForm.elements.map_lng.value !== "" ? Number(devForm.elements.map_lng.value) : null;
-      if (!isEdit) payload.slug = slugify(payload.name);
+      payload.slug = slugify(devForm.elements.slug.value.trim() || payload.name);
       const q = isEdit
         ? supabase.from("developments").update(payload).eq("id", devForm.elements.id.value)
         : supabase.from("developments").insert(payload);
