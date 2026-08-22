@@ -229,7 +229,24 @@
     return firstInvalid;
   }
 
+  /* — Spam deterrents for enquiry forms — a honeypot field bots fill in but
+     real visitors never see, plus a minimum fill time (real people take
+     longer than a script to read and type a message). Either trip fakes the
+     same success state so the bot gets no signal to adapt, and neither the
+     lead nor a notification email goes out. This stops scripted form-fillers;
+     it does not stop a request sent straight to the API, which api/notify-lead.js
+     guards separately. */
   document.querySelectorAll("form[data-enquiry]").forEach(function (form) {
+    var hp = document.createElement("input");
+    hp.type = "text";
+    hp.name = "company";
+    hp.autocomplete = "off";
+    hp.tabIndex = -1;
+    hp.setAttribute("aria-hidden", "true");
+    hp.style.cssText = "position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0";
+    form.appendChild(hp);
+    form.dataset.openedAt = String(Date.now());
+
     form.querySelectorAll(".field input, .field select, .field textarea").forEach(function (input) {
       input.addEventListener("input", function () { if (input.checkValidity()) clearFieldError(input); });
       input.addEventListener("blur", function () { if (!input.checkValidity()) setFieldError(input); });
@@ -238,15 +255,21 @@
       e.preventDefault();
       var btn = form.querySelector('button[type="submit"]');
       var note = form.querySelector("[data-form-note]");
-      var firstInvalid = validateForm(form);
-      if (firstInvalid) { firstInvalid.focus(); return; }
-      btn.dataset.state = "loading";
-      submitLead(leadFromForm(form)).then(function () {
+
+      function fakeSuccess() {
         btn.dataset.state = "success";
         btn.textContent = "Received, thank you";
         if (note) note.textContent = "Your request has been noted. Expect a personal reply within one business day.";
         form.querySelectorAll("input, select, textarea, button").forEach(function (f) { f.disabled = true; });
-      }).catch(function () {
+      }
+
+      var openedAt = Number(form.dataset.openedAt || 0);
+      if (hp.value.trim() || Date.now() - openedAt < 1500) { fakeSuccess(); return; }
+
+      var firstInvalid = validateForm(form);
+      if (firstInvalid) { firstInvalid.focus(); return; }
+      btn.dataset.state = "loading";
+      submitLead(leadFromForm(form)).then(fakeSuccess).catch(function () {
         btn.dataset.state = "error";
         btn.textContent = "Try again";
         if (note) note.textContent = "Something went wrong sending your request. Please retry, or write directly to concierge@propertiesbychel.com.";

@@ -10,6 +10,35 @@
 const RESEND_URL = "https://api.resend.com/emails";
 const OWNER_EMAIL = "concierge@propertiesbychel.com";
 
+// Only the site itself should ever call this — it's the endpoint that
+// actually sends mail, and it has no auth. Anyone who finds the URL could
+// otherwise POST arbitrary JSON straight at it and spam the owner's inbox
+// with no need to go through the site or Supabase at all.
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  if (origin === "https://propertiesbychel.com" || origin === "https://www.propertiesbychel.com") return true;
+  return /^https:\/\/propertiesbychel[a-z0-9.-]*\.vercel\.app$/.test(origin);
+}
+
+function refererOrigin(referer) {
+  if (!referer) return null;
+  try {
+    return new URL(referer).origin;
+  } catch {
+    return null;
+  }
+}
+
+// A blocked/junk request gets a plain 200 "ok" rather than an error, same as
+// a genuine one — giving a bot nothing to distinguish "worked" from "didn't"
+// means no signal to adapt against.
+function silentOk() {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
+  });
+}
+
 const LEAD_FIELDS = [
   ["name", "Name"],
   ["email", "Email"],
@@ -72,12 +101,21 @@ export async function POST(request) {
     });
   }
 
+  const origin = request.headers.get("origin") || refererOrigin(request.headers.get("referer"));
+  if (!isAllowedOrigin(origin)) return silentOk();
+
   let lead;
   try {
     lead = await request.json();
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
+  if (!lead || typeof lead !== "object") return silentOk();
+
+  const hasContent = ["name", "email", "notes"].some(function (k) {
+    return typeof lead[k] === "string" && lead[k].trim();
+  });
+  if (!hasContent) return silentOk();
 
   const enquirerEmail = typeof lead.email === "string" ? lead.email.trim() : "";
   const tasks = [
