@@ -460,12 +460,16 @@
         <div class="field"><label>Slug</label><input name="slug" placeholder="auto-generated from title">
           <p class="field__note">Used in the listing's URL (property?slug=…). Changing this on an already-published listing breaks any links or bookmarks pointing at the old slug.</p>
         </div>
-        <div class="dash-form__row">
-          <div class="field"><label>Availability</label>
-            <select name="status"><option value="sale">For sale</option><option value="lease">For lease</option><option value="investment">Investment</option></select>
+        <fieldset class="field" style="border:0;padding:0">
+          <label>Availability</label>
+          <div class="dash-checks">
+            <label><input type="checkbox" name="status" value="sale" checked> For sale</label>
+            <label><input type="checkbox" name="status" value="lease"> For lease</label>
+            <label><input type="checkbox" name="status" value="investment"> Investment</label>
           </div>
-          <div class="field"><label>Corner tag (optional)</label><input name="tag" placeholder="Featured · Reserved · Allocation"></div>
-        </div>
+          <p class="field__note">Select every way this listing is currently offered — e.g. both For sale and For lease.</p>
+        </fieldset>
+        <div class="field"><label>Corner tag (optional)</label><input name="tag" placeholder="Featured · Reserved · Allocation"></div>
         <div class="field"><label>Part of a development (optional)</label>
           <select name="development_id"><option value="">— Standalone listing —</option></select>
         </div>
@@ -691,7 +695,7 @@
 
 <script src="js/supabase-config.js?v=17"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=32"></script>
+<script type="module" src="js/dashboard.js?v=33"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

@@ -131,7 +131,7 @@
     function applyFilters() {
       // queried live so dynamically rendered listings keep filtering
       document.querySelectorAll("[data-status]").forEach(function (c) {
-        var okStatus = state.status === "all" || c.dataset.status === state.status;
+        var okStatus = state.status === "all" || (c.dataset.status || "").split(" ").indexOf(state.status) !== -1;
         var okColl = state.collection === "all" || (c.dataset.collection || "").split(" ").indexOf(state.collection) !== -1;
         c.classList.toggle("is-filtered-out", !(okStatus && okColl));
       });

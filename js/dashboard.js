@@ -391,13 +391,18 @@ async function init(supabase) {
     renderListings();
   }
 
+  const LISTING_STATUS_LABELS = { sale: "For sale", lease: "For lease", investment: "Investment" };
+  // listings.status is a text[] column, but tolerate a plain string too —
+  // in case the array migration hasn't been run on this database yet.
+  const statusArr = (s) => (Array.isArray(s) ? s : s ? [s] : []);
+
   function renderListings() {
     if (!listings.length) { $("#listings-list").innerHTML = '<p class="dash-empty">No listings yet. Add the first one.</p>'; return; }
     $("#listings-list").innerHTML = listings.map((l) => `
       <div class="dash-row" data-id="${l.id}">
         <div class="dash-row__line">
           <span class="dash-row__name">${esc(l.title)}</span>
-          <span class="dash-row__meta">${esc(l.price_display || "")} · ${esc(l.status)}</span>
+          <span class="dash-row__meta">${esc(l.price_display || "")} · ${esc(statusArr(l.status).map((s) => LISTING_STATUS_LABELS[s] || s).join(", "))}</span>
           <span class="dash-row__spacer"></span>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-pub ${l.published ? "checked" : ""}> Published</label>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-feat ${l.featured ? "checked" : ""}> Featured</label>
@@ -513,7 +518,7 @@ async function init(supabase) {
     form.elements.id.value = l ? l.id : "";
     if (l) {
       ["title", "slug", "tag", "location_label", "meta_line", "price_display", "overview", "hero_image_url", "meta_description", "development_id"].forEach((k) => { form.elements[k].value = l[k] || ""; });
-      form.elements.status.value = l.status;
+      $$('input[name="status"]', form).forEach((cb) => { cb.checked = statusArr(l.status).includes(cb.value); });
       form.elements.aspect.value = l.aspect || "4/3";
       form.elements.sort_order.value = l.sort_order;
       form.elements.published.checked = l.published;
@@ -1140,10 +1145,12 @@ async function init(supabase) {
       const photoUrl = $("#listing-photo-url").value.trim();
       if (photoFile) form.elements.hero_image_url.value = await uploadPhoto(photoFile, "listings");
       else if (photoUrl) form.elements.hero_image_url.value = photoUrl;
+      const statusValues = $$('input[name="status"]:checked', form).map((c) => c.value);
+      if (!statusValues.length) throw new Error("Select at least one availability option.");
       const isEdit = !!form.elements.id.value;
       const payload = {
         title: form.elements.title.value.trim(),
-        status: form.elements.status.value,
+        status: statusValues,
         tag: form.elements.tag.value.trim() || null,
         collections: $$('input[name="collections"]:checked', form).map((c) => c.value),
         location_label: form.elements.location_label.value.trim() || null,
