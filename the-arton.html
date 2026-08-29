@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Arton by Rockwell · Properties by Chel</title>
+<meta name="description" content="The Arton by Rockwell — three residential towers on 1.9 hectares in Katipunan, Quezon City, with 80% open space. Studio to three-bedroom residences, 24 to 130 sqm, minutes from Ateneo, Miriam, and UP Diliman.">
+<link rel="canonical" href="https://www.propertiesbychel.com/the-arton">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.propertiesbychel.com/the-arton">
+<meta property="og:site_name" content="Properties by Chel">
+<meta property="og:title" content="The Arton by Rockwell · Properties by Chel">
+<meta property="og:description" content="Three residential towers on 1.9 hectares in Katipunan, Quezon City, with 80% open space. Studio to three-bedroom residences, minutes from Ateneo, Miriam, and UP Diliman.">
+<meta property="og:image" content="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-by-Rockwell-Featured-Image.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Arton by Rockwell · Properties by Chel">
+<meta name="twitter:description" content="Three residential towers on 1.9 hectares in Katipunan, Quezon City, with 80% open space. Studio to three-bedroom residences, minutes from Ateneo, Miriam, and UP Diliman.">
+<meta name="twitter:image" content="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-by-Rockwell-Featured-Image.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=47">
+<link rel="icon" href="images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<style>
+  /* page-scoped composition helpers, tokens only — same pattern as edades-west.html / two-botanika.html */
+  .ar-status-banner {
+    background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin);
+    text-align: center; font-size: var(--text-sm); margin-top: 6.5rem;
+    opacity: 0; transition: opacity var(--dur) var(--ease-out);
+  }
+  .ar-status-banner.is-in { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .ar-status-banner { transition: none; } }
+  .ar-status-banner a { color: var(--brass); text-decoration: underline; }
+
+  .ar-hero { max-width: 44rem; margin-inline: auto; text-align: center; padding-top: var(--space-12); }
+  .ar-hero .eyebrow { justify-content: center; margin-inline: auto; }
+  .ar-hero .lede { margin-inline: auto; }
+  .ar-hero__media { max-width: 56rem; margin: var(--space-12) auto 0; aspect-ratio: 1440/583; }
+
+  /* Floor plans are drawings, not photographs: they render uncropped at full sheet
+     ratio on a light ground, and open full size in the lightbox for measuring. */
+  .ar-plans {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-16) var(--space-10); margin-top: var(--space-16);
+  }
+  @media (max-width: 48rem) { .ar-plans { grid-template-columns: 1fr; gap: var(--space-12); } }
+  .ar-plan { cursor: zoom-in; }
+  .ar-plan__frame { aspect-ratio: 2550/3300; background: var(--paper); }
+  .ar-plan__frame img { object-fit: contain; }
+  .ar-plan__frame::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: color-mix(in oklch, var(--espresso) 8%, transparent);
+    opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) { .ar-plan:hover .ar-plan__frame::after { opacity: 1; } }
+  .ar-plan figcaption { padding-top: 0; }
+  .ar-plan__cap {
+    display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4);
+    margin-top: var(--space-4); padding-top: var(--space-4); border-top: var(--rule) solid var(--line);
+  }
+  .ar-plan__name { font-family: var(--font-display); font-size: var(--text-h3); color: var(--ink); }
+  .ar-plan__sqm {
+    font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps);
+    text-transform: uppercase; color: var(--ink-faint); white-space: nowrap;
+  }
+  .ar-plan__band { display: block; font-size: var(--text-sm); color: var(--ink-faint); margin-top: var(--space-2); }
+  /* A plan opened in the shared lightbox needs more height than a photograph does;
+     hug the drawing rather than letterboxing it: 82vh tall at the sheet's 2550/3300 ratio. */
+  .gallery-lightbox.is-plan .gallery-lightbox__frame { max-width: min(56rem, calc(82vh * 0.7727)); background: var(--paper); }
+  .gallery-lightbox.is-plan .gallery-lightbox__frame img { max-height: 82vh; }
+  /* The site development plan is landscape, so it gets its own lightbox proportion. */
+  .gallery-lightbox.is-sdp .gallery-lightbox__frame { max-width: min(64rem, calc(82vh * 1.6)); background: var(--paper); }
+  .gallery-lightbox.is-sdp .gallery-lightbox__frame img { max-height: 82vh; }
+
+  .ar-amenities-media { aspect-ratio: 3/2; }
+  .ar-features-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-8) var(--space-4);
+    margin-top: var(--space-12);
+  }
+  .ar-feature { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); }
+  .ar-feature svg { width: 1.75rem; height: 1.75rem; color: var(--brass); flex-shrink: 0; }
+  .ar-feature span { font-size: var(--text-sm); color: var(--ink-faint); line-height: 1.3; }
+  @media (max-width: 48rem) { .ar-features-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 30rem) { .ar-features-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .ar-sdp { cursor: zoom-in; aspect-ratio: 1920/1200; background: var(--paper); }
+  .ar-sdp img { object-fit: contain; }
+</style>
+</head>
+<body>
+<a class="visually-hidden" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="masthead__inner shell">
+    <a class="masthead__mark" href="/">
+      <img class="masthead__logo masthead__logo--navy" src="images/logo-navy.png" alt="Properties by Chel" width="73" height="34">
+      <img class="masthead__logo masthead__logo--white" src="images/logo-white.png" alt="Properties by Chel" width="73" height="34">
+    </a>
+    <nav class="masthead__nav" aria-label="Primary">
+      <a href="properties">Collections</a>
+      <a href="developer">Developer</a>
+      <a href="insights">Insights</a>
+      <a href="about">About</a>
+      <a class="masthead__cta" href="presentation">Private Presentation</a>
+    </nav>
+    <button class="masthead__toggle" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menu" tabindex="-1">
+  <div class="menu-overlay__head">
+    <img class="menu-overlay__logo" src="images/logo-white.png" alt="Properties by Chel" width="60" height="28">
+    <button class="masthead__toggle" data-menu-close>Close</button>
+  </div>
+  <ul class="menu-overlay__list">
+    <li><a href="/">Home</a></li>
+    <li><a href="properties">Collections</a></li>
+    <li><a href="developer">Developer</a></li>
+    <li><a href="insights">Insights</a></li>
+    <li><a href="sellers">For Sellers</a></li>
+    <li><a href="foreign-buyers">Foreign Buyer Guidance</a></li>
+    <li><a href="about">About Chel</a></li>
+    <li><a href="presentation">Private Presentation</a></li>
+    <li><a href="contact">Contact</a></li>
+  </ul>
+  <div class="menu-overlay__foot">
+    <span>Makati City, Philippines</span>
+    <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a>
+  </div>
+</div>
+
+<main id="main">
+
+  <div id="ar-status-banner" class="ar-status-banner" hidden role="status">
+    <div class="shell">This development is no longer actively marketed. <a href="presentation?listing=the-arton-by-rockwell">Contact us</a> for current availability.</div>
+  </div>
+
+  <!-- Hero -->
+  <section class="section section--tight ar-hero" aria-labelledby="ar-h">
+    <p class="eyebrow">Katipunan, Quezon City</p>
+    <h1 class="display mt-8" id="ar-h">The Arton</h1>
+    <p class="lede mt-8"><strong style="color:var(--ink);font-weight:500">Three towers on 1.9 hectares, with 80% of the ground left open.</strong> Rockwell Land's Katipunan address sits inside the university belt — Ateneo, Miriam, and UP Diliman all within a short drive, and the LRT-2 station 350 metres from the gate.</p>
+    <div class="ar-hero__media frame frame--corners" data-reveal>
+      <img src="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-by-Rockwell-Featured-Image.webp" alt="The Arton by Rockwell exterior render, Katipunan, Quezon City" loading="lazy">
+    </div>
+    <p class="mt-8">
+      <a href="https://streetview.my/rockwellland/thearton/" id="ar-tour-link" class="link-line link-line--brass" target="_blank" rel="noopener">View the 360° tour <span class="arr">→</span></a>
+    </p>
+  </section>
+
+  <!-- The record -->
+  <section class="section section--tight" aria-labelledby="ar-record-h">
+    <div class="shell" style="max-width:44rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">The Record</p>
+        <h2 class="h2 mt-8" id="ar-record-h">What the developer publishes</h2>
+      </div>
+      <table class="spec mt-12">
+        <tbody>
+          <tr><th scope="row">Developer</th><td>Rockwell Land Corporation</td></tr>
+          <tr><th scope="row">Address</th><td>Katipunan, Quezon City</td></tr>
+          <tr><th scope="row">Site</th><td>1.9 hectares (4.6 acres) · 80% open space</td></tr>
+          <tr><th scope="row">Towers</th><td>Arton West, 24 floors · Arton North, 28 floors · Arton East, 32 floors</td></tr>
+          <tr><th scope="row">Configurations</th><td>Studio, one-, two-, and three-bedroom</td></tr>
+          <tr><th scope="row">Sizes</th><td>24 – 130 sqm (258 – 1,340 sqft)</td></tr>
+          <tr><th scope="row">Price range</th><td>₱7M – ₱21M, as published by Rockwell Land</td></tr>
+          <tr><th scope="row">Development features</th><td>Exclusive shuttle service · co-working space · amenity deck</td></tr>
+          <tr><th scope="row">Status</th><td>Pre-selling</td></tr>
+        </tbody>
+      </table>
+      <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint);text-align:center">Figures are the developer's published specifications. Unit-level pricing, availability, and terms are confirmed on enquiry.</p>
+    </div>
+  </section>
+
+  <!-- Units -->
+  <section id="units" class="section band-parchment" aria-labelledby="ar-units-h">
+    <div class="shell" style="max-width:72rem">
+      <div style="text-align:center;max-width:44rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">Our Units</p>
+        <h2 class="h2 mt-8" id="ar-units-h">Four published plans</h2>
+        <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint)">Select any plan to open it full size. Areas and level ranges are read from the drawings themselves.</p>
+      </div>
+
+      <div class="ar-plans" data-reveal-stagger id="ar-plans-grid">
+        <figure class="ar-plan" data-reveal>
+          <div class="frame ar-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/L-Series_page-0001-1.webp" alt="Studio floor plan, Unit L, at The Arton — 27 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ar-plan__cap"><span class="ar-plan__name">Studio · Unit L</span><span class="ar-plan__sqm">27 sqm</span></span>
+            <span class="ar-plan__band">Levels 2 – 32 · studio band 24 – 29 sqm</span>
+          </figcaption>
+        </figure>
+        <figure class="ar-plan" data-reveal>
+          <div class="frame ar-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Arton-East-Series-H-Layout_page-0001.webp" alt="One-bedroom floor plan, Unit H, at The Arton — 49 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ar-plan__cap"><span class="ar-plan__name">One Bedroom · Unit H</span><span class="ar-plan__sqm">49 sqm</span></span>
+            <span class="ar-plan__band">Levels 2 – 37 · one-bedroom band 37 – 49 sqm</span>
+          </figcaption>
+        </figure>
+        <figure class="ar-plan" data-reveal>
+          <div class="frame ar-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/G-Series_page-0001.webp" alt="Two-bedroom floor plan, Unit G, at The Arton — 74 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ar-plan__cap"><span class="ar-plan__name">Two Bedroom · Unit G</span><span class="ar-plan__sqm">74 sqm</span></span>
+            <span class="ar-plan__band">Levels 2 – 32 · two-bedroom band 64 – 86 sqm</span>
+          </figcaption>
+        </figure>
+        <figure class="ar-plan" data-reveal>
+          <div class="frame ar-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Arton-East-Series-S-Layout_page-0001.webp" alt="Three-bedroom floor plan, Unit S, at The Arton — 84 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ar-plan__cap"><span class="ar-plan__name">Three Bedroom · Unit S</span><span class="ar-plan__sqm">84 sqm</span></span>
+            <span class="ar-plan__band">Levels 2 – 37 · three-bedroom band 84 – 130 sqm</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mt-16" style="max-width:40rem;margin-inline:auto">
+        <table class="spec">
+          <tbody>
+            <tr><th scope="row">Studio</th><td>24 – 29 sqm · 258 – 312 sqft</td></tr>
+            <tr><th scope="row">1BR</th><td>37 – 49 sqm · 398 – 527 sqft</td></tr>
+            <tr><th scope="row">2BR</th><td>64 – 86 sqm · 689 – 926 sqft</td></tr>
+            <tr><th scope="row">3BR</th><td>84 – 130 sqm · 904 – 1,340 sqft</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-12" style="text-align:center"><a class="btn" href="presentation?listing=the-arton-by-rockwell">Private Presentation</a></p>
+    </div>
+  </section>
+
+  <!-- Amenities -->
+  <section id="amenities" class="section" aria-labelledby="ar-amenities-h">
+    <div class="shell" style="text-align:center;max-width:40rem;margin-inline:auto" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Our Amenities</p>
+      <h2 class="h2 mt-8" id="ar-amenities-h">Room to put the day down</h2>
+      <p class="prose mt-8">Four fifths of the site stays open — a great lawn, a hill to play on, a court, and a pool, with the working rooms and the shuttle handling the parts of the day that leave the property.</p>
+    </div>
+    <div class="shell mt-12" data-reveal>
+      <div class="frame frame--corners ar-amenities-media" style="max-width:52rem;margin-inline:auto">
+        <img src="https://e-rockwell.com/wp-content/uploads/2024/09/Amenity-Deck-Edited-2.webp" alt="Swimming pool on the amenity deck at The Arton" loading="lazy">
+      </div>
+    </div>
+    <div class="shell">
+      <div class="ar-features-grid">
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 19c3-6 6-9 10-9s7 3 10 9"/><circle cx="9" cy="7" r="2"/><path d="M9 9v4"/></svg><span>Unlimited Play Time on the Hill</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="11" rx="1"/><path d="M8 20h8M12 16v4"/><path d="M8 10h8"/></svg><span>Co-working Space</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M3 11h18"/><path d="M6 20v-2M18 20v-2"/><circle cx="7.5" cy="16.5" r="1"/><circle cx="16.5" cy="16.5" r="1"/></svg><span>Shuttle Service</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16"/><path d="M3 12h18"/><circle cx="12" cy="12" r="2.5"/><path d="M3 8h3v8H3M21 8h-3v8h3"/></svg><span>Multi-purpose Court</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18h18"/><path d="M5 18c0-4 3-7 7-7s7 3 7 7"/><path d="M12 11V5M9 7l3-3 3 3"/></svg><span>Great Lawn</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 19c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M8 12V5a2 2 0 0 1 4 0M16 12V5a2 2 0 0 1 4 0"/></svg><span>Swimming Pool</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></svg><span>Fitness Gym</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M7 18v2M17 18v2M7 6V4M17 6V4"/><path d="M8 12h8"/></svg><span>Function Room</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M10 21v-6h4v6"/></svg><span>Lobby</span></div>
+        <div class="ar-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M5 20v-6h14v6"/><path d="M4 14l8-6 8 6"/></svg><span>Amenity Deck</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location -->
+  <section id="location" class="section band-parchment" aria-labelledby="ar-location-h">
+    <div class="shell">
+      <div style="text-align:center;max-width:48rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">A Connected Community</p>
+        <h2 class="h2 mt-8" id="ar-location-h">Inside the Katipunan university belt</h2>
+        <p class="lede mt-8" style="margin-inline:auto">Katipunan, Quezon City — an address whose demand is set by the academic calendar as much as by the market, with the LRT-2 line and the Metro Manila Subway's future Katipunan station both within walking reach.</p>
+      </div>
+      <div class="grid-12 mt-16">
+        <div class="col-span-6">
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">LRT-2 Katipunan Station</span><span class="index-row__meta">350m</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">LRT-2 Santolan Station</span><span class="index-row__meta">1.7km</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">The Arton Strip</span><span class="index-row__meta">1.8km</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Ateneo de Manila University</span><span class="index-row__meta">2.2km</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Miriam College</span><span class="index-row__meta">2.3km</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Metro Manila Subway Katipunan Station</span><span class="index-row__meta">2.3km</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">U.P. Town Center</span><span class="index-row__meta">3.4km</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">University of the Philippines</span><span class="index-row__meta">4.4km</span></div>
+          <div class="mt-8">
+            <a class="link-line link-line--brass" href="https://www.google.com/maps/dir//The+Arton+by+Rockwell,+Katipunan,+Quezon+City" target="_blank" rel="noopener">Get directions <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="col-span-5 col-start-8">
+          <div id="ar-map" style="height:360px;border:var(--rule) solid var(--line)"></div>
+        </div>
+      </div>
+
+      <div class="mt-20" data-reveal>
+        <div style="text-align:center;max-width:40rem;margin-inline:auto">
+          <h3 style="font-size:var(--text-caps);font-weight:600;letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--ink-faint)">Site Development Plan</h3>
+        </div>
+        <div class="frame frame--corners ar-sdp mt-8" style="max-width:60rem;margin-inline:auto" id="ar-sdp">
+          <img src="https://e-rockwell.com/wp-content/uploads/2024/09/Arton-SDP_page-0001.webp" alt="Site development plan for The Arton, showing the three towers and the open ground between them" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="gallery" class="section" aria-labelledby="ar-gallery-h">
+    <div class="shell">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">Photos</p>
+        <h2 class="h2 mt-8" id="ar-gallery-h">The Arton</h2>
+      </div>
+      <div class="photo-grid mt-16" data-reveal-stagger id="ar-gallery-grid">
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Three-Bedroom-Living-Dining-Area.webp" alt="Three-bedroom living and dining area at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Three-Bedroom-Master-Bedroom.webp" alt="Three-bedroom master bedroom at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Two-Bedroom-Living-and-Dining.webp" alt="Two-bedroom living and dining area at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Two-Bedroom-Master-Bedroom.webp" alt="Two-bedroom master bedroom at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/One-Bedroom-Living-Dining-Area.webp" alt="One-bedroom living and dining area at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/One-Bedroom-Master-Bedroom.webp" alt="One-bedroom master bedroom at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/IMG_3028-3.webp" alt="Studio interior at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-Lobby.webp" alt="Lobby at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-Co-working-Space.webp" alt="Co-working space at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-Great-Lawn.webp" alt="Great lawn at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-Court.webp" alt="Multi-purpose court at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/IMG_6031-1.webp" alt="Fitness gym at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/IMG_3024-1.webp" alt="Function room at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/The-Arton-Shuttle-Service.webp" alt="Shuttle service at The Arton" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Arton-property-page-banner.webp" alt="The Arton towers seen from the grounds" loading="lazy"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section band text-center" aria-labelledby="ar-about-h">
+    <div class="shell" style="max-width:44rem" data-reveal>
+      <p class="eyebrow eyebrow--bare" style="justify-content:center">The Developer</p>
+      <h2 class="h2 mt-8" id="ar-about-h">Rockwell Land</h2>
+      <p class="lede mt-8" style="margin-inline:auto">Rockwell Land set out in 1995 to turn an old thermal power plant into a high-end mixed-use district; that project became Rockwell Center in Makati. The company now builds residential, retail, hotel and leisure, and office properties across the Philippines. The Arton carries that standard north, to Katipunan.</p>
+      <div class="mt-12" style="display:flex;gap:var(--space-6);justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--on-dark" href="presentation?listing=the-arton-by-rockwell">Request a private presentation</a>
+        <a class="link-line link-line--on-dark" href="properties">Back to the collection <span class="arr">→</span></a>
+      </div>
+      <hr class="rule rule--brass mt-16" style="max-width:2.5rem;margin-inline:auto">
+    </div>
+  </section>
+
+</main>
+
+<div class="gallery-lightbox" id="gallery-lightbox" hidden>
+  <button type="button" class="gallery-lightbox__close" id="gallery-lightbox-close" aria-label="Close gallery">×</button>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--prev" id="gallery-lightbox-prev" aria-label="Previous photo">‹</button>
+  <div class="gallery-lightbox__frame frame frame--corners">
+    <img id="gallery-lightbox-img" src="" alt="">
+  </div>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--next" id="gallery-lightbox-next" aria-label="Next photo">›</button>
+  <p class="gallery-lightbox__caption" id="gallery-lightbox-caption"></p>
+</div>
+
+<footer class="footer">
+  <div class="shell">
+    <img class="footer__logo" src="images/logo-white.png" alt="Properties by Chel" width="90" height="42">
+    <p class="footer__statement">Considered advice for <em>considered</em> property.</p>
+    <div class="footer__grid">
+      <div>
+        <h4>The Practice</h4>
+        <address>
+          Properties by Chel, Private Real Estate Advisory<br>
+          Makati City, Metro Manila, Philippines<br>
+          PRC-licensed real estate broker<br>
+          License details furnished on enquiry
+        </address>
+      </div>
+      <div>
+        <h4>Portfolio</h4>
+        <ul>
+          <li><a href="properties">Collections</a></li>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="sellers">For Sellers</a></li>
+          <li><a href="foreign-buyers">Foreign Buyers</a></li>
+          <li><a href="https://allabodeph.com" target="_blank" rel="noopener">All Abode PH ↗</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Advisory</h4>
+        <ul>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="about">About Chel</a></li>
+          <li><a href="contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Enquiries</h4>
+        <address>
+          <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a><br>
+          Direct line shared upon introduction<br>
+          <a href="presentation">Request a private presentation</a>
+        </address>
+        <div class="footer__social">
+          <a href="https://www.linkedin.com/in/aremchelcruzado/" target="_blank" rel="noopener" aria-label="Chel Cruzado on LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7.5" y1="10.5" x2="7.5" y2="16.5"/><circle cx="7.5" cy="7" r="0.75" fill="currentColor" stroke="none"/><path d="M11.5 16.5v-4c0-1.4.9-2.3 2.2-2.3s2.3 1 2.3 2.3v4"/><line x1="11.5" y1="10.5" x2="11.5" y2="16.5"/></svg>
+          </a>
+          <a href="https://www.facebook.com/propertiesbychelcruzado" target="_blank" rel="noopener" aria-label="Properties by Chel on Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M14 21v-6.5h2.2l.3-2.7H14V10c0-.8.2-1.3 1.4-1.3H16.5V6.3C16.1 6.2 15.2 6 14.2 6c-2.1 0-3.5 1.3-3.5 3.6v2.2H8.5v2.7h2.2V21"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <span>© 2026 Properties by Chel · All rights reserved</span>
+      <span><a href="legal#privacy">Privacy</a> &nbsp;·&nbsp; <a href="legal#terms">Terms</a> &nbsp;·&nbsp; <a href="contact">Contact</a></span>
+    </div>
+  </div>
+</footer>
+<script src="js/supabase-config.js?v=17"></script>
+<script src="js/site.js?v=24"></script>
+<script src="js/vendor/motion.js?v=1"></script>
+<script src="js/motion-enhance.js?v=4"></script>
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fadeIn(el) {
+    if (reduceMotion) { el.classList.add("is-in"); return; }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("is-in"); });
+    });
+  }
+
+  /* — Reflect the dashboard-managed development's published status — */
+  var sb = window.SUPABASE_CONFIG || {};
+  if (sb.url && sb.anonKey) {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.the-arton-by-rockwell&limit=1", {
+      headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var d = rows[0];
+        if (d && d.published === false) {
+          var banner = document.getElementById("ar-status-banner");
+          banner.hidden = false;
+          fadeIn(banner);
+        }
+      })
+      .catch(function () { /* fail open — page stays as-is if the check can't run */ });
+  }
+
+  /* — Gallery lightbox — reuses the shared .photo-grid / .gallery-lightbox
+     visual pattern from the site's generic listing/development pages, wired locally
+     since this static page doesn't run through js/listings.js's Supabase-driven flow. */
+  var items = [];
+  var activeKind = "";
+  var lightbox = document.getElementById("gallery-lightbox");
+  var lightboxImg = document.getElementById("gallery-lightbox-img");
+  var lightboxCaption = document.getElementById("gallery-lightbox-caption");
+  var lightboxClose = document.getElementById("gallery-lightbox-close");
+  var lightboxPrev = document.getElementById("gallery-lightbox-prev");
+  var lightboxNext = document.getElementById("gallery-lightbox-next");
+  var currentIndex = 0;
+  var lastFocused = null;
+
+  function showSlide(i) {
+    currentIndex = (i + items.length) % items.length;
+    var item = items[currentIndex];
+    lightboxImg.src = item.url;
+    lightboxImg.alt = item.alt;
+    lightboxCaption.textContent = items.length > 1
+      ? item.alt + " · " + (currentIndex + 1) + " / " + items.length
+      : item.alt;
+  }
+  function openGallery(index) {
+    lastFocused = document.activeElement;
+    showSlide(index);
+    lightbox.classList.toggle("is-plan", activeKind === "plan");
+    lightbox.classList.toggle("is-sdp", activeKind === "sdp");
+    // A single-image set has nothing to page through.
+    lightboxPrev.hidden = lightboxNext.hidden = items.length < 2;
+    lightbox.hidden = false;
+    fadeIn(lightbox);
+    lightboxClose.focus();
+  }
+  function closeGallery() {
+    lightbox.classList.remove("is-in");
+    if (reduceMotion) {
+      lightbox.hidden = true;
+      lightboxImg.src = "";
+    } else {
+      var onEnd = function (e) {
+        if (e.target !== lightbox) return;
+        lightbox.removeEventListener("transitionend", onEnd);
+        lightbox.hidden = true;
+        lightboxImg.src = "";
+      };
+      lightbox.addEventListener("transitionend", onEnd);
+    }
+    if (lastFocused) lastFocused.focus();
+  }
+
+  /* Three sets feed the one lightbox — the floor plans, the site development plan,
+     and the photo gallery. Whichever set is clicked becomes the active set. */
+  [
+    { id: "ar-plans-grid", kind: "plan", item: "figure" },
+    { id: "ar-sdp", kind: "sdp", item: null },
+    { id: "ar-gallery-grid", kind: "photo", item: "figure" }
+  ].forEach(function (set) {
+    var root = document.getElementById(set.id);
+    if (!root) return;
+    var setItems = Array.prototype.map.call(root.querySelectorAll("img"), function (img) {
+      return { url: img.src, alt: img.alt };
+    });
+    var triggers = set.item ? root.querySelectorAll(set.item) : [root];
+    Array.prototype.forEach.call(triggers, function (el, i) {
+      el.addEventListener("click", function () {
+        items = setItems;
+        activeKind = set.kind;
+        openGallery(i);
+      });
+    });
+  });
+
+  lightboxClose.addEventListener("click", closeGallery);
+  lightboxPrev.addEventListener("click", function () { showSlide(currentIndex - 1); });
+  lightboxNext.addEventListener("click", function () { showSlide(currentIndex + 1); });
+  lightbox.addEventListener("click", function (e) { if (e.target === lightbox) closeGallery(); });
+  document.addEventListener("keydown", function (e) {
+    if (lightbox.hidden) return;
+    if (e.key === "Escape") closeGallery();
+    if (e.key === "ArrowLeft") showSlide(currentIndex - 1);
+    if (e.key === "ArrowRight") showSlide(currentIndex + 1);
+  });
+
+  /* — 360° tour opens in a small popup window, not a full new tab — */
+  var tourLink = document.getElementById("ar-tour-link");
+  if (tourLink) {
+    tourLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      var w = 1100, h = 750;
+      var left = (window.screenX || 0) + Math.max(0, (window.outerWidth - w) / 2);
+      var top = (window.screenY || 0) + Math.max(0, (window.outerHeight - h) / 2);
+      var popup = window.open(tourLink.href, "artonTour", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top + ",noopener,noreferrer");
+      if (popup) popup.opener = null;
+    });
+  }
+
+  /* — Brand-styled map, same treatment as the dashboard-managed development pages — */
+  var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
+  var mapEl = document.getElementById("ar-map");
+  if (mapEl && mapConfig.apiKey) {
+    var BRAND_MAP_STYLE = [
+      { elementType: "geometry", stylers: [{ color: "#f1eee6" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#5f5e5a" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#faf8f4" }] },
+      { featureType: "poi", stylers: [{ visibility: "off" }] },
+      { featureType: "transit", stylers: [{ visibility: "off" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#e3ded1" }] },
+      { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a6b14" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#d4c9a8" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9d3d9" }] },
+      { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9c4b5" }] }
+    ];
+    var BRAND_PIN_ICON = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">' +
+      '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.7 23.3 0 15 0z" fill="#8A6B14"/>' +
+      '<circle cx="15" cy="15" r="5.5" fill="#FAF8F4"/></svg>'
+    );
+    var center = { lat: 14.6320824, lng: 121.0755601 };
+    var cbName = "__initArMap";
+    window[cbName] = function () {
+      var map = new google.maps.Map(mapEl, {
+        center: center, zoom: 16, disableDefaultUI: true, zoomControl: true, styles: BRAND_MAP_STYLE
+      });
+      new google.maps.Marker({ position: center, map: map, icon: BRAND_PIN_ICON });
+    };
+    var script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapConfig.apiKey) + "&callback=" + cbName;
+    script.async = true;
+    document.head.appendChild(script);
+  }
+})();
+</script>
+</body>
+</html>

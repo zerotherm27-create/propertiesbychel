@@ -47,6 +47,7 @@ export default async function middleware(request) {
     "the-observatory": "/the-observatory",
     "yume-at-riverpark": "/yume-at-riverpark",
     "edades-west": "/edades-west",
+    "the-arton-by-rockwell": "/the-arton",
   };
   if (path === "/property") {
     const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
