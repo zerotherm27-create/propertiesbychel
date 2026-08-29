@@ -448,7 +448,7 @@ async function init(supabase) {
       <div class="dash-row" data-id="${d.id}">
         <div class="dash-row__line">
           <span class="dash-row__name">${esc(d.name)}</span>
-          <span class="dash-row__meta">${esc((d.developer && d.developer.name) || d.developer_name || "")} · ${esc(DEV_AVAILABILITY_LABELS[d.availability] || "Selling")}</span>
+          <span class="dash-row__meta">${[esc((d.developer && d.developer.name) || d.developer_name || ""), esc(DEV_AVAILABILITY_LABELS[d.availability] || "Selling"), d.bespoke_path ? "Hand-built page " + esc(d.bespoke_path) : ""].filter(Boolean).join(" · ")}</span>
           <span class="dash-row__spacer"></span>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-pub ${d.published ? "checked" : ""}> Published</label>
           <label class="dash-switch" style="margin:0"><input type="checkbox" data-feat ${d.featured ? "checked" : ""}> Featured</label>
@@ -542,13 +542,29 @@ async function init(supabase) {
     editor.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  /* A development with a hand-built page renders none of the generic page's
+     content, so stop asking for it. Overview and Gallery are deliberately not
+     in that block — unit listings fall back to them (js/listings.js). */
+  function toggleGenericPageFields() {
+    const block = $("#dev-generic-page-fields");
+    if (block) block.hidden = !!devForm.elements.bespoke_path.value.trim();
+  }
+
+  /* Stored root-relative so the same value works as a browser href and as a
+     middleware Location header — accept "edades-west" and fix it up. */
+  function normalisePath(v) {
+    const s = v.trim();
+    if (!s) return null;
+    return s.startsWith("/") || /^https?:\/\//i.test(s) ? s : "/" + s;
+  }
+
   function openDevelopmentEditor(d) {
     devEditor.hidden = false;
     $("#dev-editor-title").textContent = d ? "Edit: " + d.name : "New development";
     devForm.reset();
     devForm.elements.id.value = d ? d.id : "";
     if (d) {
-      ["name", "slug", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
+      ["name", "slug", "bespoke_path", "tagline", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => { devForm.elements[k].value = d[k] || ""; });
       devForm.elements.developer_id.value = d.developer_id || "";
       $$('input[name="collections"]', devForm).forEach((cb) => { cb.checked = (d.collections || []).includes(cb.value); });
       devForm.elements.sort_order.value = d.sort_order;
@@ -563,6 +579,7 @@ async function init(supabase) {
       }
     }
     updateDevMetaCount();
+    toggleGenericPageFields();
     devForm.elements.hero_image_url.value = (d && d.hero_image_url) || "";
     const prev = $("#development-photo-preview");
     prev.hidden = !(d && d.hero_image_url);
@@ -598,6 +615,7 @@ async function init(supabase) {
     el.classList.toggle("is-over", n > 160);
   }
   form.elements.meta_description.addEventListener("input", updateMetaCount);
+  devForm.elements.bespoke_path.addEventListener("input", toggleGenericPageFields);
 
   $("#development-photo").addEventListener("change", () => {
     const f = $("#development-photo").files[0];
@@ -1226,6 +1244,7 @@ async function init(supabase) {
         tagline: devForm.elements.tagline.value.trim() || null,
         location_label: devForm.elements.location_label.value.trim() || null,
         meta_line: devForm.elements.meta_line.value.trim() || null,
+        bespoke_path: normalisePath(devForm.elements.bespoke_path.value),
         overview: devForm.elements.overview.value.trim() || null,
         meta_description: devForm.elements.meta_description.value.trim() || null,
         hero_image_url: devForm.elements.hero_image_url.value || null,

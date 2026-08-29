@@ -21,6 +21,30 @@ const PASSTHROUGH_PATHS = new Set([
 ]);
 const PREVIEW_COOKIE = "pbc_preview";
 
+// Same public project + anon key the browser already ships in
+// js/supabase-config.js; row-level security is what actually gates access.
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://ndoiommnmkeoukxbnobp.supabase.co";
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY || "sb_publishable_u3EntIBoaYn83t3sDXaL2g_kzgnZMT8";
+
+/* A development can have a hand-coded landing page, recorded as bespoke_path
+ * on its row. Look it up rather than keeping a hardcoded map in sync — adding
+ * a page is then a dashboard edit, not a deploy. Returns null on any failure;
+ * the generic page then loads and redirects client-side (js/listings.js). */
+async function bespokePathFor(slug) {
+  const endpoint =
+    SUPABASE_URL +
+    "/rest/v1/developments?select=bespoke_path&slug=eq." +
+    encodeURIComponent(slug) +
+    "&limit=1";
+  const res = await fetch(endpoint, {
+    headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
+  });
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return (rows[0] && rows[0].bespoke_path) || null;
+}
+
 function getCookie(request, name) {
   const header = request.headers.get("cookie");
   if (!header) return null;
@@ -36,26 +60,24 @@ export default async function middleware(request) {
   const url = new URL(request.url);
   const path = url.pathname;
 
-  // Developments with a bespoke landing page supersede their generic listing
-  // page; send that URL there permanently instead of showing the thinner one.
-  const BESPOKE_DEV_PAGES = {
-    "ongpin-tower": "/ongpin-tower",
-    "laya-by-shang-properties": "/laya-by-shang",
-    "botanika-nature-residences": "/botanika-tower-one",
-    "two-botanika-nature-residences": "/two-botanika",
-    "1001-parkway-residences": "/1001-parkway",
-    "the-observatory": "/the-observatory",
-    "yume-at-riverpark": "/yume-at-riverpark",
-    "edades-west": "/edades-west",
-    "the-arton-by-rockwell": "/the-arton",
-  };
-  // /development is where the site's own cards point; /property covers the older
-  // shape of the same URL. Either way a bespoke slug never renders the generic
-  // template, even if a stale cached script still links to the query URL.
+  // Developments with a hand-built landing page supersede their generic page;
+  // send that URL there permanently instead of showing the thinner one.
+  // /development is where the site's own cards point; /property covers the
+  // older shape of the same URL. Either way a development that has its own
+  // page never renders the generic template, even from a stale cached script
+  // or a bookmark. Fails open — js/listings.js redirects client-side if the
+  // lookup can't run.
   if (path === "/development" || path === "/property") {
-    const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
-    if (bespokePath) {
-      return new Response(null, { status: 301, headers: { Location: bespokePath } });
+    const slug = url.searchParams.get("slug");
+    if (slug) {
+      try {
+        const bespokePath = await bespokePathFor(slug);
+        if (bespokePath) {
+          return new Response(null, { status: 301, headers: { Location: bespokePath } });
+        }
+      } catch {
+        // Supabase unreachable — fall through to the page itself.
+      }
     }
   }
 

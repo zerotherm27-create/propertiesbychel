@@ -323,7 +323,10 @@
         </div>
         <div class="field"><label>Name</label><input name="name" required placeholder="e.g. Ongpin Tower"></div>
         <div class="field"><label>Slug</label><input name="slug" placeholder="auto-generated from name">
-          <p class="field__note">Used in the development's URL (development?slug=…). Changing this on an already-published development breaks any links or bookmarks pointing at the old slug — and, for developments with a bespoke landing page, must match the key in BESPOKE_DEV_PAGES (developer.html, js/listings.js, middleware.js) or the card will fall back to the generic template.</p>
+          <p class="field__note">Used in the development's URL (development?slug=…). Changing this on an already-published development breaks any links or bookmarks pointing at the old slug.</p>
+        </div>
+        <div class="field"><label>Hand-built page path (optional)</label><input name="bespoke_path" placeholder="e.g. /edades-west">
+          <p class="field__note">For developments with their own hand-coded page. Fill this in and every card on the site links straight to that page, and development?slug=… redirects to it. The fields that only fed the generic page — meta description, amenities, map, nearby landmarks — then disappear, because that page carries its own. Overview and Gallery photos stay: unit listings inside this development fall back to them. Leave it empty and this development uses the generic page built from the fields below.</p>
         </div>
         <div class="dash-form__row">
           <div class="field"><label>Developer</label>
@@ -350,6 +353,10 @@
           </div>
         </fieldset>
         <div class="field"><label>Overview (shown on the development page)</label><textarea name="overview" rows="4" placeholder="Two or three considered sentences on the building and its positioning."></textarea></div>
+        <!-- Fields only the generic development page renders. Hidden when a hand-built
+             page path is set — see toggleGenericPageFields() in js/dashboard.js. Overview
+             and Gallery stay outside this block: unit listings fall back to them. -->
+        <div id="dev-generic-page-fields">
         <button class="btn" type="button" id="dev-meta-ai-btn">Generate with AI</button>
         <p class="field__note" id="dev-meta-ai-status">Drafts from the Name, Developer, Tagline, Location, Overview, and Amenities already entered above — fill those in first. A well-written description earns more clicks on a result that's already showing in search; it does not itself raise where a page ranks, which depends on the page's content, links, and competition.</p>
         <div class="field"><label>Meta description (for search results)</label>
@@ -394,6 +401,7 @@
             <div class="field"><input name="feature_value_4" placeholder="Value"></div>
           </div>
         </div>
+        </div><!-- /#dev-generic-page-fields -->
         <div class="field"><label>Availability</label>
           <select name="availability">
             <option value="pre-selling">Pre-selling</option>
@@ -695,7 +703,7 @@
 
 <script src="js/supabase-config.js?v=17"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=33"></script>
+<script type="module" src="js/dashboard.js?v=34"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

@@ -213,17 +213,11 @@
   var section = document.getElementById("dev-section");
   if (!SB.url || !SB.anonKey) { if (section) section.removeAttribute("data-is-loading"); return; }
 
-  var BESPOKE_DEV_PAGES = {
-    "ongpin-tower": "ongpin-tower",
-    "laya-by-shang-properties": "laya-by-shang",
-    "botanika-nature-residences": "botanika-tower-one",
-    "two-botanika-nature-residences": "two-botanika",
-    "1001-parkway-residences": "1001-parkway",
-    "the-observatory": "the-observatory",
-    "yume-at-riverpark": "yume-at-riverpark",
-    "edades-west": "edades-west",
-    "the-arton-by-rockwell": "the-arton"
-  };
+  /* A development with a hand-coded landing page carries its path in
+     bespoke_path — set in the dashboard, so a new page needs no edit here. */
+  function devHref(d) {
+    return d.bespoke_path || "development?slug=" + encodeURIComponent(d.slug);
+  }
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -252,7 +246,7 @@
       var html = order.map(function (key) {
         var g = groups[key];
         var projects = g.items.map(function (d) {
-          var href = BESPOKE_DEV_PAGES[d.slug] || "development?slug=" + encodeURIComponent(d.slug);
+          var href = devHref(d);
           var img = d.hero_image_url
             ? '<img src="' + esc(d.hero_image_url) + '" alt="' + esc(d.image_alt || d.name) + '" loading="lazy">'
             : "";

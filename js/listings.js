@@ -31,19 +31,13 @@
     return Array.isArray(s) ? s : s ? [s] : [];
   }
 
-  /* Developments with a bespoke landing page (richer than the generic
-     development.html/property.html template) — cross-linked below. */
-  var BESPOKE_DEV_PAGES = {
-    "ongpin-tower": "ongpin-tower",
-    "laya-by-shang-properties": "laya-by-shang",
-    "botanika-nature-residences": "botanika-tower-one",
-    "two-botanika-nature-residences": "two-botanika",
-    "1001-parkway-residences": "1001-parkway",
-    "the-observatory": "the-observatory",
-    "yume-at-riverpark": "yume-at-riverpark",
-    "edades-west": "edades-west",
-    "the-arton-by-rockwell": "the-arton"
-  };
+  /* Where a development card points. A development with a hand-coded landing
+     page (richer than the generic development.html template) carries its path
+     in bespoke_path — set in the dashboard, so shipping a new page needs no
+     code change here. Everything else gets the generic template. */
+  function devHref(d) {
+    return d.bespoke_path || "development?slug=" + encodeURIComponent(d.slug);
+  }
 
   var DEV_AVAILABILITY_LABELS = { "pre-selling": "Pre-selling", selling: "Selling", "sold-out": "Sold Out", rfo: "RFO" };
 
@@ -193,7 +187,7 @@
    * for the price tag since a whole building has no single price. */
   function developmentCardHTML(d, i) {
     var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
-    var href = BESPOKE_DEV_PAGES[d.slug] || "development?slug=" + encodeURIComponent(d.slug);
+    var href = devHref(d);
     return (
       '<a class="plisting is-in" href="' + href + '"' +
       ' data-status="development" data-collection="' + esc((d.collections || []).join(" ")) + '">' +
@@ -214,7 +208,7 @@
   if (gallery) {
     gallery.setAttribute("data-is-loading", "");
     Promise.all([
-      api("listings?select=*,development:developments(name,slug,hero_image_url)&published=eq.true&order=sort_order.asc"),
+      api("listings?select=*,development:developments(name,slug,bespoke_path,hero_image_url)&published=eq.true&order=sort_order.asc"),
       api("developments?select=*&published=eq.true&order=sort_order.asc")
     ]).then(function (results) {
       gallery.removeAttribute("data-is-loading");
@@ -234,7 +228,7 @@
   var slug = new URLSearchParams(location.search).get("slug");
   if (detail && slug) {
     detail.setAttribute("data-is-loading", "");
-    api("listings?select=*,development:developments(name,slug,overview,hero_image_url,image_alt,gallery_images)&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
+    api("listings?select=*,development:developments(name,slug,bespoke_path,overview,hero_image_url,image_alt,gallery_images)&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
       detail.removeAttribute("data-is-loading");
       var l = rows[0];
       if (!l) return;
@@ -304,8 +298,7 @@
       // back to the generic development template.
       var devNoteEl = document.querySelector("[data-l-dev-note]");
       if (devNoteEl && dev && dev.slug) {
-        var devHref = BESPOKE_DEV_PAGES[dev.slug] || "development?slug=" + encodeURIComponent(dev.slug);
-        devNoteEl.querySelector("[data-l-dev-link]").href = devHref;
+        devNoteEl.querySelector("[data-l-dev-link]").href = devHref(dev);
         devNoteEl.querySelector("[data-l-dev-name]").textContent = dev.name;
         devNoteEl.hidden = false;
       }
@@ -359,6 +352,10 @@
       devDetail.removeAttribute("data-is-loading");
       var d = rows[0];
       if (!d) return;
+      // A development with a hand-built page has no business rendering the
+      // generic one. Middleware normally 301s this URL before it ever loads;
+      // this is the backstop for when that lookup fails open.
+      if (d.bespoke_path) { location.replace(d.bespoke_path); return; }
       document.title = d.name + " · Properties by Chel";
 
       var setMeta = function (selector, attr, value) {
@@ -391,14 +388,6 @@
       bindD("location_label", d.location_label || "");
       bindD("availability", DEV_AVAILABILITY_LABELS[d.availability] || "Selling");
       bindD("developer_line", d.developer_name ? "Developed by " + d.developer_name + "." : "");
-
-      // Bespoke developments get their own richer page alongside this
-      // dashboard-managed one.
-      var fullSiteNote = document.querySelector("[data-d-full-site]");
-      if (fullSiteNote && BESPOKE_DEV_PAGES[d.slug]) {
-        fullSiteNote.querySelector("[data-d-full-site-link]").href = BESPOKE_DEV_PAGES[d.slug];
-        fullSiteNote.hidden = false;
-      }
 
       var hero = document.querySelector("[data-d-img]");
       if (hero && d.hero_image_url) { hero.src = d.hero_image_url; hero.alt = d.image_alt || d.name; }
@@ -500,7 +489,7 @@
       if (t) t.textContent = isDev ? winner.name : winner.title;
       if (m) m.textContent = winner.meta_line || winner.location_label || "";
       if (img && winner.hero_image_url) { img.src = winner.hero_image_url; img.alt = winner.image_alt || (isDev ? winner.name : winner.title); }
-      if (link) link.href = isDev ? (BESPOKE_DEV_PAGES[winner.slug] || "development?slug=" + encodeURIComponent(winner.slug)) : "property?slug=" + encodeURIComponent(winner.slug);
+      if (link) link.href = isDev ? devHref(winner) : "property?slug=" + encodeURIComponent(winner.slug);
       if (ov && winner.overview) ov.textContent = winner.overview;
       var sample = spot.querySelector("[data-sample-only]");
       if (sample) sample.hidden = true;

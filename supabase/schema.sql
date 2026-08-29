@@ -289,6 +289,14 @@ alter table public.developments
 alter table public.developments
   add column if not exists collections text[] not null default '{}';
 
+-- ————————————————————————————— hand-built development pages —————————————————————————————
+-- Root-relative path to a hand-coded landing page for this development (e.g.
+-- '/edades-west'). When set, cards link straight to it and development?slug=…
+-- redirects there instead of rendering the generic template.
+-- See migration-development-bespoke-path.sql.
+alter table public.developments
+  add column if not exists bespoke_path text;
+
 -- ————————————————————————————— listings ↔ developments —————————————————————————————
 alter table public.listings
   add column if not exists development_id uuid references public.developments(id) on delete set null;
