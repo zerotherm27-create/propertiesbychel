@@ -40,7 +40,9 @@
     "two-botanika-nature-residences": "two-botanika",
     "1001-parkway-residences": "1001-parkway",
     "the-observatory": "the-observatory",
-    "yume-at-riverpark": "yume-at-riverpark"
+    "yume-at-riverpark": "yume-at-riverpark",
+    "edades-west": "edades-west",
+    "the-arton-by-rockwell": "the-arton"
   };
 
   var DEV_AVAILABILITY_LABELS = { "pre-selling": "Pre-selling", selling: "Selling", "sold-out": "Sold Out", rfo: "RFO" };

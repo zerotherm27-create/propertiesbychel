@@ -49,7 +49,10 @@ export default async function middleware(request) {
     "edades-west": "/edades-west",
     "the-arton-by-rockwell": "/the-arton",
   };
-  if (path === "/property") {
+  // /development is where the site's own cards point; /property covers the older
+  // shape of the same URL. Either way a bespoke slug never renders the generic
+  // template, even if a stale cached script still links to the query URL.
+  if (path === "/development" || path === "/property") {
     const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];
     if (bespokePath) {
       return new Response(null, { status: 301, headers: { Location: bespokePath } });
