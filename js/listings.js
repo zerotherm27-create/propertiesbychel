@@ -163,6 +163,13 @@
    * development page's "linked units" grid. When a row carries an
    * embedded `development` (via a `development:developments(name,slug)`
    * select), a small "Part of <name>" note is added under the meta line. */
+  /* An <img> with an empty src is invalid and makes the browser re-request the
+     page itself; a record with no hero photo yet should just leave the frame's
+     own ground showing. Same guard developer.html uses. */
+  function cardImgHTML(url, alt, imgAttrs) {
+    return url ? '<img src="' + esc(url) + '" alt="' + esc(alt) + '" ' + imgAttrs + ">" : "";
+  }
+
   function listingCardHTML(l, i) {
     var imgAttrs = i === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
     var devNote = l.development ? '<p class="plisting__meta">Part of ' + esc(l.development.name) + "</p>" : "";
@@ -172,7 +179,7 @@
       ' data-status="' + esc(statusArr(l.status).join(" ")) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
         '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
           (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
-          '<img src="' + esc(heroUrl) + '" alt="' + esc(l.image_alt || l.title) + '" ' + imgAttrs + '>' +
+          cardImgHTML(heroUrl, l.image_alt || l.title, imgAttrs) +
         "</div>" +
         '<div class="plisting__head"><span class="plisting__title">' + esc(l.title) + "</span>" +
           '<span class="plisting__rule"></span><span class="plisting__price">' + esc(l.price_display || "Price on application") + "</span></div>" +
@@ -193,7 +200,7 @@
       ' data-status="development" data-collection="' + esc((d.collections || []).join(" ")) + '">' +
         '<div class="frame frame--hover" style="aspect-ratio:' + esc(d.aspect || "4/3") + ';position:relative">' +
           '<span class="plisting__tag">Development</span>' +
-          '<img src="' + esc(d.hero_image_url || "") + '" alt="' + esc(d.image_alt || d.name) + '" ' + imgAttrs + '>' +
+          cardImgHTML(d.hero_image_url, d.image_alt || d.name, imgAttrs) +
         "</div>" +
         '<div class="plisting__head"><span class="plisting__title">' + esc(d.name) + "</span></div>" +
         '<p class="plisting__meta">' + [d.meta_line || d.location_label, DEV_AVAILABILITY_LABELS[d.availability] || "Selling"].filter(Boolean).map(esc).join(" · ") + "</p>" +
