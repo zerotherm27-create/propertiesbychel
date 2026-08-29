@@ -46,6 +46,7 @@ export default async function middleware(request) {
     "1001-parkway-residences": "/1001-parkway",
     "the-observatory": "/the-observatory",
     "yume-at-riverpark": "/yume-at-riverpark",
+    "edades-west": "/edades-west",
   };
   if (path === "/property") {
     const bespokePath = BESPOKE_DEV_PAGES[url.searchParams.get("slug")];

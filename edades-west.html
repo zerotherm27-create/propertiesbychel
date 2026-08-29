@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edades West · Properties by Chel</title>
+<meta name="description" content="Edades West — a 47-storey, 217-residence tower by Rockwell Land inside Rockwell Center, Makati. Two- and three-bedroom residences from 100 to 274 sqm, including garden and penthouse units.">
+<link rel="canonical" href="https://www.propertiesbychel.com/edades-west">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.propertiesbychel.com/edades-west">
+<meta property="og:site_name" content="Properties by Chel">
+<meta property="og:title" content="Edades West · Properties by Chel">
+<meta property="og:description" content="A 47-storey, 217-residence tower by Rockwell Land inside Rockwell Center, Makati. Two- and three-bedroom residences from 100 to 274 sqm.">
+<meta property="og:image" content="https://e-rockwell.com/wp-content/uploads/2024/09/EDW-1920x662-1.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Edades West · Properties by Chel">
+<meta name="twitter:description" content="A 47-storey, 217-residence tower by Rockwell Land inside Rockwell Center, Makati. Two- and three-bedroom residences from 100 to 274 sqm.">
+<meta name="twitter:image" content="https://e-rockwell.com/wp-content/uploads/2024/09/EDW-1920x662-1.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=47">
+<link rel="icon" href="images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<style>
+  /* page-scoped composition helpers, tokens only — same pattern as two-botanika.html / the-observatory.html */
+  .ew-status-banner {
+    background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin);
+    text-align: center; font-size: var(--text-sm); margin-top: 6.5rem;
+    opacity: 0; transition: opacity var(--dur) var(--ease-out);
+  }
+  .ew-status-banner.is-in { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .ew-status-banner { transition: none; } }
+  .ew-status-banner a { color: var(--brass); text-decoration: underline; }
+
+  .ew-hero { max-width: 44rem; margin-inline: auto; text-align: center; padding-top: var(--space-12); }
+  .ew-hero .eyebrow { justify-content: center; margin-inline: auto; }
+  .ew-hero .lede { margin-inline: auto; }
+  .ew-hero__media { max-width: 56rem; margin: var(--space-12) auto 0; aspect-ratio: 1920/662; }
+
+  /* Floor plans are drawings, not photographs: they read at full page ratio on a
+     light ground, uncropped, and open full-size in the lightbox for measuring. */
+  .ew-plans {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-16) var(--space-10); margin-top: var(--space-16);
+  }
+  @media (max-width: 48rem) { .ew-plans { grid-template-columns: 1fr; gap: var(--space-12); } }
+  .ew-plan { cursor: zoom-in; }
+  .ew-plan__frame { aspect-ratio: 1920/2485; background: var(--paper); }
+  .ew-plan__frame img { object-fit: contain; }
+  .ew-plan__frame::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: color-mix(in oklch, var(--espresso) 8%, transparent);
+    opacity: 0; transition: opacity var(--dur-fast) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) { .ew-plan:hover .ew-plan__frame::after { opacity: 1; } }
+  .ew-plan figcaption { padding-top: 0; }
+  .ew-plan__cap {
+    display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4);
+    margin-top: var(--space-4); padding-top: var(--space-4); border-top: var(--rule) solid var(--line);
+  }
+  .ew-plan__name { font-family: var(--font-display); font-size: var(--text-h3); color: var(--ink); }
+  .ew-plan__sqm {
+    font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps);
+    text-transform: uppercase; color: var(--ink-faint); white-space: nowrap;
+  }
+  .ew-plan__band { display: block; font-size: var(--text-sm); color: var(--ink-faint); margin-top: var(--space-2); }
+  /* A plan opened in the shared lightbox needs more height than a photograph does. */
+  /* Hug the drawing rather than letterboxing it: 82vh tall at the plan's 1920/2485 ratio. */
+  .gallery-lightbox.is-plan .gallery-lightbox__frame { max-width: min(56rem, calc(82vh * 0.7726)); background: var(--paper); }
+  .gallery-lightbox.is-plan .gallery-lightbox__frame img { max-height: 82vh; }
+
+  .ew-amenities-media { aspect-ratio: 16/9; }
+  .ew-features-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-8) var(--space-4);
+    margin-top: var(--space-12);
+  }
+  .ew-feature { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-3); }
+  .ew-feature svg { width: 1.75rem; height: 1.75rem; color: var(--brass); flex-shrink: 0; }
+  .ew-feature span { font-size: var(--text-sm); color: var(--ink-faint); line-height: 1.3; }
+  @media (max-width: 48rem) { .ew-features-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 30rem) { .ew-features-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+<a class="visually-hidden" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="masthead__inner shell">
+    <a class="masthead__mark" href="/">
+      <img class="masthead__logo masthead__logo--navy" src="images/logo-navy.png" alt="Properties by Chel" width="73" height="34">
+      <img class="masthead__logo masthead__logo--white" src="images/logo-white.png" alt="Properties by Chel" width="73" height="34">
+    </a>
+    <nav class="masthead__nav" aria-label="Primary">
+      <a href="properties">Collections</a>
+      <a href="developer">Developer</a>
+      <a href="insights">Insights</a>
+      <a href="about">About</a>
+      <a class="masthead__cta" href="presentation">Private Presentation</a>
+    </nav>
+    <button class="masthead__toggle" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menu" tabindex="-1">
+  <div class="menu-overlay__head">
+    <img class="menu-overlay__logo" src="images/logo-white.png" alt="Properties by Chel" width="60" height="28">
+    <button class="masthead__toggle" data-menu-close>Close</button>
+  </div>
+  <ul class="menu-overlay__list">
+    <li><a href="/">Home</a></li>
+    <li><a href="properties">Collections</a></li>
+    <li><a href="developer">Developer</a></li>
+    <li><a href="insights">Insights</a></li>
+    <li><a href="sellers">For Sellers</a></li>
+    <li><a href="foreign-buyers">Foreign Buyer Guidance</a></li>
+    <li><a href="about">About Chel</a></li>
+    <li><a href="presentation">Private Presentation</a></li>
+    <li><a href="contact">Contact</a></li>
+  </ul>
+  <div class="menu-overlay__foot">
+    <span>Makati City, Philippines</span>
+    <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a>
+  </div>
+</div>
+
+<main id="main">
+
+  <div id="ew-status-banner" class="ew-status-banner" hidden role="status">
+    <div class="shell">This development is no longer actively marketed. <a href="presentation?listing=edades-west">Contact us</a> for current availability.</div>
+  </div>
+
+  <!-- Hero -->
+  <section class="section section--tight ew-hero" aria-labelledby="ew-h">
+    <p class="eyebrow">Rockwell Center, Makati</p>
+    <h1 class="display mt-8" id="ew-h">Edades West</h1>
+    <p class="lede mt-8"><strong style="color:var(--ink);font-weight:500">One tower, forty-seven floors, two hundred and seventeen residences.</strong> Rockwell Land's Edades West sits inside the Rockwell Center estate, a short walk from the Rockwell Club and Power Plant Mall — expansive two- and three-bedroom plans in a district that has spent three decades earning its address.</p>
+    <div class="ew-hero__media frame frame--corners" data-reveal>
+      <img src="https://e-rockwell.com/wp-content/uploads/2024/09/EDW-1920x662-1.webp" alt="Edades West tower exterior render, Rockwell Center, Makati" loading="lazy">
+    </div>
+  </section>
+
+  <!-- The record -->
+  <section class="section section--tight" aria-labelledby="ew-record-h">
+    <div class="shell" style="max-width:44rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">The Record</p>
+        <h2 class="h2 mt-8" id="ew-record-h">What the developer publishes</h2>
+      </div>
+      <table class="spec mt-12">
+        <tbody>
+          <tr><th scope="row">Developer</th><td>Rockwell Land Corporation</td></tr>
+          <tr><th scope="row">Address</th><td>Rockwell Center, Makati City</td></tr>
+          <tr><th scope="row">Scale</th><td>1 residential tower · 47 floors · 217 units</td></tr>
+          <tr><th scope="row">Configurations</th><td>Two- and three-bedroom, including garden and penthouse units</td></tr>
+          <tr><th scope="row">Sizes</th><td>100 – 274 sqm (1,076 – 2,949 sqft)</td></tr>
+          <tr><th scope="row">Price range</th><td>₱63M – ₱267M, as published by Rockwell Land</td></tr>
+          <tr><th scope="row">Building features</th><td>Low-emissivity coated glass windows · heated amenity pool</td></tr>
+          <tr><th scope="row">Status</th><td>Selling</td></tr>
+        </tbody>
+      </table>
+      <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint);text-align:center">Figures are the developer's published specifications. Unit-level pricing, availability, and terms are confirmed on enquiry.</p>
+    </div>
+  </section>
+
+  <!-- Units -->
+  <section id="units" class="section band-parchment" aria-labelledby="ew-units-h">
+    <div class="shell" style="max-width:60rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">Our Units</p>
+        <h2 class="h2 mt-8" id="ew-units-h">Four published plans</h2>
+      </div>
+      <p class="mt-8" style="text-align:center;font-size:var(--text-sm);color:var(--ink-faint)">Select any plan to open it full size.</p>
+
+      <div class="ew-plans" data-reveal-stagger id="ew-plans-grid">
+        <figure class="ew-plan" data-reveal>
+          <div class="frame ew-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/2BR-Unit-F-100-sqm_page-0001.webp" alt="Two-bedroom Unit F floor plan at Edades West, 100 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ew-plan__cap"><span class="ew-plan__name">Two Bedroom · Unit F</span><span class="ew-plan__sqm">100 sqm</span></span>
+            <span class="ew-plan__band">Two-bedroom band · 100 – 137 sqm</span>
+          </figcaption>
+        </figure>
+        <figure class="ew-plan" data-reveal>
+          <div class="frame ew-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/2BR-Unit-E-133-sqm_page-0001.webp" alt="Two-bedroom Unit E floor plan at Edades West, 133 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ew-plan__cap"><span class="ew-plan__name">Two Bedroom · Unit E</span><span class="ew-plan__sqm">133 sqm</span></span>
+            <span class="ew-plan__band">Two-bedroom band · 100 – 137 sqm</span>
+          </figcaption>
+        </figure>
+        <figure class="ew-plan" data-reveal>
+          <div class="frame ew-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/3BR-Unit-A-244-sqm_page-0001.webp" alt="Three-bedroom Unit A floor plan at Edades West, 244 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ew-plan__cap"><span class="ew-plan__name">Three Bedroom · Unit A</span><span class="ew-plan__sqm">244 sqm</span></span>
+            <span class="ew-plan__band">Three-bedroom band · 161 – 260 sqm</span>
+          </figcaption>
+        </figure>
+        <figure class="ew-plan" data-reveal>
+          <div class="frame ew-plan__frame"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/3BR-Unit-D-248-sqm_page-0001.webp" alt="Three-bedroom Unit D floor plan at Edades West, 248 sqm" loading="lazy"></div>
+          <figcaption>
+            <span class="ew-plan__cap"><span class="ew-plan__name">Three Bedroom · Unit D</span><span class="ew-plan__sqm">248 sqm</span></span>
+            <span class="ew-plan__band">Three-bedroom band · 161 – 260 sqm</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mt-16" style="max-width:40rem;margin-inline:auto">
+        <table class="spec">
+          <tbody>
+            <tr><th scope="row">2BR</th><td>100 – 137 sqm · 1,076 – 1,474 sqft</td></tr>
+            <tr><th scope="row">3BR</th><td>161 – 260 sqm · 1,733 – 2,798 sqft</td></tr>
+            <tr><th scope="row">3BR Garden</th><td>227 – 274 sqm · 2,443 – 2,949 sqft</td></tr>
+            <tr><th scope="row">3BR Penthouse</th><td>233 – 248 sqm · 2,507 – 2,669 sqft</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-12" style="text-align:center"><a class="btn" href="presentation?listing=edades-west">Private Presentation</a></p>
+    </div>
+  </section>
+
+  <!-- Amenities -->
+  <section id="amenities" class="section" aria-labelledby="ew-amenities-h">
+    <div class="shell" style="text-align:center;max-width:40rem;margin-inline:auto" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Our Amenities</p>
+      <h2 class="h2 mt-8" id="ew-amenities-h">Leisure kept close to home</h2>
+      <p class="prose mt-8">An amenity deck built around a heated pool, with the quieter rooms — library, function room, studio — arranged for residents who use them daily rather than for show.</p>
+    </div>
+    <div class="shell mt-12" data-reveal>
+      <div class="frame frame--corners ew-amenities-media" style="max-width:52rem;margin-inline:auto">
+        <img src="https://e-rockwell.com/wp-content/uploads/2024/09/Edades-West_Amenity-Area-Aerial-View_FA_230325.webp" alt="Aerial view of the amenity area at Edades West" loading="lazy">
+      </div>
+    </div>
+    <div class="shell">
+      <div class="ew-features-grid">
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 19c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M8 12V5a2 2 0 0 1 4 0M16 12V5a2 2 0 0 1 4 0"/></svg><span>Heated Amenity Pool</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z"/><path d="M20 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg><span>Library &amp; Lounge Areas</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15h18"/><path d="M5 15V9.5L7 6h10l2 3.5V15"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg><span>Drop-Off Area</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M5 20v-6h14v6"/><path d="M4 14l8-6 8 6"/></svg><span>Amenity Deck</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="10" width="7" height="7"/><rect x="14" y="10" width="7" height="7"/><rect x="8" y="3" width="7" height="7"/></svg><span>Lounge &amp; Children's Play Area</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M7 18v2M17 18v2M7 6V4M17 6V4"/><path d="M8 12h8"/></svg><span>Private Function Room</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="1.8"/><path d="M12 7v6M12 13l-3 7M12 13l3 7M7 9.5l5 1.5 5-1.5"/></svg><span>Yoga &amp; Dance Studio</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></svg><span>Fitness Facility</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-5 9 5"/><path d="M5 9v11h14V9"/><path d="M9 20v-5h6v5"/></svg><span>Rooftop Deck</span></div>
+        <div class="ew-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V6a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v14"/><path d="M3 20h11"/><path d="M13 10h3a2 2 0 0 1 2 2v4a1.5 1.5 0 0 0 3 0v-6l-2-2"/><path d="M8.5 8 7 11h2l-1.5 3"/></svg><span>EV Charging Provision</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location -->
+  <section id="location" class="section band-parchment" aria-labelledby="ew-location-h">
+    <div class="shell">
+      <div style="text-align:center;max-width:48rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">A Connected Community</p>
+        <h2 class="h2 mt-8" id="ew-location-h">Inside the Rockwell Center estate</h2>
+        <p class="lede mt-8" style="margin-inline:auto">Rockwell Center, Makati — a gated, master-planned district where the retail, the club, and the residences were drawn together rather than assembled over time.</p>
+      </div>
+      <div class="grid-12 mt-16">
+        <div class="col-span-6">
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Power Plant Mall</span><span class="index-row__meta">Walkable, within the estate</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Rockwell Club</span><span class="index-row__meta">Walkable, within the estate</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Milky Way Cafe · Power Plant Mall</span><span class="index-row__meta">105m</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Belo Medical Group · Power Plant Mall</span><span class="index-row__meta">195m</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Estrella Bus Stop</span><span class="index-row__meta">579m</span></div>
+          <div class="mt-8">
+            <a class="link-line link-line--brass" href="https://www.google.com/maps/dir//Edades+West+Tower,+Rockwell+Center,+Makati" target="_blank" rel="noopener">Get directions <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="col-span-5 col-start-8">
+          <div id="ew-map" style="height:360px;border:var(--rule) solid var(--line)"></div>
+        </div>
+      </div>
+      <div class="mt-16" data-reveal>
+        <div class="frame frame--corners" style="max-width:52rem;margin-inline:auto">
+          <img src="https://e-rockwell.com/wp-content/uploads/2024/09/Rockwell-Center-Vicinity-Map-Edades-West-2.webp" alt="Vicinity map of Rockwell Center showing Edades West" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section id="gallery" class="section" aria-labelledby="ew-gallery-h">
+    <div class="shell">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">Photos</p>
+        <h2 class="h2 mt-8" id="ew-gallery-h">Edades West</h2>
+      </div>
+      <div class="photo-grid mt-16" data-reveal-stagger id="ew-gallery-grid">
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/EW-Hero-Banner-1366x599-3BRA.webp" alt="Three-bedroom Unit A interior at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Living-Room.webp" alt="Living room at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Edades-West-Balcony-Render.webp" alt="Balcony render at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Edades-West_Drop-off-Area-MEV-Dusk-Scene_FA_240325.webp" alt="Drop-off area at Edades West at dusk" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Rockwell-Edades-West-Main-Amenities.webp" alt="Main amenity area at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Rockwell-Edades-West.-Private-Function-Room.webp" alt="Private function room at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Yoga_EdadesWest.webp" alt="Yoga and dance studio at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/EW-Gym-v2.webp" alt="Fitness facility at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Edades-West-Playground.webp" alt="Children's play area at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/Edades-West-Roofdeck-2.webp" alt="Rooftop deck at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/CHARGING-STATION.webp" alt="Electric vehicle charging provision at Edades West" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://e-rockwell.com/wp-content/uploads/2024/09/DSC_8993-scaled.webp" alt="Edades West interior detail" loading="lazy"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section band text-center" aria-labelledby="ew-about-h">
+    <div class="shell" style="max-width:44rem" data-reveal>
+      <p class="eyebrow eyebrow--bare" style="justify-content:center">The Developer</p>
+      <h2 class="h2 mt-8" id="ew-about-h">Rockwell Land</h2>
+      <p class="lede mt-8" style="margin-inline:auto">Rockwell Land set out in 1995 to turn an old thermal power plant into a high-end mixed-use district; that project became Rockwell Center in Makati. The company now builds residential, retail, hotel and leisure, and office properties across the Philippines. Edades West rises within the estate that started it.</p>
+      <div class="mt-12" style="display:flex;gap:var(--space-6);justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--on-dark" href="presentation?listing=edades-west">Request a private presentation</a>
+        <a class="link-line link-line--on-dark" href="properties">Back to the collection <span class="arr">→</span></a>
+      </div>
+      <hr class="rule rule--brass mt-16" style="max-width:2.5rem;margin-inline:auto">
+    </div>
+  </section>
+
+</main>
+
+<div class="gallery-lightbox" id="gallery-lightbox" hidden>
+  <button type="button" class="gallery-lightbox__close" id="gallery-lightbox-close" aria-label="Close gallery">×</button>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--prev" id="gallery-lightbox-prev" aria-label="Previous photo">‹</button>
+  <div class="gallery-lightbox__frame frame frame--corners">
+    <img id="gallery-lightbox-img" src="" alt="">
+  </div>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--next" id="gallery-lightbox-next" aria-label="Next photo">›</button>
+  <p class="gallery-lightbox__caption" id="gallery-lightbox-caption"></p>
+</div>
+
+<footer class="footer">
+  <div class="shell">
+    <img class="footer__logo" src="images/logo-white.png" alt="Properties by Chel" width="90" height="42">
+    <p class="footer__statement">Considered advice for <em>considered</em> property.</p>
+    <div class="footer__grid">
+      <div>
+        <h4>The Practice</h4>
+        <address>
+          Properties by Chel, Private Real Estate Advisory<br>
+          Makati City, Metro Manila, Philippines<br>
+          PRC-licensed real estate broker<br>
+          License details furnished on enquiry
+        </address>
+      </div>
+      <div>
+        <h4>Portfolio</h4>
+        <ul>
+          <li><a href="properties">Collections</a></li>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="sellers">For Sellers</a></li>
+          <li><a href="foreign-buyers">Foreign Buyers</a></li>
+          <li><a href="https://allabodeph.com" target="_blank" rel="noopener">All Abode PH ↗</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Advisory</h4>
+        <ul>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="about">About Chel</a></li>
+          <li><a href="contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Enquiries</h4>
+        <address>
+          <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a><br>
+          Direct line shared upon introduction<br>
+          <a href="presentation">Request a private presentation</a>
+        </address>
+        <div class="footer__social">
+          <a href="https://www.linkedin.com/in/aremchelcruzado/" target="_blank" rel="noopener" aria-label="Chel Cruzado on LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7.5" y1="10.5" x2="7.5" y2="16.5"/><circle cx="7.5" cy="7" r="0.75" fill="currentColor" stroke="none"/><path d="M11.5 16.5v-4c0-1.4.9-2.3 2.2-2.3s2.3 1 2.3 2.3v4"/><line x1="11.5" y1="10.5" x2="11.5" y2="16.5"/></svg>
+          </a>
+          <a href="https://www.facebook.com/propertiesbychelcruzado" target="_blank" rel="noopener" aria-label="Properties by Chel on Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M14 21v-6.5h2.2l.3-2.7H14V10c0-.8.2-1.3 1.4-1.3H16.5V6.3C16.1 6.2 15.2 6 14.2 6c-2.1 0-3.5 1.3-3.5 3.6v2.2H8.5v2.7h2.2V21"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <span>© 2026 Properties by Chel · All rights reserved</span>
+      <span><a href="legal#privacy">Privacy</a> &nbsp;·&nbsp; <a href="legal#terms">Terms</a> &nbsp;·&nbsp; <a href="contact">Contact</a></span>
+    </div>
+  </div>
+</footer>
+<script src="js/supabase-config.js?v=17"></script>
+<script src="js/site.js?v=24"></script>
+<script src="js/vendor/motion.js?v=1"></script>
+<script src="js/motion-enhance.js?v=4"></script>
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fadeIn(el) {
+    if (reduceMotion) { el.classList.add("is-in"); return; }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("is-in"); });
+    });
+  }
+
+  /* — Reflect the dashboard-managed development's published status — */
+  var sb = window.SUPABASE_CONFIG || {};
+  if (sb.url && sb.anonKey) {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.edades-west&limit=1", {
+      headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var d = rows[0];
+        if (d && d.published === false) {
+          var banner = document.getElementById("ew-status-banner");
+          banner.hidden = false;
+          fadeIn(banner);
+        }
+      })
+      .catch(function () { /* fail open — page stays as-is if the check can't run */ });
+  }
+
+  /* — Gallery lightbox — reuses the shared .photo-grid / .gallery-lightbox
+     visual pattern from the site's generic listing/development pages, wired locally
+     since this static page doesn't run through js/listings.js's Supabase-driven flow. */
+  var items = [];
+  var isPlanSet = false;
+  var lightbox = document.getElementById("gallery-lightbox");
+  var lightboxImg = document.getElementById("gallery-lightbox-img");
+  var lightboxCaption = document.getElementById("gallery-lightbox-caption");
+  var lightboxClose = document.getElementById("gallery-lightbox-close");
+  var lightboxPrev = document.getElementById("gallery-lightbox-prev");
+  var lightboxNext = document.getElementById("gallery-lightbox-next");
+  var currentIndex = 0;
+  var lastFocused = null;
+
+  function showSlide(i) {
+    currentIndex = (i + items.length) % items.length;
+    var item = items[currentIndex];
+    lightboxImg.src = item.url;
+    lightboxImg.alt = item.alt;
+    lightboxCaption.textContent = item.alt + " · " + (currentIndex + 1) + " / " + items.length;
+  }
+  function openGallery(index) {
+    lastFocused = document.activeElement;
+    showSlide(index);
+    lightbox.classList.toggle("is-plan", isPlanSet);
+    lightbox.hidden = false;
+    fadeIn(lightbox);
+    lightboxClose.focus();
+  }
+  function closeGallery() {
+    lightbox.classList.remove("is-in");
+    if (reduceMotion) {
+      lightbox.hidden = true;
+      lightboxImg.src = "";
+    } else {
+      var onEnd = function (e) {
+        if (e.target !== lightbox) return;
+        lightbox.removeEventListener("transitionend", onEnd);
+        lightbox.hidden = true;
+        lightboxImg.src = "";
+      };
+      lightbox.addEventListener("transitionend", onEnd);
+    }
+    if (lastFocused) lastFocused.focus();
+  }
+  /* Two sets feed the one lightbox — the photo gallery and the floor plans.
+     Whichever set is clicked becomes the active set for prev/next. */
+  [
+    { id: "ew-plans-grid", isPlan: true },
+    { id: "ew-gallery-grid", isPlan: false }
+  ].forEach(function (set) {
+    var grid = document.getElementById(set.id);
+    if (!grid) return;
+    var setItems = Array.prototype.map.call(grid.querySelectorAll("img"), function (img) {
+      return { url: img.src, alt: img.alt };
+    });
+    grid.querySelectorAll("figure").forEach(function (fig, i) {
+      fig.addEventListener("click", function () {
+        items = setItems;
+        isPlanSet = set.isPlan;
+        openGallery(i);
+      });
+    });
+  });
+  lightboxClose.addEventListener("click", closeGallery);
+  lightboxPrev.addEventListener("click", function () { showSlide(currentIndex - 1); });
+  lightboxNext.addEventListener("click", function () { showSlide(currentIndex + 1); });
+  lightbox.addEventListener("click", function (e) { if (e.target === lightbox) closeGallery(); });
+  document.addEventListener("keydown", function (e) {
+    if (lightbox.hidden) return;
+    if (e.key === "Escape") closeGallery();
+    if (e.key === "ArrowLeft") showSlide(currentIndex - 1);
+    if (e.key === "ArrowRight") showSlide(currentIndex + 1);
+  });
+
+  /* — Brand-styled map, same treatment as the dashboard-managed development pages — */
+  var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
+  var mapEl = document.getElementById("ew-map");
+  if (mapEl && mapConfig.apiKey) {
+    var BRAND_MAP_STYLE = [
+      { elementType: "geometry", stylers: [{ color: "#f1eee6" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#5f5e5a" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#faf8f4" }] },
+      { featureType: "poi", stylers: [{ visibility: "off" }] },
+      { featureType: "transit", stylers: [{ visibility: "off" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#e3ded1" }] },
+      { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a6b14" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#d4c9a8" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9d3d9" }] },
+      { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9c4b5" }] }
+    ];
+    var BRAND_PIN_ICON = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">' +
+      '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.7 23.3 0 15 0z" fill="#8A6B14"/>' +
+      '<circle cx="15" cy="15" r="5.5" fill="#FAF8F4"/></svg>'
+    );
+    var center = { lat: 14.5632459, lng: 121.0367656 };
+    var cbName = "__initEwMap";
+    window[cbName] = function () {
+      var map = new google.maps.Map(mapEl, {
+        center: center, zoom: 16, disableDefaultUI: true, zoomControl: true, styles: BRAND_MAP_STYLE
+      });
+      new google.maps.Marker({ position: center, map: map, icon: BRAND_PIN_ICON });
+    };
+    var script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapConfig.apiKey) + "&callback=" + cbName;
+    script.async = true;
+    document.head.appendChild(script);
+  }
+})();
+</script>
+</body>
+</html>
