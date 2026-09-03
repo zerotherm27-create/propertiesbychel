@@ -58,10 +58,14 @@ if (SB.url && SB.anonKey) {
     supabase.from("briefings").select("pdf_url").eq("section", isJournal ? "journal" : "intelligence").eq("status", "published").maybeSingle()
       .then(({ data: briefing }) => {
         if (!briefing || !briefing.pdf_url) return;
-        const link = document.getElementById(isJournal ? "art-journal-cta-link" : "art-intel-cta-link");
+        // A published PDF is ready to hand over directly; skip the lead-capture
+        // form in favour of a straight download link.
+        const suffix = isJournal ? "journal" : "intel";
+        const link = document.getElementById("art-" + suffix + "-cta-link");
+        const form = document.getElementById("art-" + suffix + "-cta-form");
         link.href = briefing.pdf_url;
-        link.target = "_blank";
-        link.rel = "noopener";
+        link.hidden = false;
+        if (form) form.hidden = true;
       });
 
     if (article.hero_image_url) {

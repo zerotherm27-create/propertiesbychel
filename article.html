@@ -92,7 +92,16 @@
           <p class="eyebrow">Companion Briefing</p>
           <h2 class="h3 mt-8" id="art-jcta-h">The Village Market: an owner's paper</h2>
           <p class="prose mt-6">A briefing PDF expanding this essay with the diligence checklist we use inside village transactions. Shared on request.</p>
-          <a class="link-line mt-6" style="display:inline-flex" id="art-journal-cta-link" href="presentation">Request the briefing <span class="arr">→</span></a>
+          <a class="link-line mt-6" style="display:inline-flex" id="art-journal-cta-link" href="" target="_blank" rel="noopener" hidden>Download the briefing <span class="arr">→</span></a>
+          <form class="briefing-request mt-6" id="art-journal-cta-form" data-enquiry novalidate>
+            <input type="hidden" name="request_type" value="briefing">
+            <div class="field">
+              <label for="art-journal-email" class="visually-hidden">Email</label>
+              <input id="art-journal-email" name="email" type="email" required placeholder="Email for the briefing">
+            </div>
+            <button class="btn" type="submit">Request the briefing</button>
+            <p class="field__note mt-8" data-form-note>Held in confidence. See our <a href="legal#privacy" style="text-decoration:underline">privacy notice</a>.</p>
+          </form>
         </div>
       </div>
     </section>
@@ -107,7 +116,16 @@
             <tr><th scope="row">Format</th><td>PDF briefing &middot; 12&ndash;16 pages</td></tr>
             <tr><th scope="row">Access</th><td>Complimentary to clients; by request otherwise</td></tr>
           </table>
-          <a class="btn mt-12" id="art-intel-cta-link" href="presentation">Request the current briefing</a>
+          <a class="btn mt-12" id="art-intel-cta-link" href="" target="_blank" rel="noopener" hidden>Download the current briefing</a>
+          <form class="briefing-request mt-12" id="art-intel-cta-form" data-enquiry novalidate>
+            <input type="hidden" name="request_type" value="briefing">
+            <div class="field">
+              <label for="art-intel-email" class="visually-hidden">Email</label>
+              <input id="art-intel-email" name="email" type="email" required placeholder="Email for the briefing">
+            </div>
+            <button class="btn" type="submit">Request the current briefing</button>
+            <p class="field__note mt-8" data-form-note>Held in confidence. See our <a href="legal#privacy" style="text-decoration:underline">privacy notice</a>.</p>
+          </form>
         </div>
       </div>
     </section>

@@ -126,7 +126,15 @@
           <tr><th scope="row">Format</th><td>PDF briefing · 12–16 pages</td></tr>
           <tr><th scope="row">Access</th><td>Complimentary to clients; by request otherwise</td></tr>
         </table>
-        <a class="btn mt-12" href="presentation">Request the current briefing</a>
+        <form class="briefing-request mt-12" data-enquiry novalidate>
+          <input type="hidden" name="request_type" value="briefing">
+          <div class="field">
+            <label for="in-briefing-email" class="visually-hidden">Email</label>
+            <input id="in-briefing-email" name="email" type="email" required placeholder="Email for the briefing">
+          </div>
+          <button class="btn" type="submit">Request the current briefing</button>
+          <p class="field__note mt-8" data-form-note>Held in confidence. See our <a href="legal#privacy" style="text-decoration:underline">privacy notice</a>.</p>
+        </form>
       </div>
     </div>
   </section>
@@ -204,6 +212,7 @@
     </div>
   </div>
 </footer>
+<script src="js/supabase-config.js?v=16"></script>
 <script src="js/site.js?v=24"></script>
 <script src="js/vendor/motion.js?v=1"></script>
 <script src="js/motion-enhance.js?v=4"></script>

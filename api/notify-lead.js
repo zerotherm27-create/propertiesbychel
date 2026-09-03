@@ -39,10 +39,13 @@ function silentOk() {
   });
 }
 
+const REQUEST_TYPE_LABELS = { presentation: "Private presentation", briefing: "Briefing request", contact: "Contact note" };
+
 const LEAD_FIELDS = [
   ["name", "Name"],
   ["email", "Email"],
   ["phone", "Phone"],
+  ["request_type", "Request type"],
   ["intent", "Interest"],
   ["districts", "Districts"],
   ["budget_range", "Budget"],
@@ -73,7 +76,9 @@ async function sendEmail(payload) {
 function ownerNotificationHtml(lead) {
   const rows = LEAD_FIELDS
     .map(function ([key, label]) {
-      return lead[key] ? [label, lead[key]] : null;
+      if (!lead[key]) return null;
+      const value = key === "request_type" ? (REQUEST_TYPE_LABELS[lead[key]] || lead[key]) : lead[key];
+      return [label, value];
     })
     .filter(Boolean);
   const body = rows
@@ -123,7 +128,7 @@ export async function POST(request) {
       from: from,
       to: OWNER_EMAIL,
       reply_to: enquirerEmail || undefined,
-      subject: "New enquiry from " + (lead.name || "a visitor"),
+      subject: "New " + (REQUEST_TYPE_LABELS[lead.request_type] || "enquiry").toLowerCase() + " from " + (lead.name || "a visitor"),
       html: ownerNotificationHtml(lead)
     })
   ];

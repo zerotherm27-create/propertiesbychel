@@ -66,12 +66,24 @@ create table if not exists public.leads (
   notes        text,
   source_page  text,
   listing_slug text,
+  request_type text not null default 'presentation'
+               check (request_type in ('presentation','briefing','contact')),
   status       text not null default 'new'
                check (status in ('new','contacted','viewing','negotiating','closed','archived')),
   owner_notes  text,
   created_at   timestamptz not null default now(),
   updated_at   timestamptz not null default now()
 );
+
+-- Idempotent for databases where public.leads already existed before this
+-- column was added (create table if not exists above is a no-op on those).
+-- See migration-lead-request-type.sql for the same change against an
+-- already-provisioned project.
+alter table public.leads add column if not exists request_type text not null default 'presentation';
+alter table public.leads drop constraint if exists leads_request_type_check;
+alter table public.leads
+  add constraint leads_request_type_check
+  check (request_type in ('presentation', 'briefing', 'contact'));
 
 alter table public.leads enable row level security;
 

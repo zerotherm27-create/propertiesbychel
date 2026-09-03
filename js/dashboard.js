@@ -122,6 +122,7 @@ async function init(supabase) {
   /* ————— leads (CRM) ————— */
   const STATUSES = ["new", "contacted", "viewing", "negotiating", "closed", "archived"];
   const STATUS_LABELS = { new: "New", contacted: "Contacted", viewing: "Viewing", negotiating: "Negotiating", closed: "Closed", archived: "Archived" };
+  const REQUEST_TYPE_LABELS = { presentation: "Presentation", briefing: "Briefing", contact: "Contact" };
   let leads = [];
   let leadFilter = "active";
   let leadView = "board";
@@ -216,7 +217,7 @@ async function init(supabase) {
     const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" });
     return `
       <button type="button" class="kanban-card" draggable="true" data-id="${l.id}">
-        <span class="kanban-card__intent">${esc(l.intent || "Inquiry")}</span>
+        <span class="kanban-card__intent">${esc(l.intent || REQUEST_TYPE_LABELS[l.request_type] || "Inquiry")}</span>
         <span class="kanban-card__name">${esc(l.name || "(no name)")}</span>
         <span class="kanban-card__meta">${when}${l.listing_slug ? " · " + esc(l.listing_slug) : ""}</span>
       </button>`;
@@ -240,13 +241,14 @@ async function init(supabase) {
     $("#leads-list").innerHTML = `
       <div class="dash-table-wrap">
         <table class="dash-table">
-          <thead><tr><th>Name</th><th>Intent</th><th>Contact</th><th>Brief</th><th>Source</th><th>Status</th><th>Date</th></tr></thead>
+          <thead><tr><th>Name</th><th>Type</th><th>Intent</th><th>Contact</th><th>Brief</th><th>Source</th><th>Status</th><th>Date</th></tr></thead>
           <tbody>
             ${rows.map((l) => {
               const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
               return `
               <tr data-id="${l.id}">
                 <td><button type="button" class="dash-linkbtn" data-view-lead>${esc(l.name || "(no name)")}</button></td>
+                <td>${esc(REQUEST_TYPE_LABELS[l.request_type] || "—")}</td>
                 <td>${esc(l.intent || "—")}</td>
                 <td>${esc(l.email || "—")}${l.phone ? "<br>" + esc(l.phone) : ""}</td>
                 <td>${esc([l.districts, l.budget_range, l.timeframe].filter(Boolean).join(" · ") || "—")}</td>
@@ -346,8 +348,10 @@ async function init(supabase) {
         </dd>
         <dt>Contact</dt><dd>${esc(l.email || "—")}${l.phone ? " · " + esc(l.phone) : ""}
           ${l.email ? ` · <a class="dash-linkbtn" href="mailto:${esc(l.email)}">write back</a>` : ""}</dd>
+        <dt>Type</dt><dd>${esc(REQUEST_TYPE_LABELS[l.request_type] || "—")}</dd>
+        ${l.request_type === "presentation" ? `
         <dt>Intent</dt><dd>${esc(l.intent || "—")}</dd>
-        <dt>Brief</dt><dd>${esc([l.districts, l.budget_range, l.timeframe].filter(Boolean).join(" · ") || "—")}</dd>
+        <dt>Brief</dt><dd>${esc([l.districts, l.budget_range, l.timeframe].filter(Boolean).join(" · ") || "—")}</dd>` : ""}
         <dt>Source</dt><dd>${when} · ${esc(l.source_page || "—")}${l.listing_slug ? " · " + esc(l.listing_slug) : ""}</dd>
         ${l.notes ? `<dt>Their note</dt><dd>${esc(l.notes)}</dd>` : ""}
         <dt>Your notes</dt>
