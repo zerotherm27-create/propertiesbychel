@@ -270,7 +270,7 @@ figcaption { font-size: var(--text-sm); color: var(--ink-faint); padding-top: va
 .cine__close {
   position: absolute; inset-inline: 0; bottom: 0; z-index: 3; text-align: center;
   padding: var(--space-16) var(--margin) var(--space-20); color: var(--on-espresso);
-  opacity: 0; transform: translateY(24px); will-change: opacity, transform; pointer-events: none;
+  opacity: 0; transform: scale(0.94); will-change: opacity, transform; pointer-events: none;
   background: linear-gradient(to top, color-mix(in oklch, var(--espresso) 94%, transparent) 0%, color-mix(in oklch, var(--espresso) 55%, transparent) 70%, transparent 100%);
 }
 .cine__close.is-live { pointer-events: auto; }

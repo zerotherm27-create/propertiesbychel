@@ -107,7 +107,7 @@
 
       var arrive = ease(seg(p, 0.6, 0.85));
       close.style.opacity = String(arrive);
-      close.style.transform = "translateY(" + (24 * (1 - arrive)) + "px)";
+      close.style.transform = "scale(" + (0.94 + 0.06 * arrive) + ")";
       close.classList.toggle("is-live", arrive > 0.6);
 
       if (window.heroSequence && window.heroSequence.ready) window.heroSequence.setProgress(p);
