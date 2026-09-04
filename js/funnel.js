@@ -13,12 +13,34 @@
   var current = 1;
   var transitioning = false;
 
-  // Carry ?listing=<slug> into the submission so the CRM shows provenance
-  var listingParam = new URLSearchParams(location.search).get("listing");
-  if (listingParam) {
+  var qs = new URLSearchParams(location.search);
+
+  // Carry ?listing=<slug> or ?development=<slug> into the submission so the CRM shows provenance
+  var slugParam = qs.get("listing") || qs.get("development");
+  if (slugParam) {
     var hidden = form.querySelector('input[name="listing_slug"]');
-    if (hidden) hidden.value = listingParam;
+    if (hidden) hidden.value = slugParam;
   }
+
+  // Prefill districts of interest when arriving from a district-specific CTA
+  var districtParam = qs.get("district");
+  if (districtParam) {
+    var districtField = form.querySelector('#f-district');
+    if (districtField) districtField.value = districtParam;
+  }
+
+  // Humanize a slug like "the-arton-by-rockwell" into "The Arton by Rockwell"
+  var LOWER_WORDS = ["a", "an", "the", "of", "by", "at", "in", "on", "for", "and"];
+  function humanizeSlug(slug) {
+    return slug.split("-").map(function (word, i) {
+      var lower = word.toLowerCase();
+      if (i > 0 && LOWER_WORDS.indexOf(lower) !== -1) return lower;
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    }).join(" ");
+  }
+
+  var intentParam = qs.get("intent");
+  var propertyName = slugParam ? humanizeSlug(slugParam) : "";
 
   function setStep(n, backwards) {
     if (transitioning) return;
@@ -66,6 +88,36 @@
       window.setTimeout(function () { setStep(2); }, reduceMotion ? 0 : 260);
     });
   });
+
+  // Arriving with a known intent: pre-select the matching Step-1 choice and
+  // reword the header for context, same as if the visitor had chosen it themselves.
+  var eyebrow = document.getElementById("adm-eyebrow");
+  var heading = document.getElementById("adm-h");
+  var lede = document.getElementById("adm-lede");
+
+  if (intentParam === "viewing") {
+    var viewingRadio = form.querySelector('input[name="intent"][value="Arranging a viewing"]');
+    if (viewingRadio) {
+      viewingRadio.checked = true;
+      if (eyebrow) eyebrow.textContent = "Scheduling a Viewing";
+      if (heading) heading.innerHTML = "Arrange a<br>Viewing";
+      if (lede) {
+        lede.textContent = propertyName
+          ? "You've asked to view " + propertyName + ". A few considered questions, enough to prepare the viewing properly, and nothing more."
+          : "You've asked to arrange a viewing. A few considered questions, enough to prepare it properly, and nothing more.";
+      }
+      viewingRadio.dispatchEvent(new Event("change"));
+    }
+  } else if (intentParam === "advice") {
+    var adviceRadio = form.querySelector('input[name="intent"][value="Not yet sure, seeking advice"]');
+    if (adviceRadio) {
+      adviceRadio.checked = true;
+      if (lede && districtParam) {
+        lede.textContent = "You're asking about " + districtParam + ". A few considered questions, enough to prepare a useful reply, and nothing more.";
+      }
+      adviceRadio.dispatchEvent(new Event("change"));
+    }
+  }
 
   form.querySelectorAll("[data-funnel-next]").forEach(function (btn) {
     btn.addEventListener("click", function () { setStep(current + 1); });

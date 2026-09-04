@@ -75,9 +75,9 @@
 
   <section class="page-hero text-center" aria-labelledby="adm-h">
     <div class="shell adm">
-      <p class="eyebrow eyebrow--bare" style="justify-content:center">Portfolio Admission</p>
+      <p class="eyebrow eyebrow--bare" id="adm-eyebrow" style="justify-content:center">Portfolio Admission</p>
       <h1 class="h1" id="adm-h" style="margin-inline:auto">Private Presentation<br>Request</h1>
-      <p class="lede mt-8" style="margin-inline:auto">A few considered questions, enough to prepare properly for a first conversation, and nothing more. Your details are held in confidence and never shared or sold.</p>
+      <p class="lede mt-8" id="adm-lede" style="margin-inline:auto">A few considered questions, enough to prepare properly for a first conversation, and nothing more. Your details are held in confidence and never shared or sold.</p>
       <div class="adm-steps mt-16" data-funnel-progress aria-hidden="true">
         <span class="is-current" data-prog="1">1 · Your brief</span>
         <span data-prog="2">2 · The particulars</span>
@@ -123,6 +123,12 @@
               <input type="radio" name="intent" value="Not yet sure, seeking advice">
               <span class="funnel-choice__no">05</span>
               <span class="funnel-choice__title">Not yet sure, seeking advice</span>
+              <span class="funnel-choice__arr" aria-hidden="true">→</span>
+            </label>
+            <label class="funnel-choice">
+              <input type="radio" name="intent" value="Arranging a viewing">
+              <span class="funnel-choice__no">06</span>
+              <span class="funnel-choice__title">Arranging a viewing</span>
               <span class="funnel-choice__arr" aria-hidden="true">→</span>
             </label>
           </div>
@@ -252,6 +258,6 @@
 <script src="js/site.js?v=24"></script>
 <script src="js/vendor/motion.js?v=1"></script>
 <script src="js/motion-enhance.js?v=4"></script>
-<script src="js/funnel.js?v=15"></script>
+<script src="js/funnel.js?v=16"></script>
 </body>
 </html>

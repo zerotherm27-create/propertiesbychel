@@ -343,9 +343,11 @@
       var heading = document.querySelector("[data-l-heading]");
       if (heading) heading.textContent = "The residence, in brief.";
 
-      // Carry provenance into the funnel
+      // Carry provenance into the funnel, preserving any query string already on the anchor (e.g. ?intent=viewing)
       document.querySelectorAll('a[href^="presentation"]').forEach(function (a) {
-        a.href = "presentation?listing=" + encodeURIComponent(l.slug);
+        var url = new URL(a.getAttribute("href"), location.href);
+        url.searchParams.set("listing", l.slug);
+        a.href = "presentation" + url.search;
       });
     }).catch(function () { detail.removeAttribute("data-is-loading"); /* sample content stands */ });
   }
@@ -451,9 +453,11 @@
         mapSection.hidden = false;
       }
 
-      // Carry provenance into the funnel
+      // Carry provenance into the funnel, preserving any query string already on the anchor (e.g. ?intent=viewing)
       document.querySelectorAll('a[href^="presentation"]').forEach(function (a) {
-        a.href = "presentation?development=" + encodeURIComponent(d.slug);
+        var url = new URL(a.getAttribute("href"), location.href);
+        url.searchParams.set("development", d.slug);
+        a.href = "presentation" + url.search;
       });
 
       // Linked units
