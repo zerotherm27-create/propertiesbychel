@@ -29,7 +29,7 @@
   .dev-block__head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; margin-bottom: var(--space-10); }
   .dev-projects { display: grid; gap: var(--space-8); }
   @media (min-width: 48rem) { .dev-projects { grid-template-columns: repeat(2, 1fr); } }
-  .dev-card { display: block; }
+  .dev-card__link { display: block; }
   .dev-card__media { aspect-ratio: 4/3; margin-bottom: var(--space-4); }
   .dev-card__name { font-family: var(--font-display); font-size: var(--text-lede); color: var(--ink); }
   .dev-card__meta { font-size: var(--text-sm); color: var(--ink-faint); margin-top: var(--space-1); }
@@ -94,13 +94,16 @@
           <h2 class="h2">Keen and Worth Property Developers, Inc.</h2>
         </div>
         <div class="dev-projects">
-          <a class="dev-card" href="ongpin-tower">
-            <div class="frame frame--hover frame--corners dev-card__media">
-              <img src="https://ongpintower.com/wp-content/uploads/2025/11/Living-Room-scaled.jpg" alt="Ongpin Tower" loading="lazy">
-            </div>
-            <span class="dev-card__name">Ongpin Tower</span>
-            <p class="dev-card__meta">Binondo, Manila</p>
-          </a>
+          <div class="dev-card">
+            <a class="dev-card__link" href="ongpin-tower">
+              <div class="frame frame--hover frame--corners dev-card__media">
+                <img src="https://ongpintower.com/wp-content/uploads/2025/11/Living-Room-scaled.jpg" alt="Ongpin Tower" loading="lazy">
+              </div>
+              <span class="dev-card__name">Ongpin Tower</span>
+              <p class="dev-card__meta">Binondo, Manila</p>
+            </a>
+            <a class="link-line mt-4" style="display:inline-flex" href="presentation?intent=viewing&amp;development=ongpin-tower">Arrange a viewing <span class="arr">→</span></a>
+          </div>
         </div>
       </div>
     </div>
@@ -251,11 +254,14 @@
             ? '<img src="' + esc(d.hero_image_url) + '" alt="' + esc(d.image_alt || d.name) + '" loading="lazy">'
             : "";
           return (
-            '<a class="dev-card" href="' + href + '">' +
-              '<div class="frame frame--hover frame--corners dev-card__media">' + img + "</div>" +
-              '<span class="dev-card__name">' + esc(d.name) + "</span>" +
-              '<p class="dev-card__meta">' + [d.location_label, DEV_AVAILABILITY_LABELS[d.availability] || "Selling"].filter(Boolean).map(esc).join(" · ") + "</p>" +
-            "</a>"
+            '<div class="dev-card">' +
+              '<a class="dev-card__link" href="' + href + '">' +
+                '<div class="frame frame--hover frame--corners dev-card__media">' + img + "</div>" +
+                '<span class="dev-card__name">' + esc(d.name) + "</span>" +
+                '<p class="dev-card__meta">' + [d.location_label, DEV_AVAILABILITY_LABELS[d.availability] || "Selling"].filter(Boolean).map(esc).join(" · ") + "</p>" +
+              "</a>" +
+              '<a class="link-line mt-4" style="display:inline-flex" href="presentation?intent=viewing&development=' + encodeURIComponent(d.slug) + '">Arrange a viewing <span class="arr">→</span></a>' +
+            "</div>"
           );
         }).join("");
         return (
