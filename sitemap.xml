@@ -3,12 +3,8 @@
   <url><loc>https://www.propertiesbychel.com/</loc><priority>1.0</priority></url>
   <url><loc>https://www.propertiesbychel.com/properties</loc><priority>0.9</priority></url>
   <url><loc>https://www.propertiesbychel.com/property</loc><priority>0.6</priority></url>
-  <url><loc>https://www.propertiesbychel.com/districts</loc><priority>0.8</priority></url>
   <url><loc>https://www.propertiesbychel.com/district</loc><priority>0.6</priority></url>
-  <url><loc>https://www.propertiesbychel.com/intelligence</loc><priority>0.8</priority></url>
-  <url><loc>https://www.propertiesbychel.com/intelligence-note</loc><priority>0.6</priority></url>
-  <url><loc>https://www.propertiesbychel.com/journal</loc><priority>0.8</priority></url>
-  <url><loc>https://www.propertiesbychel.com/journal-article</loc><priority>0.6</priority></url>
+  <url><loc>https://www.propertiesbychel.com/insights</loc><priority>0.8</priority></url>
   <url><loc>https://www.propertiesbychel.com/about</loc><priority>0.8</priority></url>
   <url><loc>https://www.propertiesbychel.com/sellers</loc><priority>0.7</priority></url>
   <url><loc>https://www.propertiesbychel.com/foreign-buyers</loc><priority>0.7</priority></url>
