@@ -699,7 +699,7 @@ async function init(supabase) {
   function flowNodeHtml(type, data) {
     data = data || {};
     let meta = "";
-    if (type === "wait") meta = (data.delay_days || 0) + " day(s)";
+    if (type === "wait") meta = "Day " + (data.delay_days || 0);
     if (type === "send_email") {
       const t = templates.find((x) => x.id === data.template_id);
       meta = t ? t.name : "No template selected";
@@ -755,7 +755,7 @@ async function init(supabase) {
     if (!node || node.name === "trigger") { panel.hidden = true; return; }
     panel.dataset.nodeId = nodeId;
     if (node.name === "wait") {
-      panel.innerHTML = `<h3 class="h3">Wait</h3><div class="field"><label>Days from when this block is reached</label><input type="number" min="0" id="flow-cfg-delay" value="${node.data.delay_days || 0}"></div>`;
+      panel.innerHTML = `<h3 class="h3">Wait</h3><div class="field"><label>Day (counted from enrollment, not from the previous block)</label><input type="number" min="0" id="flow-cfg-delay" value="${node.data.delay_days || 0}"></div>`;
     } else if (node.name === "send_email") {
       panel.innerHTML = `<h3 class="h3">Send Email</h3><div class="field"><label>Template</label><select id="flow-cfg-template"><option value="">Choose a template…</option>${templates.map((t) => `<option value="${t.id}" ${t.id === node.data.template_id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></div>`;
     } else if (node.name === "condition") {
@@ -837,6 +837,12 @@ async function init(supabase) {
    * send along the way. Branching (Condition blocks) stays a manual,
    * drag-in feature — reliably generating a branching graph from a prompt
    * is a further step this doesn't attempt. */
+  /* Lays out generated flows top-to-bottom like the reference product,
+   * instead of one long horizontal row: a single trunk column for the
+   * spine, branching into a left (Yes) and right (No) column below a
+   * Condition block. */
+  const FLOW_LAYOUT = { trunkX: 320, yesX: 60, noX: 580, rowGap: 110 };
+
   async function generateFlowFromAI({ category, angle }) {
     const status = $("#flow-ai-status");
     if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
@@ -854,15 +860,9 @@ async function init(supabase) {
       initFlowEditor().clear();
       $("#flow-node-config").hidden = true;
 
-      let x = 50;
-      let prevId = addFlowNode("trigger", x, 100);
-      for (const step of data.steps) {
-        x += 180;
-        const waitId = addFlowNode("wait", x, 100, { delay_days: step.delay_days || 0 });
-        flowEditor.addConnection(prevId, waitId, "output_1", "input_1");
-
-        const { data: templateRow, error: templateError } = await supabase.from("email_templates").insert({
-          name: step.template.name || (data.name + " — step"),
+      async function createTemplate(step, labelSuffix) {
+        const { data: templateRow, error } = await supabase.from("email_templates").insert({
+          name: step.template.name || (data.name + labelSuffix),
           category: category || "general",
           subject: step.template.subject || "",
           heading: step.template.heading || "",
@@ -871,15 +871,57 @@ async function init(supabase) {
           button_url: "https://www.propertiesbychel.com/presentation",
           ai_generated: true
         }).select().single();
-        if (templateError) throw new Error("Could not create template: " + templateError.message);
+        if (error) throw new Error("Could not create template: " + error.message);
         templates.push(templateRow);
-
-        x += 180;
-        const sendId = addFlowNode("send_email", x, 100, { template_id: templateRow.id });
-        flowEditor.addConnection(waitId, sendId, "output_1", "input_1");
-        prevId = sendId;
+        return templateRow;
       }
-      status.textContent = data.steps.length + " email(s) generated as new templates. Review each block, then save.";
+
+      // A vertical Wait -> Send chain in one column, connected onward from
+      // prevId via prevOutputKey (only the FIRST hop uses that output —
+      // matters when prevId is a Condition block with two outputs).
+      async function buildChain(steps, x, startY, prevId, prevOutputKey, labelSuffix) {
+        let y = startY;
+        let prev = prevId;
+        let outputKey = prevOutputKey;
+        let count = 0;
+        for (const step of steps || []) {
+          const waitId = addFlowNode("wait", x, y, { delay_days: step.delay_days || 0 });
+          flowEditor.addConnection(prev, waitId, outputKey, "input_1");
+          outputKey = "output_1";
+          y += FLOW_LAYOUT.rowGap;
+          const templateRow = await createTemplate(step, labelSuffix);
+          const sendId = addFlowNode("send_email", x, y, { template_id: templateRow.id });
+          flowEditor.addConnection(waitId, sendId, "output_1", "input_1");
+          y += FLOW_LAYOUT.rowGap;
+          prev = sendId;
+          count++;
+        }
+        return { lastId: prev, y, count };
+      }
+
+      let y = 40;
+      const triggerId = addFlowNode("trigger", FLOW_LAYOUT.trunkX, y);
+      y += FLOW_LAYOUT.rowGap;
+
+      const spine = await buildChain(data.steps, FLOW_LAYOUT.trunkX, y, triggerId, "output_1", " — step");
+      let emailCount = spine.count;
+      y = spine.y;
+
+      if (data.branch) {
+        const condId = addFlowNode("condition", FLOW_LAYOUT.trunkX, y, {
+          field: (data.branch.condition && data.branch.condition.field) || "status",
+          operator: (data.branch.condition && data.branch.condition.operator) || "in",
+          value: (data.branch.condition && data.branch.condition.value) || []
+        });
+        flowEditor.addConnection(spine.lastId, condId, "output_1", "input_1");
+        const branchY = y + FLOW_LAYOUT.rowGap;
+
+        const yes = await buildChain(data.branch.yes_steps, FLOW_LAYOUT.yesX, branchY, condId, "output_1", " — warm");
+        const no = await buildChain(data.branch.no_steps, FLOW_LAYOUT.noX, branchY, condId, "output_2", " — not yet");
+        emailCount += yes.count + no.count;
+      }
+
+      status.textContent = emailCount + " email(s) generated as new templates. Review each block, then save.";
       renderTemplatesList();
     } catch (ex) {
       status.textContent = "Could not generate: " + (ex.message || ex);

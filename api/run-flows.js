@@ -175,6 +175,11 @@ export async function GET(request) {
 
   async function processEnrollment(enrollment, flow, lead) {
     let nodeId = enrollment.current_node_id;
+    // Every Wait block's delay_days is measured from enrollment, not from
+    // whenever the walk happens to reach that block — so "Day 7" means the
+    // same thing regardless of which branch a lead took to get there, and
+    // a late-processed step doesn't push everything after it later too.
+    const enrolledAt = new Date(enrollment.enrolled_at);
     let nodeEnteredAt = new Date(enrollment.node_entered_at);
     let hops = 0;
 
@@ -191,8 +196,8 @@ export async function GET(request) {
 
       if (node.name === "wait") {
         const delayMs = (node.data.delay_days || 0) * 86400000;
-        if (Date.now() - nodeEnteredAt.getTime() < delayMs) {
-          const dueAt = new Date(nodeEnteredAt.getTime() + delayMs);
+        const dueAt = new Date(enrolledAt.getTime() + delayMs);
+        if (Date.now() < dueAt.getTime()) {
           return updateEnrollment(enrollment.id, {
             current_node_id: nodeId, node_entered_at: nodeEnteredAt.toISOString(), next_check_at: dueAt.toISOString()
           });
