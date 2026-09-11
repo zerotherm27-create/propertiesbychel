@@ -175,7 +175,7 @@
     var devNote = l.development ? '<p class="plisting__meta">Part of ' + esc(l.development.name) + "</p>" : "";
     var heroUrl = l.hero_image_url || (l.development && l.development.hero_image_url) || "";
     return (
-      '<a class="plisting is-in" href="property?slug=' + encodeURIComponent(l.slug) + '"' +
+      '<a class="plisting is-in" href="/' + encodeURIComponent(l.slug) + '"' +
       ' data-status="' + esc(statusArr(l.status).join(" ")) + '" data-collection="' + esc((l.collections || []).join(" ")) + '">' +
         '<div class="frame frame--hover" style="aspect-ratio:' + esc(l.aspect || "4/3") + ';position:relative">' +
           (l.tag ? '<span class="plisting__tag">' + esc(l.tag) + "</span>" : "") +
@@ -232,7 +232,11 @@
 
   /* — Property detail — */
   var detail = document.querySelector("[data-listing-detail]");
-  var slug = new URLSearchParams(location.search).get("slug");
+  // A listing's own slug doubles as its clean top-level URL (middleware
+  // rewrites /<slug> to this page); ?slug=... still works for direct links
+  // to the template itself.
+  var slug = new URLSearchParams(location.search).get("slug") ||
+    (location.pathname !== "/property" ? location.pathname.replace(/^\/+|\/+$/g, "") : "");
   if (detail && slug) {
     detail.setAttribute("data-is-loading", "");
     api("listings?select=*,development:developments(name,slug,bespoke_path,overview,hero_image_url,image_alt,gallery_images)&slug=eq." + encodeURIComponent(slug) + "&limit=1").then(function (rows) {
@@ -250,7 +254,7 @@
         var el = document.querySelector(selector);
         if (el && value) el.setAttribute(attr, value);
       };
-      var pageUrl = "https://www.propertiesbychel.com/property?slug=" + encodeURIComponent(l.slug);
+      var pageUrl = "https://www.propertiesbychel.com/" + encodeURIComponent(l.slug);
       var pageTitle = l.title + (l.location_label ? ", " + l.location_label : "") + " · Private Presentation · Properties by Chel";
       setMeta('link[rel="canonical"]', "href", pageUrl);
       setMeta('meta[property="og:url"]', "content", pageUrl);
@@ -496,7 +500,7 @@
       if (t) t.textContent = isDev ? winner.name : winner.title;
       if (m) m.textContent = winner.meta_line || winner.location_label || "";
       if (img && winner.hero_image_url) { img.src = winner.hero_image_url; img.alt = winner.image_alt || (isDev ? winner.name : winner.title); }
-      if (link) link.href = isDev ? devHref(winner) : "property?slug=" + encodeURIComponent(winner.slug);
+      if (link) link.href = isDev ? devHref(winner) : "/" + encodeURIComponent(winner.slug);
       if (ov && winner.overview) ov.textContent = winner.overview;
       var sample = spot.querySelector("[data-sample-only]");
       if (sample) sample.hidden = true;

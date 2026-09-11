@@ -78,12 +78,24 @@ export default async function middleware(request) {
       } catch {
         // Supabase unreachable — fall through to the page itself.
       }
+      // Every listing's own slug is its clean URL (see below); an old-style
+      // /property?slug=... link consolidates there once it's confirmed above
+      // not to actually be a development.
+      if (path === "/property") {
+        return new Response(null, { status: 301, headers: { Location: "/" + encodeURIComponent(slug) } });
+      }
     }
   }
 
   // Districts, Intelligence, and Journal used to be separate top-level pages;
-  // they're now sections within the combined Insights hub.
-  const RETIRED_INDEX_PAGES = new Set(["/districts", "/intelligence", "/journal"]);
+  // they're now sections within the combined Insights hub. journal-article
+  // and intelligence-note were unlinked sample pages from the original
+  // template, removed outright — redirected here in case a search engine
+  // still has either indexed.
+  const RETIRED_INDEX_PAGES = new Set([
+    "/districts", "/intelligence", "/journal",
+    "/journal-article", "/intelligence-note",
+  ]);
   if (RETIRED_INDEX_PAGES.has(path)) {
     return new Response(null, { status: 301, headers: { Location: "/insights" } });
   }
@@ -118,14 +130,52 @@ export default async function middleware(request) {
   try {
     comingSoon = (await get("coming_soon")) === true;
   } catch {
-    // Edge Config unreachable or not linked — fail open so the real site stays up.
-    return next();
+    // Edge Config unreachable or not linked — fail open (treat as not coming
+    // soon) rather than returning early, so a clean listing URL below still
+    // resolves even when this lookup can't run.
   }
 
-  if (!comingSoon) return next();
+  if (comingSoon) {
+    url.pathname = "/coming-soon";
+    return rewrite(url);
+  }
 
-  url.pathname = "/coming-soon";
-  return rewrite(url);
+  // A listing's slug doubles as its own top-level URL (e.g. /one-central) —
+  // unlike a development, it needs no dashboard field for this since the
+  // slug already is the path. Only a single bare path segment is considered,
+  // and only once it clears the site's fixed pages, so this costs a lookup
+  // only for genuine listing slugs (or a bespoke development slug or a typo,
+  // neither of which will match and both of which fall through to next()
+  // below — a real static file or a 404 — exactly as before). Checked after
+  // the coming-soon gate so a listing page can't leak while that's on.
+  const RESERVED_TOP_LEVEL_PATHS = new Set([
+    "/", "/about", "/article", "/coming-soon", "/coming-soon.html", "/contact",
+    "/dashboard", "/dashboard-manifest.json", "/dashboard-sw.js", "/developer",
+    "/development", "/district", "/favicon.ico", "/foreign-buyers", "/insights",
+    "/legal", "/presentation", "/properties", "/property", "/robots.txt",
+    "/sellers", "/sitemap.xml", "/tokens.css",
+  ]);
+  if (/^\/[^/]+$/.test(path) && !RESERVED_TOP_LEVEL_PATHS.has(path)) {
+    try {
+      const endpoint =
+        SUPABASE_URL +
+        "/rest/v1/listings?select=slug&slug=eq." +
+        encodeURIComponent(path.slice(1)) +
+        "&published=eq.true&limit=1";
+      const res = await fetch(endpoint, {
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY },
+      });
+      const rows = res.ok ? await res.json() : [];
+      if (rows[0]) {
+        url.pathname = "/property";
+        return rewrite(url);
+      }
+    } catch {
+      // Supabase unreachable — fall through to normal static routing.
+    }
+  }
+
+  return next();
 }
 
 export const config = {
