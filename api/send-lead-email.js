@@ -21,6 +21,27 @@ function jsonResponse(body, status) {
   });
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// The compose box is a plain textarea, not a rich-text editor, and the AI
+// draft is instructed to write "plain paragraphs separated by blank lines"
+// (server/lib/leads.js) — never actual markup. Converting that to real
+// HTML here, once, right before it's logged and sent, means both an
+// AI draft and anything the owner hand-edits in the textarea render as
+// proper paragraphs instead of one run-on block, and can't be
+// misinterpreted as HTML by accident.
+function renderPlainTextEmailHtml(text) {
+  return String(text || "")
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => "<p>" + escapeHtml(p).replace(/\n/g, "<br>") + "</p>")
+    .join("");
+}
+
 // Mirrors server/lib/auth.js's requireOwner, adapted to this Vercel
 // function's Web-standard Request/Response shape (that file's Express
 // middleware shape can't be imported directly into a separate deployment).
@@ -79,10 +100,11 @@ export async function POST(request) {
   } catch {
     return jsonResponse({ error: "Invalid JSON" }, 400);
   }
-  const { lead_id, subject, body_html, goal } = payload || {};
-  if (!lead_id || !subject || !body_html) {
+  const { lead_id, subject, body_html: rawBody, goal } = payload || {};
+  if (!lead_id || !subject || !rawBody) {
     return jsonResponse({ error: "lead_id, subject, and body_html are required" }, 400);
   }
+  const body_html = renderPlainTextEmailHtml(rawBody);
 
   // The caller's own token is forwarded for every Supabase REST call below,
   // so RLS (is_owner()-gated) applies exactly as it would from the dashboard.
