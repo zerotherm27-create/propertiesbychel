@@ -105,6 +105,9 @@ export async function POST(request) {
     return jsonResponse({ error: "lead_id, subject, and body_html are required" }, 400);
   }
   const body_html = renderPlainTextEmailHtml(rawBody);
+  if (!body_html) {
+    return jsonResponse({ error: "Email body can't be blank" }, 400);
+  }
 
   // The caller's own token is forwarded for every Supabase REST call below,
   // so RLS (is_owner()-gated) applies exactly as it would from the dashboard.

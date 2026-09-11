@@ -755,11 +755,12 @@ async function init(supabase) {
     if (!node || node.name === "trigger") { panel.hidden = true; return; }
     panel.dataset.nodeId = nodeId;
     if (node.name === "wait") {
-      panel.innerHTML = `<h3 class="h3">Wait</h3><div class="field"><label>Day (counted from enrollment, not from the previous block)</label><input type="number" min="0" id="flow-cfg-delay" value="${node.data.delay_days || 0}"></div>`;
+      panel.innerHTML = `<h3 class="h3">Wait</h3><div class="field"><label>Day (counted from enrollment, not from the previous block — the engine only checks once a day, so exact-hour timing isn't guaranteed)</label><input type="number" min="0" id="flow-cfg-delay" value="${node.data.delay_days || 0}"></div>`;
     } else if (node.name === "send_email") {
       panel.innerHTML = `<h3 class="h3">Send Email</h3><div class="field"><label>Template</label><select id="flow-cfg-template"><option value="">Choose a template…</option>${templates.map((t) => `<option value="${t.id}" ${t.id === node.data.template_id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></div>`;
     } else if (node.name === "condition") {
-      panel.innerHTML = `<h3 class="h3">Condition</h3><p class="field__note">Checks the lead's pipeline status. The first output (top) is Yes, the second (bottom) is No.</p><div class="field"><label>Status is one of (comma-separated)</label><input type="text" id="flow-cfg-value" value="${esc((node.data.value || []).join(", "))}" placeholder="e.g. viewing, negotiating"></div>`;
+      const selected = node.data.value || [];
+      panel.innerHTML = `<h3 class="h3">Condition</h3><p class="field__note">Checks the lead's pipeline status. The first output (top) is Yes, the second (bottom) is No.</p><div class="field"><label>Status is one of</label><div class="dash-checks">${STATUSES.map((s) => `<label><input type="checkbox" value="${s}" ${selected.includes(s) ? "checked" : ""}> ${esc(STATUS_LABELS[s])}</label>`).join("")}</div></div>`;
     }
     panel.hidden = false;
   }
@@ -769,9 +770,12 @@ async function init(supabase) {
     const node = flowEditor.getNodeFromId(nodeId);
     if (!node) return;
     let data = {};
-    if (node.name === "wait") data = { delay_days: Number($("#flow-cfg-delay").value) || 0 };
+    if (node.name === "wait") data = { delay_days: Math.max(0, Number($("#flow-cfg-delay").value) || 0) };
     else if (node.name === "send_email") data = { template_id: $("#flow-cfg-template").value || null };
-    else if (node.name === "condition") data = { field: "status", operator: "in", value: $("#flow-cfg-value").value.split(",").map((s) => s.trim()).filter(Boolean) };
+    else if (node.name === "condition") {
+      const checked = Array.from($("#flow-node-config").querySelectorAll('input[type="checkbox"]:checked')).map((el) => el.value);
+      data = { field: "status", operator: "in", value: checked };
+    }
     flowEditor.updateNodeDataFromId(nodeId, data);
     refreshFlowNodeDom(nodeId);
   });
@@ -907,11 +911,13 @@ async function init(supabase) {
       let emailCount = spine.count;
       y = spine.y;
 
-      if (data.branch) {
+      const branchValues = ((data.branch && data.branch.condition && data.branch.condition.value) || [])
+        .filter((v) => STATUSES.includes(v));
+      if (data.branch && branchValues.length) {
         const condId = addFlowNode("condition", FLOW_LAYOUT.trunkX, y, {
           field: (data.branch.condition && data.branch.condition.field) || "status",
           operator: (data.branch.condition && data.branch.condition.operator) || "in",
-          value: (data.branch.condition && data.branch.condition.value) || []
+          value: branchValues
         });
         flowEditor.addConnection(spine.lastId, condId, "output_1", "input_1");
         const branchY = y + FLOW_LAYOUT.rowGap;
@@ -973,6 +979,13 @@ async function init(supabase) {
   /* Active enrollments: a read-only status list, since nothing here needs a
    * human click anymore — the cron engine (api/run-flows.js) does the
    * sending. This is purely for visibility into where each lead is. */
+  const CANCEL_REASON_LABELS = {
+    no_email: "lead has no email", opted_out: "lead opted out of email",
+    no_template: "flow step has no template", template_missing: "template was deleted",
+    flow_missing: "flow was deleted", lead_missing: "lead was deleted",
+    send_failed_repeatedly: "email kept failing to send"
+  };
+
   async function loadEnrollments() {
     const { data, error } = await supabase
       .from("lead_flow_enrollments")
@@ -985,7 +998,7 @@ async function init(supabase) {
       <div class="dash-row">
         <div class="dash-row__line">
           <span class="dash-row__name">${esc(en.lead ? en.lead.name || "(no name)" : "(deleted lead)")}</span>
-          <span class="dash-row__meta">${esc(en.flow ? en.flow.name : "(deleted flow)")} · ${esc(en.status)}${en.status === "active" ? " · next check " + new Date(en.next_check_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" }) : ""}</span>
+          <span class="dash-row__meta">${esc(en.flow ? en.flow.name : "(deleted flow)")} · ${esc(en.status)}${en.status === "active" ? " · next check " + new Date(en.next_check_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" }) : ""}${en.status === "cancelled" && en.cancel_reason ? " · " + esc(CANCEL_REASON_LABELS[en.cancel_reason] || en.cancel_reason) : ""}</span>
         </div>
       </div>`).join("");
   }

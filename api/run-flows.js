@@ -22,6 +22,7 @@
 const SUPABASE_URL_FALLBACK = "https://ndoiommnmkeoukxbnobp.supabase.co";
 const RESEND_URL = "https://api.resend.com/emails";
 const MAX_HOPS_PER_TICK = 20; // guards against a cyclical graph
+const MAX_SEND_RETRIES = 6; // ~6 hourly attempts before giving up on a transient send failure
 
 function jsonResponse(body, status) {
   return new Response(JSON.stringify(body), {
@@ -58,7 +59,11 @@ function renderTemplateEmailHtml(template, values) {
   const heading = substituteVars(template.heading, values);
   const body = substituteVars(template.body, values);
   const buttonText = substituteVars(template.button_text, values);
-  const paragraphs = body.split("\n\n").filter(Boolean).map((p) => "<p>" + escapeHtml(p) + "</p>").join("");
+  // A lone newline inside a paragraph becomes a <br>, matching
+  // api/send-lead-email.js's renderPlainTextEmailHtml — the dashboard
+  // preview and this autonomous send must render the same body identically.
+  const paragraphs = body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+    .map((p) => "<p>" + escapeHtml(p).replace(/\n/g, "<br>") + "</p>").join("");
   const image = template.art_image_url ? `<p><img src="${escapeHtml(template.art_image_url)}" style="max-width:100%"></p>` : "";
   const button = buttonText && template.button_url
     ? `<p><a href="${escapeHtml(template.button_url)}" style="display:inline-block;padding:10px 20px;background:#18181b;color:#fff;text-decoration:none;border-radius:6px">${escapeHtml(buttonText)}</a></p>`
@@ -126,14 +131,31 @@ export async function GET(request) {
   // checks (no email / opted out) and dedup lock (the unique index on
   // (enrollment_id, node_id) in supabase/migration-email-flows.sql), but
   // using the service-role key since there's no owner session here.
-  async function sendFlowEmail({ enrollmentId, nodeId, lead, templateId }) {
+  async function sendFlowEmail({ enrollmentId, nodeId, lead, templateId, templateCache }) {
     if (!lead.email) return { ok: false, reason: "no_email" };
     if (lead.email_opt_out) return { ok: false, reason: "opted_out" };
     if (!templateId) return { ok: false, reason: "no_template" };
 
-    const tRes = await db(`email_templates?id=eq.${encodeURIComponent(templateId)}&select=*`);
-    const [template] = tRes.ok ? await tRes.json() : [];
+    let template = templateCache && templateCache.get(templateId);
+    if (template === undefined) {
+      const tRes = await db(`email_templates?id=eq.${encodeURIComponent(templateId)}&select=*`);
+      const [row] = tRes.ok ? await tRes.json() : [];
+      template = row || null;
+      if (templateCache) templateCache.set(templateId, template);
+    }
     if (!template) return { ok: false, reason: "template_missing" };
+
+    // A row already exists for this (enrollment_id, node_id) only if a
+    // previous tick attempted this same step. If it actually went out,
+    // this really is a duplicate call — do nothing. If it only got as far
+    // as "sending" or failed, no email was ever delivered, so this is a
+    // legitimate retry: reuse the row instead of re-inserting (which would
+    // 409 against it and get misread as "already sent").
+    const existingRes = await db(
+      `lead_email_log?enrollment_id=eq.${encodeURIComponent(enrollmentId)}&node_id=eq.${encodeURIComponent(nodeId)}&select=id,status`
+    );
+    const [existing] = existingRes.ok ? await existingRes.json() : [];
+    if (existing && existing.status === "sent") return { ok: true, duplicate: true };
 
     let listingTitle = "";
     if (lead.listing_slug) {
@@ -145,35 +167,46 @@ export async function GET(request) {
     const subject = substituteVars(template.subject, values) || template.name;
     const bodyHtml = renderTemplateEmailHtml(template, values);
 
-    const logRes = await db("lead_email_log", {
-      method: "POST",
-      headers: { ...headers, Prefer: "return=representation" },
-      body: JSON.stringify({
-        lead_id: lead.id, enrollment_id: enrollmentId, node_id: nodeId,
-        subject, body_html: bodyHtml, status: "sending"
-      })
-    });
-    if (!logRes.ok) {
-      if (logRes.status === 409) return { ok: true, duplicate: true }; // already sent this node — treat as done
-      return { ok: false, reason: "log_failed" };
+    let logRowId;
+    if (existing) {
+      await db(`lead_email_log?id=eq.${existing.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ subject, body_html: bodyHtml, status: "sending", error: null })
+      });
+      logRowId = existing.id;
+    } else {
+      const logRes = await db("lead_email_log", {
+        method: "POST",
+        headers: { ...headers, Prefer: "return=representation" },
+        body: JSON.stringify({
+          lead_id: lead.id, enrollment_id: enrollmentId, node_id: nodeId,
+          subject, body_html: bodyHtml, status: "sending"
+        })
+      });
+      if (!logRes.ok) {
+        // A concurrent tick won the race and inserted first — treat as done.
+        if (logRes.status === 409) return { ok: true, duplicate: true };
+        return { ok: false, reason: "log_failed" };
+      }
+      const [logRow] = await logRes.json();
+      logRowId = logRow.id;
     }
-    const [logRow] = await logRes.json();
 
     try {
       const result = await sendEmail({ from, to: lead.email, subject, html: bodyHtml });
-      await db(`lead_email_log?id=eq.${logRow.id}`, {
+      await db(`lead_email_log?id=eq.${logRowId}`, {
         method: "PATCH", body: JSON.stringify({ status: "sent", resend_id: result.id || null })
       });
       return { ok: true };
     } catch (err) {
-      await db(`lead_email_log?id=eq.${logRow.id}`, {
+      await db(`lead_email_log?id=eq.${logRowId}`, {
         method: "PATCH", body: JSON.stringify({ status: "failed", error: err.message })
       });
       return { ok: false, reason: "send_failed" };
     }
   }
 
-  async function processEnrollment(enrollment, flow, lead) {
+  async function processEnrollment(enrollment, flow, lead, templateCache) {
     let nodeId = enrollment.current_node_id;
     // Every Wait block's delay_days is measured from enrollment, not from
     // whenever the walk happens to reach that block — so "Day 7" means the
@@ -195,8 +228,14 @@ export async function GET(request) {
       }
 
       if (node.name === "wait") {
-        const delayMs = (node.data.delay_days || 0) * 86400000;
-        const dueAt = new Date(enrolledAt.getTime() + delayMs);
+        const delayDays = Math.max(0, Number(node.data.delay_days) || 0);
+        const delayMs = delayDays * 86400000;
+        // Clamped to nodeEnteredAt so a non-ascending delay_days value (a
+        // hand-edit, or an AI-drafted branch that didn't keep counting from
+        // enrollment) can never resolve as already-due before the walk
+        // actually reached this block — it just becomes a no-op wait
+        // instead of firing every remaining node in one tick.
+        const dueAt = new Date(Math.max(enrolledAt.getTime() + delayMs, nodeEnteredAt.getTime()));
         if (Date.now() < dueAt.getTime()) {
           return updateEnrollment(enrollment.id, {
             current_node_id: nodeId, node_entered_at: nodeEnteredAt.toISOString(), next_check_at: dueAt.toISOString()
@@ -209,19 +248,30 @@ export async function GET(request) {
       }
 
       if (node.name === "send_email") {
-        const result = await sendFlowEmail({ enrollmentId: enrollment.id, nodeId, lead, templateId: node.data.template_id });
+        const result = await sendFlowEmail({ enrollmentId: enrollment.id, nodeId, lead, templateId: node.data.template_id, templateCache });
         if (!result.ok) {
           // No email / opted out / missing template won't resolve on their
           // own — stop this enrollment rather than retry forever. A
-          // transient send failure just gets retried next tick.
+          // transient send failure gets retried hourly, up to a cap, so a
+          // persistent problem (bad address, prolonged Resend outage)
+          // eventually stops silently retrying too.
           const permanent = ["no_email", "opted_out", "no_template", "template_missing"].includes(result.reason);
-          return updateEnrollment(enrollment.id, permanent
-            ? { status: "cancelled" }
-            : { current_node_id: nodeId, node_entered_at: nodeEnteredAt.toISOString(), next_check_at: new Date(Date.now() + 3600000).toISOString() });
+          if (permanent) {
+            return updateEnrollment(enrollment.id, { status: "cancelled", cancel_reason: result.reason });
+          }
+          const retryCount = (enrollment.send_retry_count || 0) + 1;
+          if (retryCount > MAX_SEND_RETRIES) {
+            return updateEnrollment(enrollment.id, { status: "cancelled", cancel_reason: "send_failed_repeatedly" });
+          }
+          return updateEnrollment(enrollment.id, {
+            current_node_id: nodeId, node_entered_at: nodeEnteredAt.toISOString(),
+            next_check_at: new Date(Date.now() + 3600000).toISOString(), send_retry_count: retryCount
+          });
         }
         const next = nextNodeId(node, "output_1");
         if (!next) return updateEnrollment(enrollment.id, { status: "completed" });
         nodeId = next; nodeEnteredAt = new Date();
+        if (enrollment.send_retry_count) { enrollment.send_retry_count = 0; await updateEnrollment(enrollment.id, { send_retry_count: 0 }); }
         continue;
       }
 
@@ -251,14 +301,35 @@ export async function GET(request) {
   if (!dueRes.ok) return jsonResponse({ error: "Could not query due enrollments" }, 502);
   const enrollments = await dueRes.json();
 
+  // Many enrollments typically share the same flow (that's the point of a
+  // flow) and the same send-step template — fetch each distinct id once for
+  // this whole run instead of once per enrollment/hop.
+  const flowIds = [...new Set(enrollments.map((e) => e.flow_id))];
+  const leadIds = [...new Set(enrollments.map((e) => e.lead_id))];
+  const flowsById = new Map();
+  const leadsById = new Map();
+  if (flowIds.length) {
+    const r = await db(`email_flows?id=in.(${flowIds.map(encodeURIComponent).join(",")})&select=*`);
+    if (r.ok) for (const f of await r.json()) flowsById.set(f.id, f);
+  }
+  if (leadIds.length) {
+    const r = await db(`leads?id=in.(${leadIds.map(encodeURIComponent).join(",")})&select=*`);
+    if (r.ok) for (const l of await r.json()) leadsById.set(l.id, l);
+  }
+  const templateCache = new Map();
+
   let processed = 0;
   for (const enrollment of enrollments) {
-    const flowRes = await db(`email_flows?id=eq.${encodeURIComponent(enrollment.flow_id)}&select=*`);
-    const [flow] = flowRes.ok ? await flowRes.json() : [];
-    const leadRes = await db(`leads?id=eq.${encodeURIComponent(enrollment.lead_id)}&select=*`);
-    const [lead] = leadRes.ok ? await leadRes.json() : [];
-    if (!flow || !lead) { await updateEnrollment(enrollment.id, { status: "cancelled" }); continue; }
-    await processEnrollment(enrollment, flow, lead);
+    const flow = flowsById.get(enrollment.flow_id);
+    const lead = leadsById.get(enrollment.lead_id);
+    if (!flow || !lead) {
+      await updateEnrollment(enrollment.id, { status: "cancelled", cancel_reason: !flow ? "flow_missing" : "lead_missing" });
+      continue;
+    }
+    // A deactivated flow is meant to pause sending, not cancel leads already
+    // on it — leave the enrollment as-is so it resumes if reactivated.
+    if (!flow.active) continue;
+    await processEnrollment(enrollment, flow, lead, templateCache);
     processed++;
   }
 

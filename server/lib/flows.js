@@ -11,6 +11,12 @@ function extractJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
+// Must match the STATUSES enum in js/dashboard.js and the check constraint
+// on public.leads.status in supabase/schema.sql — a value outside this set
+// would never match anything in api/run-flows.js's evaluateCondition, so
+// every lead would silently and permanently take the "No" branch.
+const LEAD_STATUSES = ["new", "contacted", "viewing", "negotiating", "closed", "archived"];
+
 function cleanStep(s) {
   return {
     delay_days: Number(s.delay_days) || 0,
@@ -72,14 +78,13 @@ Omit "condition", "yes_steps", and "no_steps" entirely (do not include the keys)
     branch: null
   };
 
-  if (draft.condition && Array.isArray(draft.yes_steps) && draft.yes_steps.length &&
+  const conditionValues = draft.condition && Array.isArray(draft.condition.value)
+    ? draft.condition.value.filter((v) => LEAD_STATUSES.includes(v))
+    : [];
+  if (draft.condition && conditionValues.length && Array.isArray(draft.yes_steps) && draft.yes_steps.length &&
       Array.isArray(draft.no_steps) && draft.no_steps.length) {
     result.branch = {
-      condition: {
-        field: "status",
-        operator: "in",
-        value: Array.isArray(draft.condition.value) ? draft.condition.value.filter(Boolean) : []
-      },
+      condition: { field: "status", operator: "in", value: conditionValues },
       yes_steps: draft.yes_steps.map(cleanStep),
       no_steps: draft.no_steps.map(cleanStep)
     };
