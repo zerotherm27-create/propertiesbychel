@@ -45,8 +45,32 @@ if (SB.url && SB.anonKey) {
     document.getElementById("article-loading").hidden = true;
     if (error || !article) { document.getElementById("article-notfound").hidden = false; return; }
 
-    document.getElementById("doc-title").textContent = article.title + " · Properties by Chel";
+    const pageTitle = article.title + " · Properties by Chel";
+    document.getElementById("doc-title").textContent = pageTitle;
     if (article.meta_description) document.getElementById("doc-description").setAttribute("content", article.meta_description);
+
+    // Same fallback role as js/listings.js's setMeta calls: middleware.js
+    // already serves these correctly to first-load requests (including
+    // link-preview bots, which don't run this script), this just keeps
+    // them right if the page is already open and the user navigates here
+    // via client-side routing, or if that server-side lookup ever fails.
+    const setMeta = (selector, attr, value) => {
+      const el = document.querySelector(selector);
+      if (el && value) el.setAttribute(attr, value);
+    };
+    const pageUrl = "https://www.propertiesbychel.com/article?slug=" + encodeURIComponent(article.slug);
+    setMeta('link[rel="canonical"]', "href", pageUrl);
+    setMeta('meta[property="og:url"]', "content", pageUrl);
+    setMeta('meta[property="og:title"]', "content", pageTitle);
+    setMeta('meta[name="twitter:title"]', "content", pageTitle);
+    if (article.meta_description) {
+      setMeta('meta[property="og:description"]', "content", article.meta_description);
+      setMeta('meta[name="twitter:description"]', "content", article.meta_description);
+    }
+    if (article.hero_image_url) {
+      setMeta('meta[property="og:image"]', "content", article.hero_image_url);
+      setMeta('meta[name="twitter:image"]', "content", article.hero_image_url);
+    }
 
     const isJournal = article.section === "journal";
     document.getElementById("nav-insights").setAttribute("aria-current", "page");
