@@ -8,6 +8,7 @@ import { draftBriefing } from "./lib/briefings.js";
 import { renderBriefingHtml, htmlToPdfBuffer } from "./lib/briefing-pdf.js";
 import { draftListingDescription } from "./lib/listings.js";
 import { importDevelopmentFromUrl, draftDevelopmentMeta } from "./lib/developments.js";
+import { draftLeadEmail } from "./lib/leads.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -95,6 +96,22 @@ app.post("/generate-development-meta", requireOwner, async (req, res) => {
   }
   try {
     const draft = await draftDevelopmentMeta(client, { name, developer_name, tagline, location_label, overview, amenities_text });
+    res.json(draft);
+  } catch (err) {
+    console.error(err);
+    res.status(502).json({ error: err.message || "Generation failed" });
+  }
+});
+
+app.post("/generate-lead-email", requireOwner, async (req, res) => {
+  const client = getOpenAI();
+  if (!client) return res.status(503).json({ error: "OPENAI_API_KEY is not set on this server yet" });
+  const { lead, goal } = req.body || {};
+  if (!lead || !goal) {
+    return res.status(400).json({ error: "lead and goal are required" });
+  }
+  try {
+    const draft = await draftLeadEmail(client, { lead, goal });
     res.json(draft);
   } catch (err) {
     console.error(err);

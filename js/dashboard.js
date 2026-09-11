@@ -353,6 +353,20 @@ async function init(supabase) {
         <dt>Your notes</dt>
         <dd><textarea class="dash-note-field" data-note placeholder="Private notes: viewing feedback, next steps…">${esc(l.owner_notes || "")}</textarea>
         <button type="button" class="btn" data-save-note style="margin-top:var(--space-2)">Save note</button></dd>
+        <dt>Email</dt>
+        <dd>
+          <label class="dash-switch"><input type="checkbox" data-email-optout ${l.email_opt_out ? "checked" : ""}> This lead has opted out of email</label>
+          ${!l.email ? '<p class="field__note">No email address on file — can\'t compose one.</p>' :
+            `<button type="button" class="btn mt-4" data-compose-toggle>Compose email</button>
+             <div id="lead-compose" class="mt-4" hidden>
+               <div class="field"><label>What should this email accomplish?</label><textarea data-compose-goal rows="2" placeholder="e.g. Follow up after their viewing last week and ask if they have questions"></textarea></div>
+               <button type="button" class="btn" data-compose-draft>Draft with AI</button>
+               <div class="field mt-4"><label>Subject</label><input type="text" data-compose-subject></div>
+               <div class="field"><label>Body</label><textarea data-compose-body rows="8"></textarea></div>
+               <button type="button" class="btn btn--solid" data-compose-send>Send</button>
+               <p class="field__note" data-compose-status></p>
+             </div>`}
+        </dd>
       </dl>`;
     $("#lead-detail").hidden = false;
     $("#lead-detail").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -369,16 +383,272 @@ async function init(supabase) {
   });
 
   $("#lead-detail-body").addEventListener("click", async (e) => {
-    if (!e.target.closest("[data-save-note]")) return;
-    const btn = e.target.closest("[data-save-note]");
     const id = $("#lead-detail").dataset.id;
-    const note = $("#lead-detail-body [data-note]").value;
-    btn.textContent = "Saving…";
-    const { error } = await supabase.from("leads").update({ owner_notes: note }).eq("id", id);
-    btn.textContent = error ? "Failed, retry" : "Saved";
-    setTimeout(() => { btn.textContent = "Save note"; }, 1800);
     const lead = leads.find((l) => l.id === id);
-    if (lead && !error) lead.owner_notes = note;
+
+    if (e.target.closest("[data-save-note]")) {
+      const btn = e.target.closest("[data-save-note]");
+      const note = $("#lead-detail-body [data-note]").value;
+      btn.textContent = "Saving…";
+      const { error } = await supabase.from("leads").update({ owner_notes: note }).eq("id", id);
+      btn.textContent = error ? "Failed, retry" : "Saved";
+      setTimeout(() => { btn.textContent = "Save note"; }, 1800);
+      if (lead && !error) lead.owner_notes = note;
+      return;
+    }
+
+    if (e.target.closest("[data-compose-toggle]")) {
+      $("#lead-compose").hidden = !$("#lead-compose").hidden;
+      return;
+    }
+
+    if (e.target.closest("[data-compose-draft]")) {
+      const status = $("#lead-detail-body [data-compose-status]");
+      const goal = $("#lead-detail-body [data-compose-goal]").value.trim();
+      if (!goal) { status.textContent = "Say what this email should accomplish first."; return; }
+      if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+      const btn = e.target.closest("[data-compose-draft]");
+      btn.disabled = true;
+      status.textContent = "Drafting…";
+      try {
+        const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+        const body = JSON.stringify({
+          lead: { name: lead.name, intent: lead.intent, districts: lead.districts, budget_range: lead.budget_range, timeframe: lead.timeframe, notes: lead.notes, status: lead.status },
+          goal
+        });
+        const r = await fetch(AGENT_URL + "/generate-lead-email", { method: "POST", headers, body });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "Draft failed");
+        $("#lead-detail-body [data-compose-subject]").value = data.subject || "";
+        $("#lead-detail-body [data-compose-body]").value = data.body_html || "";
+        status.textContent = "Draft ready. Review and edit before sending.";
+      } catch (ex) {
+        status.textContent = "Could not draft: " + (ex.message || ex);
+      } finally {
+        btn.disabled = false;
+      }
+      return;
+    }
+
+    if (e.target.closest("[data-compose-send]")) {
+      const status = $("#lead-detail-body [data-compose-status]");
+      const subject = $("#lead-detail-body [data-compose-subject]").value.trim();
+      const body_html = $("#lead-detail-body [data-compose-body]").value.trim();
+      const goal = $("#lead-detail-body [data-compose-goal]").value.trim();
+      if (!subject || !body_html) { status.textContent = "Subject and body are both required."; return; }
+      const btn = e.target.closest("[data-compose-send]");
+      btn.disabled = true;
+      status.textContent = "Sending…";
+      try {
+        const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+        const body = JSON.stringify({ lead_id: id, subject, body_html, goal });
+        const r = await fetch("/api/send-lead-email", { method: "POST", headers, body });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "Send failed");
+        status.textContent = "Sent.";
+        showToast("Email sent.");
+      } catch (ex) {
+        status.textContent = "Could not send: " + (ex.message || ex);
+      } finally {
+        btn.disabled = false;
+      }
+      return;
+    }
+  });
+
+  $("#lead-detail-body").addEventListener("change", async (e) => {
+    const optout = e.target.closest("[data-email-optout]");
+    if (!optout) return;
+    const id = $("#lead-detail").dataset.id;
+    const { error } = await supabase.from("leads").update({ email_opt_out: optout.checked }).eq("id", id);
+    if (error) { showToast("Could not update: " + error.message, true); optout.checked = !optout.checked; return; }
+    const lead = leads.find((l) => l.id === id);
+    if (lead) lead.email_opt_out = optout.checked;
+  });
+
+  /* manually add a lead — a call, referral, or walk-in that didn't come
+     through the site's own inquiry form */
+  const leadEditor = $("#lead-editor");
+  const leadForm = $("#lead-form");
+  $("#lead-new-btn").addEventListener("click", () => {
+    leadForm.reset();
+    $("#lead-error").textContent = "";
+    leadEditor.hidden = false;
+    leadEditor.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $("#lead-editor-close").addEventListener("click", () => { leadEditor.hidden = true; });
+
+  leadForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("#lead-error");
+    err.textContent = "";
+    const btn = $("#lead-save");
+    btn.textContent = "Saving…";
+    try {
+      const payload = {
+        name: leadForm.elements.name.value.trim(),
+        email: leadForm.elements.email.value.trim() || null,
+        phone: leadForm.elements.phone.value.trim() || null,
+        intent: leadForm.elements.intent.value || null,
+        districts: leadForm.elements.districts.value.trim() || null,
+        budget_range: leadForm.elements.budget_range.value || null,
+        timeframe: leadForm.elements.timeframe.value || null,
+        listing_slug: leadForm.elements.listing_slug.value.trim() || null,
+        notes: leadForm.elements.notes.value.trim() || null,
+        status: leadForm.elements.status.value,
+        source_page: "dashboard",
+      };
+      const { error } = await supabase.from("leads").insert(payload);
+      if (error) throw error;
+      leadEditor.hidden = true;
+      await loadLeads();
+      showToast("Lead added.");
+    } catch (ex) {
+      err.textContent = ex.message || "Could not save this lead.";
+    } finally {
+      btn.textContent = "Save lead";
+    }
+  });
+
+  /* batch-add leads — paste rows copied from a spreadsheet, or a CSV file */
+  const LEAD_COLUMN_ALIASES = {
+    name: "name", "full name": "name", "full_name": "name", "client": "name",
+    email: "email", "e-mail": "email",
+    phone: "phone", mobile: "phone", contact: "phone", "phone number": "phone",
+    intent: "intent",
+    district: "districts", districts: "districts",
+    budget: "budget_range", "budget range": "budget_range", "budget_range": "budget_range",
+    timeframe: "timeframe", timeline: "timeframe",
+    listing: "listing_slug", "listing slug": "listing_slug", "listing_slug": "listing_slug", slug: "listing_slug",
+    notes: "notes", note: "notes",
+    status: "status",
+  };
+
+  /* Splits one line on a delimiter, honouring double-quoted fields for CSV —
+     a spreadsheet paste is tab-delimited and essentially never needs that. */
+  function splitDelimitedLine(line, delim) {
+    if (delim === "\t") return line.split("\t");
+    const cells = [];
+    let cur = "", inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (inQuotes) {
+        if (c === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else inQuotes = false; }
+        else cur += c;
+      } else if (c === '"') inQuotes = true;
+      else if (c === delim) { cells.push(cur); cur = ""; }
+      else cur += c;
+    }
+    cells.push(cur);
+    return cells;
+  }
+
+  function parseLeadRows(text) {
+    const lines = text.replace(/\r\n/g, "\n").split("\n").filter((l) => l.trim() !== "");
+    if (!lines.length) return { rows: [], skipped: [] };
+    const delim = lines[0].includes("\t") ? "\t" : ",";
+    const header = splitDelimitedLine(lines[0], delim).map((h) => h.trim().toLowerCase());
+    const rows = [];
+    const skipped = [];
+    lines.slice(1).forEach((line, i) => {
+      const cells = splitDelimitedLine(line, delim);
+      const raw = {};
+      header.forEach((h, j) => {
+        const col = LEAD_COLUMN_ALIASES[h];
+        if (col && cells[j] !== undefined) raw[col] = cells[j].trim();
+      });
+      if (!raw.name) { skipped.push({ line: i + 2, reason: "no name" }); return; }
+      rows.push({
+        name: raw.name,
+        email: raw.email || null,
+        phone: raw.phone || null,
+        intent: raw.intent || null,
+        districts: raw.districts || null,
+        budget_range: raw.budget_range || null,
+        timeframe: raw.timeframe || null,
+        listing_slug: raw.listing_slug || null,
+        notes: raw.notes || null,
+        status: STATUSES.includes(raw.status) ? raw.status : "contacted",
+        source_page: "dashboard-batch",
+      });
+    });
+    return { rows, skipped };
+  }
+
+  const batchEditor = $("#lead-batch-editor");
+  const batchPreviewEl = $("#lead-batch-preview");
+  const batchImportBtn = $("#lead-batch-import-btn");
+  let batchRows = [];
+
+  $("#lead-batch-btn").addEventListener("click", () => {
+    $("#lead-batch-file").value = "";
+    $("#lead-batch-paste").value = "";
+    batchPreviewEl.innerHTML = "";
+    batchImportBtn.hidden = true;
+    $("#lead-batch-error").textContent = "";
+    batchRows = [];
+    batchEditor.hidden = false;
+    batchEditor.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $("#lead-batch-close").addEventListener("click", () => { batchEditor.hidden = true; });
+
+  $("#lead-batch-file").addEventListener("change", async () => {
+    const file = $("#lead-batch-file").files[0];
+    if (file) $("#lead-batch-paste").value = await file.text();
+  });
+
+  $("#lead-batch-preview-btn").addEventListener("click", () => {
+    const err = $("#lead-batch-error");
+    err.textContent = "";
+    const text = $("#lead-batch-paste").value.trim();
+    if (!text) { err.textContent = "Paste some rows or choose a file first."; return; }
+    const { rows, skipped } = parseLeadRows(text);
+    batchRows = rows;
+    if (!rows.length) {
+      batchPreviewEl.innerHTML = "";
+      batchImportBtn.hidden = true;
+      err.textContent = skipped.length
+        ? `No usable rows — every line was missing a name (${skipped.length} skipped).`
+        : "No rows found. Check the format against the example above.";
+      return;
+    }
+    batchPreviewEl.innerHTML = `
+      <p class="field__note">${rows.length} lead${rows.length === 1 ? "" : "s"} ready to import${skipped.length ? `, ${skipped.length} row${skipped.length === 1 ? "" : "s"} skipped (no name)` : ""}.</p>
+      <div class="dash-table-wrap">
+        <table class="dash-table">
+          <thead><tr><th>Name</th><th>Contact</th><th>Intent</th><th>Status</th></tr></thead>
+          <tbody>
+            ${rows.map((r) => `
+              <tr>
+                <td>${esc(r.name)}</td>
+                <td>${esc(r.email || r.phone || "—")}</td>
+                <td>${esc(r.intent || "—")}</td>
+                <td>${esc(r.status)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>`;
+    batchImportBtn.hidden = false;
+    batchImportBtn.textContent = `Import ${rows.length} lead${rows.length === 1 ? "" : "s"}`;
+  });
+
+  batchImportBtn.addEventListener("click", async () => {
+    if (!batchRows.length) return;
+    const err = $("#lead-batch-error");
+    err.textContent = "";
+    batchImportBtn.textContent = "Importing…";
+    batchImportBtn.disabled = true;
+    try {
+      const { error } = await supabase.from("leads").insert(batchRows);
+      if (error) throw error;
+      showToast(`${batchRows.length} lead${batchRows.length === 1 ? "" : "s"} imported.`);
+      batchEditor.hidden = true;
+      await loadLeads();
+    } catch (ex) {
+      err.textContent = ex.message || "Could not import these leads.";
+    } finally {
+      batchImportBtn.disabled = false;
+    }
   });
 
   /* ————— listings ————— */
