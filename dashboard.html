@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/site.css?v=47">
+<link rel="stylesheet" href="css/vendor/drawflow.min.css?v=1">
 <link rel="icon" href="images/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
@@ -171,6 +172,25 @@
 
   /* Media previews, gallery, suggestions */
   .dash-preview, .dash-map-preview { border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); background: var(--a-surface-2); }
+  .dash-preview-card { border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); background: var(--a-surface-2); padding: var(--space-6); }
+  .dash-preview-card p { margin: var(--space-3) 0; }
+
+  /* Flow builder (Drawflow canvas) */
+  .dash-flow-layout { display: flex; gap: 12px; align-items: stretch; }
+  .dash-flow-palette { display: flex; flex-direction: column; gap: 8px; width: 160px; flex: none; }
+  .dash-flow-palette__item {
+    border: 1px solid var(--a-border-strong); border-radius: var(--a-radius-sm); background: var(--a-surface);
+    padding: 8px 10px; font-size: 13px; font-weight: 600; color: var(--a-text); cursor: grab;
+  }
+  .dash-flow-palette__item span { display: block; font-size: 11px; font-weight: 400; color: var(--a-text-3); margin-top: 2px; }
+  .dash-flow-canvas { flex: 1; height: 480px; border: 1px solid var(--a-border); border-radius: var(--a-radius); background: var(--a-bg); position: relative; }
+  .drawflow .drawflow-node { background: var(--a-surface); border: 1px solid var(--a-border-strong); border-radius: var(--a-radius-sm); box-shadow: none; padding: 8px 12px; min-width: 140px; }
+  .drawflow .drawflow-node.selected { border-color: var(--a-accent); }
+  .drawflow .drawflow-node .dash-flow-node__type { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--a-text-3); }
+  .drawflow .drawflow-node .dash-flow-node__label { font-size: 13px; font-weight: 600; color: var(--a-text); margin-top: 2px; }
+  .drawflow .drawflow-node .dash-flow-node__meta { font-size: 11px; color: var(--a-text-3); margin-top: 2px; }
+  .drawflow .connection .main-path { stroke: var(--a-border-strong); stroke-width: 2px; }
+  .drawflow .drawflow-node .input, .drawflow .drawflow-node .output { background: var(--a-accent); height: 10px; width: 10px; }
   .dash-gallery-item img { border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); background: var(--a-surface-2); }
   .dash-suggest-chip { border: 1px solid var(--a-border); border-radius: 999px; background: var(--a-surface); color: var(--a-text-2); font-family: inherit; }
   .dash-suggest-chip:hover { background: var(--a-text); color: #fff; border-color: var(--a-text); }
@@ -783,15 +803,116 @@
   <!-- Automation -->
   <section id="tab-automation" class="dash-tab" hidden>
     <div class="dash-panel">
-      <div class="dash-panel__head"><h2 class="h3">Automation</h2></div>
-      <p class="field__note">AI-powered email automation is not set up yet. Tell Claude when you're ready to configure it.</p>
+      <div class="dash-panel__head">
+        <h2 class="h3">Flows</h2>
+        <button class="btn" id="flow-new-btn">+ Add flow</button>
+      </div>
+      <p class="field__note">A flow sends automatically once started — there's no review step per send. Enroll a lead in an active flow from their own detail panel on the Leads tab; nothing enrolls on its own.</p>
+      <div id="flows-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel">
+      <div class="dash-panel__head">
+        <h2 class="h3">Active enrollments</h2>
+        <button class="btn" id="enrollments-refresh-btn">Refresh</button>
+      </div>
+      <div id="enrollments-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel" id="flow-editor" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="flow-editor-title">New flow</h2>
+        <button class="funnel-back" id="flow-editor-close">Close</button>
+      </div>
+      <div class="dash-form__row" style="grid-template-columns:2fr 1fr;align-items:end">
+        <div class="field"><label>Name</label><input type="text" id="flow-name" placeholder="e.g. Buyer follow-up"></div>
+        <label class="dash-switch"><input type="checkbox" id="flow-active" checked> Active</label>
+      </div>
+      <p class="field__note">Drag a block onto the canvas, then connect it by dragging from the dot on one block to the dot on another. Click a block to configure it below.</p>
+      <div class="dash-flow-layout mt-4">
+        <div class="dash-flow-palette">
+          <div class="dash-flow-palette__item" draggable="true" data-node-type="wait">Wait<span>Delay before the next block</span></div>
+          <div class="dash-flow-palette__item" draggable="true" data-node-type="send_email">Send Email<span>Send a template</span></div>
+          <div class="dash-flow-palette__item" draggable="true" data-node-type="condition">Condition<span>Yes / No branch on status</span></div>
+        </div>
+        <div id="flow-canvas" class="dash-flow-canvas"></div>
+      </div>
+      <div class="dash-panel mt-4" id="flow-node-config" hidden></div>
+      <button class="btn btn--solid mt-8" type="button" id="flow-save">Save flow</button>
+      <p class="field__error" id="flow-error" role="alert"></p>
+    </div>
+
+    <div class="dash-panel">
+      <div class="dash-panel__head">
+        <h2 class="h3">Email templates</h2>
+        <button class="btn" id="template-new-btn">+ Add template</button>
+      </div>
+      <p class="field__note">Reusable email content, written once and sent to whichever lead it applies to. {firstName}, {intent}, {districts}, {budgetRange}, {timeframe}, {status}, and {listingTitle} get filled in per-recipient.</p>
+      <div class="filterbar" style="border:0;padding:0" id="template-filters">
+        <button class="chip" aria-pressed="true" data-tcategory="all">All</button>
+        <button class="chip" aria-pressed="false" data-tcategory="general">General</button>
+        <button class="chip" aria-pressed="false" data-tcategory="buyer">Buyer</button>
+        <button class="chip" aria-pressed="false" data-tcategory="seller">Seller</button>
+        <button class="chip" aria-pressed="false" data-tcategory="investor">Investor</button>
+        <button class="chip" aria-pressed="false" data-tcategory="foreign-buyer">Foreign buyer</button>
+      </div>
+      <div id="templates-list" class="dash-list"></div>
+    </div>
+
+    <div class="dash-panel" id="template-editor" hidden>
+      <div class="dash-panel__head">
+        <h2 class="h3" id="template-editor-title">New template</h2>
+        <button class="funnel-back" id="template-editor-close">Close</button>
+      </div>
+      <div class="dash-form__row">
+        <form id="template-form" class="dash-form">
+          <input type="hidden" name="id">
+          <div class="field"><label>Name</label><input name="name" required placeholder="e.g. Day 3 — Educate"></div>
+          <div class="field"><label>Category</label>
+            <select name="category">
+              <option value="general">General</option>
+              <option value="buyer">Buyer</option>
+              <option value="seller">Seller</option>
+              <option value="investor">Investor</option>
+              <option value="foreign-buyer">Foreign buyer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Draft with AI</label>
+            <div class="dash-form__row" style="grid-template-columns:1fr">
+              <textarea id="template-ai-angle" rows="2" placeholder="What should this email accomplish? e.g. Introduce the practice and ask what they're looking for"></textarea>
+            </div>
+            <button type="button" class="btn mt-4" id="template-ai-draft-btn">Draft with AI</button>
+            <p class="field__note" id="template-ai-status"></p>
+          </div>
+          <div class="field">
+            <label>Insert a merge field</label>
+            <div id="template-variable-chips"></div>
+          </div>
+          <div class="field"><label>Subject</label><input name="subject" data-template-field></div>
+          <div class="field"><label>Heading</label><input name="heading" data-template-field></div>
+          <div class="field"><label>Body</label><textarea name="body" rows="8" data-template-field></textarea></div>
+          <div class="dash-form__row">
+            <div class="field"><label>Button text</label><input name="button_text" data-template-field></div>
+            <div class="field"><label>Button URL</label><input name="button_url" placeholder="e.g. https://www.propertiesbychel.com/presentation"></div>
+          </div>
+          <div class="field"><label>Art image URL (optional)</label><input name="art_image_url"></div>
+          <button class="btn btn--solid mt-8" type="submit" id="template-save">Save template</button>
+          <p class="field__error" id="template-error" role="alert"></p>
+        </form>
+        <div>
+          <p class="field__note" style="margin-bottom:var(--space-3)">Preview, with sample values</p>
+          <div id="template-preview"></div>
+        </div>
+      </div>
     </div>
   </section>
 </main>
 
 <script src="js/supabase-config.js?v=17"></script>
+<script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=37"></script>
+<script type="module" src="js/dashboard.js?v=40"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

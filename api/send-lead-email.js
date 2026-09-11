@@ -1,9 +1,9 @@
-// Vercel Function — sends an owner-composed (optionally AI-drafted) email to
-// a lead via Resend, gated to the signed-in dashboard owner only. Every send
-// is logged in lead_email_log first, which also doubles as the dedup lock
-// for a nurture-sequence step (see the unique index in
-// supabase/migration-lead-email-log.sql): a second attempt at the same
-// (enrollment_id, step_order) gets a 409 before Resend is ever called.
+// Vercel Function — sends an owner-composed (optionally AI-drafted) one-off
+// email to a lead via Resend, gated to the signed-in dashboard owner only.
+// Every send is logged in lead_email_log for an audit trail. (Flow-driven
+// autonomous sends are a separate code path — see api/run-flows.js — since
+// those have no owner session to authenticate and follow a different
+// dedup/advance mechanism keyed on enrollment_id/node_id.)
 //
 // Requires RESEND_API_KEY / RESEND_FROM_EMAIL (see api/notify-lead.js) plus
 // SUPABASE_URL / SUPABASE_ANON_KEY / OWNER_EMAIL to verify the caller — the
@@ -79,7 +79,7 @@ export async function POST(request) {
   } catch {
     return jsonResponse({ error: "Invalid JSON" }, 400);
   }
-  const { lead_id, subject, body_html, goal, enrollment_id, step_order } = payload || {};
+  const { lead_id, subject, body_html, goal } = payload || {};
   if (!lead_id || !subject || !body_html) {
     return jsonResponse({ error: "lead_id, subject, and body_html are required" }, 400);
   }
@@ -101,22 +101,9 @@ export async function POST(request) {
   const logRes = await fetch(`${supabaseUrl}/rest/v1/lead_email_log`, {
     method: "POST",
     headers: { ...restHeaders, Prefer: "return=representation" },
-    body: JSON.stringify({
-      lead_id,
-      enrollment_id: enrollment_id || null,
-      step_order: step_order != null ? step_order : null,
-      subject,
-      body_html,
-      goal: goal || null,
-      status: "sending"
-    })
+    body: JSON.stringify({ lead_id, subject, body_html, goal: goal || null, status: "sending" })
   });
-  if (!logRes.ok) {
-    if (logRes.status === 409) {
-      return jsonResponse({ error: "This step has already been sent for this enrollment." }, 409);
-    }
-    return jsonResponse({ error: "Could not record this send" }, 502);
-  }
+  if (!logRes.ok) return jsonResponse({ error: "Could not record this send" }, 502);
   const [logRow] = await logRes.json();
 
   let resendResult;

@@ -107,6 +107,9 @@ async function init(supabase) {
     loadDevelopments();
     loadListings();
     loadPhotos();
+    loadFlows();
+    loadEnrollments();
+    loadTemplates();
     if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto, showToast });
   }
 
@@ -116,6 +119,7 @@ async function init(supabase) {
       $$(".dash-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       chip.setAttribute("aria-pressed", "true");
       ["leads", "developments", "listings", "photos", "content", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
+      if (chip.dataset.tab === "automation") loadEnrollments();
     });
   });
 
@@ -336,6 +340,7 @@ async function init(supabase) {
     $("#lead-detail-title").textContent = l.name || "(no name)";
     $("#lead-detail").dataset.id = l.id;
     const when = new Date(l.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+    const activeFlows = flows.filter((f) => f.active);
     $("#lead-detail-body").innerHTML = `
       <dl style="margin:0">
         <dt>Status</dt>
@@ -366,6 +371,15 @@ async function init(supabase) {
                <button type="button" class="btn btn--solid" data-compose-send>Send</button>
                <p class="field__note" data-compose-status></p>
              </div>`}
+        </dd>
+        <dt>Nurture flow</dt>
+        <dd>
+          <p class="field__note">A flow sends automatically once started — there's no review step per send, unlike Compose email above.</p>
+          ${activeFlows.length ?
+            `<select data-flow-select>${activeFlows.map((f) => `<option value="${f.id}">${esc(f.name)}</option>`).join("")}</select>
+             <button type="button" class="btn" data-flow-start>Start</button>
+             <p class="field__note" data-flow-status></p>` :
+            '<p class="field__note">No active flows yet — build one under the Automation tab.</p>'}
         </dd>
       </dl>`;
     $("#lead-detail").hidden = false;
@@ -452,6 +466,32 @@ async function init(supabase) {
       } finally {
         btn.disabled = false;
       }
+      return;
+    }
+
+    if (e.target.closest("[data-flow-start]")) {
+      const status = $("#lead-detail-body [data-flow-status]");
+      const sel = $("#lead-detail-body [data-flow-select]");
+      const flow = flows.find((f) => f.id === sel.value);
+      if (!flow) return;
+      const nodes = flow.graph && flow.graph.drawflow ? Object.entries(flow.graph.drawflow.Home.data) : [];
+      const triggerEntry = nodes.find(([, n]) => n.name === "trigger");
+      if (!triggerEntry) { status.textContent = "This flow has no starting block."; return; }
+      const btn = e.target.closest("[data-flow-start]");
+      btn.disabled = true;
+      status.textContent = "Starting…";
+      const now = new Date().toISOString();
+      const { error } = await supabase.from("lead_flow_enrollments").insert({
+        lead_id: id, flow_id: flow.id, current_node_id: triggerEntry[0],
+        node_entered_at: now, next_check_at: now, enrolled_at: now
+      });
+      if (error) {
+        status.textContent = error.code === "23505" ? "Already enrolled in this flow." : "Could not start: " + error.message;
+      } else {
+        status.textContent = "Enrolled.";
+        loadEnrollments();
+      }
+      btn.disabled = false;
       return;
     }
   });
@@ -648,6 +688,373 @@ async function init(supabase) {
       err.textContent = ex.message || "Could not import these leads.";
     } finally {
       batchImportBtn.disabled = false;
+    }
+  });
+
+  /* ————— automation: visual nurture flows (Drawflow) ————— */
+  let flows = [];
+  let flowEditor = null;
+  const FLOW_NODE_LABELS = { trigger: "New Lead", wait: "Wait", send_email: "Send Email", condition: "Condition" };
+
+  function flowNodeHtml(type, data) {
+    data = data || {};
+    let meta = "";
+    if (type === "wait") meta = (data.delay_days || 0) + " day(s)";
+    if (type === "send_email") {
+      const t = templates.find((x) => x.id === data.template_id);
+      meta = t ? t.name : "No template selected";
+    }
+    if (type === "condition") meta = "Yes: status in " + ((data.value || []).join(", ") || "(none set)");
+    return `<div><div class="dash-flow-node__type">${esc(type.replace("_", " "))}</div><div class="dash-flow-node__label">${esc(FLOW_NODE_LABELS[type] || type)}</div>${meta ? `<div class="dash-flow-node__meta">${esc(meta)}</div>` : ""}</div>`;
+  }
+
+  function refreshFlowNodeDom(nodeId) {
+    const node = flowEditor.getNodeFromId(nodeId);
+    if (!node) return;
+    const content = document.querySelector(`#node-${nodeId} .drawflow_content_node`);
+    if (content) content.innerHTML = flowNodeHtml(node.name, node.data);
+  }
+
+  function initFlowEditor() {
+    if (flowEditor) return flowEditor;
+    flowEditor = new Drawflow($("#flow-canvas"));
+    flowEditor.reroute = true;
+    flowEditor.start();
+    flowEditor.on("nodeSelected", (id) => openFlowNodeConfig(id));
+    flowEditor.on("nodeUnselected", () => { $("#flow-node-config").hidden = true; });
+    return flowEditor;
+  }
+
+  function addFlowNode(type, x, y) {
+    const inputs = type === "trigger" ? 0 : 1;
+    const outputs = type === "condition" ? 2 : 1;
+    const data = type === "wait" ? { delay_days: 1 }
+      : type === "send_email" ? { template_id: null }
+      : type === "condition" ? { field: "status", operator: "in", value: [] }
+      : {};
+    flowEditor.addNode(type, inputs, outputs, x, y, type, data, flowNodeHtml(type, data));
+  }
+
+  $$(".dash-flow-palette__item").forEach((item) => {
+    item.addEventListener("dragstart", (e) => { e.dataTransfer.setData("node-type", item.dataset.nodeType); });
+  });
+  $("#flow-canvas").addEventListener("dragover", (e) => e.preventDefault());
+  $("#flow-canvas").addEventListener("drop", (e) => {
+    e.preventDefault();
+    const type = e.dataTransfer.getData("node-type");
+    if (!type || !flowEditor) return;
+    const rect = $("#flow-canvas").getBoundingClientRect();
+    const x = (e.clientX - rect.left - flowEditor.canvas_x) / flowEditor.zoom;
+    const y = (e.clientY - rect.top - flowEditor.canvas_y) / flowEditor.zoom;
+    addFlowNode(type, x, y);
+  });
+
+  function openFlowNodeConfig(nodeId) {
+    const node = flowEditor.getNodeFromId(nodeId);
+    const panel = $("#flow-node-config");
+    if (!node || node.name === "trigger") { panel.hidden = true; return; }
+    panel.dataset.nodeId = nodeId;
+    if (node.name === "wait") {
+      panel.innerHTML = `<h3 class="h3">Wait</h3><div class="field"><label>Days from when this block is reached</label><input type="number" min="0" id="flow-cfg-delay" value="${node.data.delay_days || 0}"></div>`;
+    } else if (node.name === "send_email") {
+      panel.innerHTML = `<h3 class="h3">Send Email</h3><div class="field"><label>Template</label><select id="flow-cfg-template"><option value="">Choose a template…</option>${templates.map((t) => `<option value="${t.id}" ${t.id === node.data.template_id ? "selected" : ""}>${esc(t.name)}</option>`).join("")}</select></div>`;
+    } else if (node.name === "condition") {
+      panel.innerHTML = `<h3 class="h3">Condition</h3><p class="field__note">Checks the lead's pipeline status. The first output (top) is Yes, the second (bottom) is No.</p><div class="field"><label>Status is one of (comma-separated)</label><input type="text" id="flow-cfg-value" value="${esc((node.data.value || []).join(", "))}" placeholder="e.g. viewing, negotiating"></div>`;
+    }
+    panel.hidden = false;
+  }
+
+  $("#flow-node-config").addEventListener("input", () => {
+    const nodeId = Number($("#flow-node-config").dataset.nodeId);
+    const node = flowEditor.getNodeFromId(nodeId);
+    if (!node) return;
+    let data = {};
+    if (node.name === "wait") data = { delay_days: Number($("#flow-cfg-delay").value) || 0 };
+    else if (node.name === "send_email") data = { template_id: $("#flow-cfg-template").value || null };
+    else if (node.name === "condition") data = { field: "status", operator: "in", value: $("#flow-cfg-value").value.split(",").map((s) => s.trim()).filter(Boolean) };
+    flowEditor.updateNodeDataFromId(nodeId, data);
+    refreshFlowNodeDom(nodeId);
+  });
+
+  async function loadFlows() {
+    const { data, error } = await supabase.from("email_flows").select("*").order("created_at", { ascending: true });
+    if (error) { $("#flows-list").innerHTML = '<p class="dash-empty">Could not load flows: ' + esc(error.message) + "</p>"; return; }
+    flows = data;
+    renderFlowsList();
+  }
+
+  function renderFlowsList() {
+    if (!flows.length) { $("#flows-list").innerHTML = '<p class="dash-empty">No flows yet.</p>'; return; }
+    $("#flows-list").innerHTML = flows.map((f) => `
+      <div class="dash-row" data-id="${f.id}">
+        <div class="dash-row__line">
+          <span class="dash-row__name">${esc(f.name)}</span>
+          <span class="dash-row__meta">${f.active ? "active" : "inactive"}</span>
+          <span class="dash-row__spacer"></span>
+          <button type="button" class="dash-linkbtn" data-edit-flow>Edit</button>
+          <button type="button" class="dash-linkbtn" data-del-flow>Delete</button>
+        </div>
+      </div>`).join("");
+  }
+
+  $("#flows-list").addEventListener("click", async (e) => {
+    const row = e.target.closest("[data-id]");
+    if (!row) return;
+    const f = flows.find((x) => x.id === row.dataset.id);
+    if (!f) return;
+    if (e.target.closest("[data-edit-flow]")) openFlowEditor(f);
+    if (e.target.closest("[data-del-flow]")) {
+      if (!confirm(`Delete "${f.name}"? This cannot be undone.`)) return;
+      const { error } = await supabase.from("email_flows").delete().eq("id", f.id);
+      if (error) showToast("Could not delete: " + error.message, true);
+      else loadFlows();
+    }
+  });
+
+  function openFlowEditor(f) {
+    $("#flow-error").textContent = "";
+    $("#flow-name").value = f ? f.name : "";
+    $("#flow-active").checked = f ? f.active : true;
+    $("#flow-editor").dataset.id = f ? f.id : "";
+    $("#flow-editor-title").textContent = f ? "Edit flow" : "New flow";
+    $("#flow-node-config").hidden = true;
+    $("#flow-editor").hidden = false;
+    $("#flow-editor").scrollIntoView({ behavior: "smooth", block: "start" });
+    const fe = initFlowEditor();
+    fe.clear();
+    if (f && f.graph && f.graph.drawflow) {
+      fe.import(f.graph);
+    } else {
+      addFlowNode("trigger", 50, 50);
+    }
+  }
+
+  $("#flow-new-btn").addEventListener("click", () => openFlowEditor(null));
+  $("#flow-editor-close").addEventListener("click", () => { $("#flow-editor").hidden = true; });
+
+  $("#flow-save").addEventListener("click", async () => {
+    const err = $("#flow-error");
+    err.textContent = "";
+    const name = $("#flow-name").value.trim();
+    if (!name) { err.textContent = "Name is required."; return; }
+    const graph = flowEditor.export();
+    const nodes = Object.values(graph.drawflow.Home.data);
+    if (nodes.some((n) => n.name === "send_email" && !n.data.template_id)) {
+      err.textContent = "Every Send Email block needs a template selected.";
+      return;
+    }
+    const id = $("#flow-editor").dataset.id;
+    const payload = { name, active: $("#flow-active").checked, graph };
+    const btn = $("#flow-save");
+    btn.textContent = "Saving…";
+    const q = id
+      ? supabase.from("email_flows").update(payload).eq("id", id)
+      : supabase.from("email_flows").insert(payload);
+    const { error } = await q;
+    btn.textContent = "Save flow";
+    if (error) { err.textContent = error.message; return; }
+    $("#flow-editor").hidden = true;
+    await loadFlows();
+  });
+
+  /* Active enrollments: a read-only status list, since nothing here needs a
+   * human click anymore — the cron engine (api/run-flows.js) does the
+   * sending. This is purely for visibility into where each lead is. */
+  async function loadEnrollments() {
+    const { data, error } = await supabase
+      .from("lead_flow_enrollments")
+      .select("*, lead:leads(name), flow:email_flows(name)")
+      .order("enrolled_at", { ascending: false })
+      .limit(50);
+    if (error) { $("#enrollments-list").innerHTML = '<p class="dash-empty">Could not load: ' + esc(error.message) + "</p>"; return; }
+    if (!data.length) { $("#enrollments-list").innerHTML = '<p class="dash-empty">No enrollments yet.</p>'; return; }
+    $("#enrollments-list").innerHTML = data.map((en) => `
+      <div class="dash-row">
+        <div class="dash-row__line">
+          <span class="dash-row__name">${esc(en.lead ? en.lead.name || "(no name)" : "(deleted lead)")}</span>
+          <span class="dash-row__meta">${esc(en.flow ? en.flow.name : "(deleted flow)")} · ${esc(en.status)}${en.status === "active" ? " · next check " + new Date(en.next_check_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" }) : ""}</span>
+        </div>
+      </div>`).join("");
+  }
+
+  $("#enrollments-refresh-btn").addEventListener("click", loadEnrollments);
+
+  /* ————— automation: email templates ————— */
+  const TEMPLATE_CATEGORY_LABELS = { general: "General", buyer: "Buyer", seller: "Seller", investor: "Investor", "foreign-buyer": "Foreign buyer" };
+  const TEMPLATE_VARIABLES = ["firstName", "intent", "districts", "budgetRange", "timeframe", "status", "listingTitle"];
+  const TEMPLATE_PREVIEW_SAMPLE = {
+    firstName: "Maria", intent: "Acquiring a residence", districts: "Makati, BGC",
+    budgetRange: "₱150M – ₱400M", timeframe: "Within six months", status: "Viewing", listingTitle: "One Central Penthouse"
+  };
+  let templates = [];
+  let templateFilter = "all";
+
+  function substituteTemplateVars(text, values) {
+    return String(text || "").replace(/\{(\w+)\}/g, (m, key) => (key in values ? values[key] : m));
+  }
+
+  async function loadTemplates() {
+    const { data, error } = await supabase.from("email_templates").select("*").order("created_at", { ascending: true });
+    if (error) { $("#templates-list").innerHTML = '<p class="dash-empty">Could not load templates: ' + esc(error.message) + "</p>"; return; }
+    templates = data;
+    renderTemplatesList();
+  }
+
+  $("#template-filters").addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-tcategory]");
+    if (!chip) return;
+    $$("#template-filters .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
+    chip.setAttribute("aria-pressed", "true");
+    templateFilter = chip.dataset.tcategory;
+    renderTemplatesList();
+  });
+
+  function renderTemplatesList() {
+    const rows = templateFilter === "all" ? templates : templates.filter((t) => t.category === templateFilter);
+    if (!rows.length) { $("#templates-list").innerHTML = '<p class="dash-empty">No templates here yet.</p>'; return; }
+    $("#templates-list").innerHTML = rows.map((t) => `
+      <div class="dash-row" data-id="${t.id}">
+        <div class="dash-row__line">
+          <span class="dash-row__name">${esc(t.name)}</span>
+          <span class="dash-row__meta">${esc(TEMPLATE_CATEGORY_LABELS[t.category] || t.category)}${t.subject ? " · " + esc(t.subject) : ""}</span>
+          <span class="dash-row__spacer"></span>
+          <button type="button" class="dash-linkbtn" data-edit-template>Edit</button>
+          <button type="button" class="dash-linkbtn" data-del-template>Delete</button>
+        </div>
+      </div>`).join("");
+  }
+
+  $("#templates-list").addEventListener("click", async (e) => {
+    const row = e.target.closest("[data-id]");
+    if (!row) return;
+    const t = templates.find((x) => x.id === row.dataset.id);
+    if (!t) return;
+    if (e.target.closest("[data-edit-template]")) openTemplateEditor(t);
+    if (e.target.closest("[data-del-template]")) {
+      if (!confirm(`Delete "${t.name}"? This cannot be undone.`)) return;
+      const { error } = await supabase.from("email_templates").delete().eq("id", t.id);
+      if (error) showToast("Could not delete: " + error.message, true);
+      else loadTemplates();
+    }
+  });
+
+  function renderTemplatePreview() {
+    const form = $("#template-form");
+    const get = (name) => form.elements[name].value;
+    const subject = substituteTemplateVars(get("subject"), TEMPLATE_PREVIEW_SAMPLE);
+    const heading = substituteTemplateVars(get("heading"), TEMPLATE_PREVIEW_SAMPLE);
+    const body = substituteTemplateVars(get("body"), TEMPLATE_PREVIEW_SAMPLE);
+    const buttonText = substituteTemplateVars(get("button_text"), TEMPLATE_PREVIEW_SAMPLE);
+    $("#template-preview").innerHTML = `
+      <div class="dash-preview-card">
+        <p class="field__note">Subject: ${esc(subject) || "—"}</p>
+        <h3 style="margin:var(--space-2) 0">${esc(heading) || "—"}</h3>
+        ${body.split("\n\n").filter(Boolean).map((p) => `<p>${esc(p)}</p>`).join("") || "<p>—</p>"}
+        ${buttonText ? `<p class="mt-4"><span class="btn btn--solid" style="pointer-events:none;display:inline-block">${esc(buttonText)}</span></p>` : ""}
+      </div>`;
+  }
+
+  $("#template-form").addEventListener("input", (e) => {
+    if (e.target.closest("[data-template-field]")) renderTemplatePreview();
+  });
+
+  $("#template-variable-chips").innerHTML = TEMPLATE_VARIABLES.map((v) => `<button type="button" class="chip" data-insert-var="${v}">{${v}}</button>`).join("");
+  $("#template-variable-chips").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-insert-var]");
+    if (!btn) return;
+    const focused = document.activeElement;
+    const target = focused && focused.closest("[data-template-field]") ? focused : $("#template-form [name=body]");
+    const insert = "{" + btn.dataset.insertVar + "}";
+    const start = target.selectionStart ?? target.value.length;
+    const end = target.selectionEnd ?? target.value.length;
+    target.value = target.value.slice(0, start) + insert + target.value.slice(end);
+    target.focus();
+    target.selectionStart = target.selectionEnd = start + insert.length;
+    renderTemplatePreview();
+  });
+
+  function openTemplateEditor(t) {
+    const form = $("#template-form");
+    form.reset();
+    $("#template-error").textContent = "";
+    $("#template-ai-status").textContent = "";
+    $("#template-ai-angle").value = "";
+    form.elements.id.value = t ? t.id : "";
+    form.elements.name.value = t ? t.name : "";
+    form.elements.category.value = t ? t.category : "general";
+    form.elements.subject.value = t ? t.subject || "" : "";
+    form.elements.heading.value = t ? t.heading || "" : "";
+    form.elements.body.value = t ? t.body || "" : "";
+    form.elements.button_text.value = t ? t.button_text || "" : "";
+    form.elements.button_url.value = t ? t.button_url || "" : "";
+    form.elements.art_image_url.value = t ? t.art_image_url || "" : "";
+    $("#template-editor-title").textContent = t ? "Edit template" : "New template";
+    $("#template-editor").hidden = false;
+    $("#template-editor").scrollIntoView({ behavior: "smooth", block: "start" });
+    renderTemplatePreview();
+  }
+
+  $("#template-new-btn").addEventListener("click", () => openTemplateEditor(null));
+  $("#template-editor-close").addEventListener("click", () => { $("#template-editor").hidden = true; });
+
+  $("#template-ai-draft-btn").addEventListener("click", async () => {
+    const form = $("#template-form");
+    const name = form.elements.name.value.trim();
+    const status = $("#template-ai-status");
+    if (!name) { status.textContent = "Enter a name first."; return; }
+    if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+    const btn = $("#template-ai-draft-btn");
+    btn.disabled = true;
+    status.textContent = "Drafting…";
+    try {
+      const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+      const body = JSON.stringify({ name, category: form.elements.category.value, angle: $("#template-ai-angle").value.trim() });
+      const r = await fetch(AGENT_URL + "/generate-email-template", { method: "POST", headers, body });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Draft failed");
+      form.elements.subject.value = data.subject || "";
+      form.elements.heading.value = data.heading || "";
+      form.elements.body.value = data.body || "";
+      form.elements.button_text.value = data.button_text || "";
+      renderTemplatePreview();
+      status.textContent = "Draft ready. Review and edit before saving.";
+    } catch (ex) {
+      status.textContent = "Could not draft: " + (ex.message || ex);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("#template-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const err = $("#template-error");
+    err.textContent = "";
+    const btn = $("#template-save");
+    btn.textContent = "Saving…";
+    try {
+      const isEdit = !!form.elements.id.value;
+      const payload = {
+        name: form.elements.name.value.trim(),
+        category: form.elements.category.value,
+        subject: form.elements.subject.value.trim(),
+        heading: form.elements.heading.value.trim(),
+        body: form.elements.body.value.trim(),
+        button_text: form.elements.button_text.value.trim() || null,
+        button_url: form.elements.button_url.value.trim() || null,
+        art_image_url: form.elements.art_image_url.value.trim() || null
+      };
+      const q = isEdit
+        ? supabase.from("email_templates").update(payload).eq("id", form.elements.id.value)
+        : supabase.from("email_templates").insert(payload);
+      const { error } = await q;
+      if (error) throw error;
+      $("#template-editor").hidden = true;
+      await loadTemplates();
+    } catch (ex) {
+      err.textContent = ex.message || "Could not save this template.";
+    } finally {
+      btn.textContent = "Save template";
     }
   });
 
