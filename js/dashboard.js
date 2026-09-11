@@ -725,14 +725,14 @@ async function init(supabase) {
     return flowEditor;
   }
 
-  function addFlowNode(type, x, y) {
+  function addFlowNode(type, x, y, overrideData) {
     const inputs = type === "trigger" ? 0 : 1;
     const outputs = type === "condition" ? 2 : 1;
-    const data = type === "wait" ? { delay_days: 1 }
+    const data = overrideData || (type === "wait" ? { delay_days: 1 }
       : type === "send_email" ? { template_id: null }
       : type === "condition" ? { field: "status", operator: "in", value: [] }
-      : {};
-    flowEditor.addNode(type, inputs, outputs, x, y, type, data, flowNodeHtml(type, data));
+      : {});
+    return flowEditor.addNode(type, inputs, outputs, x, y, type, data, flowNodeHtml(type, data));
   }
 
   $$(".dash-flow-palette__item").forEach((item) => {
@@ -831,6 +831,77 @@ async function init(supabase) {
 
   $("#flow-new-btn").addEventListener("click", () => openFlowEditor(null));
   $("#flow-editor-close").addEventListener("click", () => { $("#flow-editor").hidden = true; });
+
+  /* AI-generated flow: replaces the canvas with a linear Trigger → (Wait →
+   * Send Email) × N chain, creating a real email_templates row for each
+   * send along the way. Branching (Condition blocks) stays a manual,
+   * drag-in feature — reliably generating a branching graph from a prompt
+   * is a further step this doesn't attempt. */
+  async function generateFlowFromAI({ category, angle }) {
+    const status = $("#flow-ai-status");
+    if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
+    $("#flow-quick-generate-btn").disabled = true;
+    $("#flow-custom-ai-btn").disabled = true;
+    status.textContent = "Generating…";
+    try {
+      const headers = { "Content-Type": "application/json", ...(await listingAuthHeader()) };
+      const body = JSON.stringify({ category, angle });
+      const r = await fetch(AGENT_URL + "/generate-flow", { method: "POST", headers, body });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Generation failed");
+
+      $("#flow-name").value = data.name || "";
+      initFlowEditor().clear();
+      $("#flow-node-config").hidden = true;
+
+      let x = 50;
+      let prevId = addFlowNode("trigger", x, 100);
+      for (const step of data.steps) {
+        x += 180;
+        const waitId = addFlowNode("wait", x, 100, { delay_days: step.delay_days || 0 });
+        flowEditor.addConnection(prevId, waitId, "output_1", "input_1");
+
+        const { data: templateRow, error: templateError } = await supabase.from("email_templates").insert({
+          name: step.template.name || (data.name + " — step"),
+          category: category || "general",
+          subject: step.template.subject || "",
+          heading: step.template.heading || "",
+          body: step.template.body || "",
+          button_text: step.template.button_text || null,
+          button_url: "https://www.propertiesbychel.com/presentation",
+          ai_generated: true
+        }).select().single();
+        if (templateError) throw new Error("Could not create template: " + templateError.message);
+        templates.push(templateRow);
+
+        x += 180;
+        const sendId = addFlowNode("send_email", x, 100, { template_id: templateRow.id });
+        flowEditor.addConnection(waitId, sendId, "output_1", "input_1");
+        prevId = sendId;
+      }
+      status.textContent = data.steps.length + " email(s) generated as new templates. Review each block, then save.";
+      renderTemplatesList();
+    } catch (ex) {
+      status.textContent = "Could not generate: " + (ex.message || ex);
+    } finally {
+      $("#flow-quick-generate-btn").disabled = false;
+      $("#flow-custom-ai-btn").disabled = false;
+    }
+  }
+
+  $("#flow-quick-generate-btn").addEventListener("click", () => {
+    generateFlowFromAI({
+      category: "general",
+      angle: $("#flow-ai-angle").value.trim() ||
+        "A general, patient follow-up sequence for a new lead who hasn't been contacted again since their first enquiry."
+    });
+  });
+
+  $("#flow-custom-ai-btn").addEventListener("click", () => {
+    const angle = $("#flow-ai-angle").value.trim();
+    if (!angle) { $("#flow-ai-status").textContent = "Describe what this flow should accomplish first."; return; }
+    generateFlowFromAI({ category: "general", angle });
+  });
 
   $("#flow-save").addEventListener("click", async () => {
     const err = $("#flow-error");

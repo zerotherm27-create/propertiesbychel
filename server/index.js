@@ -10,6 +10,7 @@ import { draftListingDescription } from "./lib/listings.js";
 import { importDevelopmentFromUrl, draftDevelopmentMeta } from "./lib/developments.js";
 import { draftLeadEmail } from "./lib/leads.js";
 import { draftEmailTemplate } from "./lib/templates.js";
+import { draftFlow } from "./lib/flows.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -129,6 +130,19 @@ app.post("/generate-email-template", requireOwner, async (req, res) => {
   }
   try {
     const draft = await draftEmailTemplate(client, { name, category, angle });
+    res.json(draft);
+  } catch (err) {
+    console.error(err);
+    res.status(502).json({ error: err.message || "Generation failed" });
+  }
+});
+
+app.post("/generate-flow", requireOwner, async (req, res) => {
+  const client = getOpenAI();
+  if (!client) return res.status(503).json({ error: "OPENAI_API_KEY is not set on this server yet" });
+  const { category, angle } = req.body || {};
+  try {
+    const draft = await draftFlow(client, { category, angle });
     res.json(draft);
   } catch (err) {
     console.error(err);

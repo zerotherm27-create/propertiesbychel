@@ -828,7 +828,13 @@
         <div class="field"><label>Name</label><input type="text" id="flow-name" placeholder="e.g. Buyer follow-up"></div>
         <label class="dash-switch"><input type="checkbox" id="flow-active" checked> Active</label>
       </div>
-      <p class="field__note">Drag a block onto the canvas, then connect it by dragging from the dot on one block to the dot on another. Click a block to configure it below.</p>
+      <div class="dash-form__row" style="grid-template-columns:1fr auto auto;align-items:start">
+        <div class="field"><label>Describe the flow (optional, for Custom AI)</label><textarea id="flow-ai-angle" rows="2" placeholder="e.g. A patient 4-week follow-up for buyers who haven't replied since their first enquiry"></textarea></div>
+        <button type="button" class="btn" id="flow-quick-generate-btn" style="margin-top:22px">Quick Generate</button>
+        <button type="button" class="btn" id="flow-custom-ai-btn" style="margin-top:22px">Custom AI</button>
+      </div>
+      <p class="field__note" id="flow-ai-status"></p>
+      <p class="field__note">This replaces everything currently on the canvas below. Drag a block on manually, then connect it by dragging from the dot on one block to the dot on another. Click a block to configure it.</p>
       <div class="dash-flow-layout mt-4">
         <div class="dash-flow-palette">
           <div class="dash-flow-palette__item" draggable="true" data-node-type="wait">Wait<span>Delay before the next block</span></div>
@@ -912,7 +918,7 @@
 <script src="js/supabase-config.js?v=17"></script>
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=40"></script>
+<script type="module" src="js/dashboard.js?v=41"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
