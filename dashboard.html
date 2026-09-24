@@ -114,6 +114,8 @@
   .inbox-sig { margin: 4px 0 16px; font-size: 13px; }
   .inbox-sig label { margin-right: 12px; }
   .inbox-sig textarea { width: 100%; margin-top: 8px; }
+  .inbox-preview .inbox-frame { height: 380px; }
+  #inbox-html-toggle { display: block; margin: 8px 0 12px; }
   .inbox-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
   .inbox-meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; margin-bottom: 12px; }
   .inbox-meta dt { color: var(--a-text-3); }
@@ -995,10 +997,11 @@
                 <span class="field__note" id="inbox-gen-status" role="status"></span>
                 <p class="field__note">Merge fields like {firstName} fill in from the lead whose email matches the To address.</p>
               </div>
-              <div class="field"><label for="inbox-html">HTML</label>
-                <textarea id="inbox-html" name="html" rows="12" spellcheck="false" class="inbox-code"></textarea></div>
               <p class="field__note">Preview</p>
-              <div id="inbox-html-preview"></div>
+              <div id="inbox-html-preview" class="inbox-preview"></div>
+              <button type="button" class="dash-linkbtn" id="inbox-html-toggle" aria-expanded="false">Edit HTML code</button>
+              <div class="field" id="inbox-html-code" hidden><label for="inbox-html">HTML</label>
+                <textarea id="inbox-html" name="html" rows="12" spellcheck="false" class="inbox-code"></textarea></div>
             </div>
             <div class="inbox-sig">
               <label><input type="checkbox" id="inbox-sig-on" checked> Include signature</label>
@@ -1025,7 +1028,7 @@
 <script src="js/supabase-config.js?v=17"></script>
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=46"></script>
+<script type="module" src="js/dashboard.js?v=47"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

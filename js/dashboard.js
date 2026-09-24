@@ -2192,6 +2192,9 @@ async function init(supabase) {
     syncSignatureField();
     f.dataset.parentMessageId = "";
     setComposeMode("text");
+    $("#inbox-html-code").hidden = true;
+    $("#inbox-html-toggle").textContent = "Edit HTML code";
+    $("#inbox-html-toggle").setAttribute("aria-expanded", "false");
     $("#inbox-gen-status").textContent = "";
     $("#inbox-compose-error").textContent = "";
     $("#inbox-compose-title").textContent = reply ? "Reply" : "New message";
@@ -2239,9 +2242,11 @@ async function init(supabase) {
     if (!$("#inbox-sig-on").checked || !signatureText.trim()) return "";
     return '<div style="margin-top:24px;color:#555">' + plainTextToHtml(signatureText) + "</div>";
   }
-  // In HTML mode the body may be a full document; put the signature inside it.
+  // In HTML mode the body may be a full document. The generated shell marks where the
+  // signature belongs (inside the card); otherwise it goes before </body>, or at the end.
   function withSignature(bodyHtml) {
     const sig = signatureHtml();
+    if (bodyHtml.includes(EMAIL_SIGNATURE_MARKER)) return bodyHtml.replace(EMAIL_SIGNATURE_MARKER, sig);
     if (!sig) return bodyHtml;
     const i = bodyHtml.toLowerCase().lastIndexOf("</body>");
     return i === -1 ? bodyHtml + sig : bodyHtml.slice(0, i) + sig + bodyHtml.slice(i);
@@ -2303,18 +2308,44 @@ async function init(supabase) {
     };
   }
 
-  // Same layout as renderTemplateEmailHtml in api/run-flows.js, so a template
-  // looks identical whether it's sent by a flow or composed here. Kept in sync by hand.
+  // Branded email shell for the HTML generator (table layout, inline styles, web-safe fonts so
+  // it renders in Gmail/Outlook/Apple Mail). Colours are the site palette (DESIGN.md): ink navy
+  // type and button, warm paper card on a parchment page, one short brass rule as the only accent.
+  // Square corners, no gradients. Flow emails sent by api/run-flows.js still use a plainer layout.
+  const EMAIL_LOGO_URL = "https://www.propertiesbychel.com/images/logo-navy.png";
+  const EMAIL_SIGNATURE_MARKER = "<!--signature-->";
   function renderTemplateHtml(t, values) {
     const sub = (v) => substituteTemplateVars(v, values);
+    const serif = "Georgia,'Times New Roman',serif";
+    const sans = "'Helvetica Neue',Helvetica,Arial,sans-serif";
     const paragraphs = sub(t.body).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
-      .map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
-    const image = t.art_image_url ? `<p><img src="${esc(t.art_image_url)}" style="max-width:100%"></p>` : "";
-    const buttonText = sub(t.button_text);
-    const button = buttonText && t.button_url
-      ? `<p><a href="${esc(t.button_url)}" style="display:inline-block;padding:10px 20px;background:#18181b;color:#fff;text-decoration:none;border-radius:6px">${esc(buttonText)}</a></p>`
+      .map((p) => `<p style="margin:0 0 16px;">${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
+    const heading = sub(t.heading).trim();
+    const buttonText = sub(t.button_text).trim();
+    const image = t.art_image_url
+      ? `<tr><td style="padding:24px 0 0;"><img src="${esc(t.art_image_url)}" alt="" width="600" style="display:block;width:100%;height:auto;border:0;"></td></tr>`
       : "";
-    return `${image}<h2>${esc(sub(t.heading))}</h2>${paragraphs}${button}`;
+    const headingRow = heading
+      ? `<tr><td style="padding:28px 32px 4px;font-family:${serif};font-size:26px;line-height:1.25;font-weight:normal;color:#152B5A;">${esc(heading)}</td></tr>`
+      : "";
+    const button = buttonText && t.button_url
+      ? `<tr><td style="padding:8px 32px 8px;"><a href="${esc(t.button_url)}" style="display:inline-block;padding:14px 30px;background:#152B5A;color:#F9F6F2;font-family:${sans};font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;text-decoration:none;">${esc(buttonText)}</a></td></tr>`
+      : "";
+    return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(sub(t.subject || heading))}</title></head>
+<body style="margin:0;padding:0;background:#F3F0E9;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F0E9;"><tr><td align="center" style="padding:32px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#F9F6F2;">
+<tr><td style="padding:28px 32px 0;"><img src="${EMAIL_LOGO_URL}" alt="Properties by Chel" width="94" height="44" style="display:block;border:0;height:44px;width:auto;"></td></tr>
+<tr><td style="padding:18px 32px 0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="48" height="2" style="width:48px;height:2px;line-height:2px;font-size:2px;background:#D3B037;">&nbsp;</td></tr></table></td></tr>
+${image}
+${headingRow}
+<tr><td style="padding:12px 32px 8px;font-family:${sans};font-size:16px;line-height:1.7;color:#505357;">${paragraphs}${EMAIL_SIGNATURE_MARKER}</td></tr>
+${button}
+<tr><td style="padding:28px 32px 28px;font-family:${sans};font-size:12px;line-height:1.6;color:#787A7E;">Properties by Chel &middot; Private Real Estate Advisory, Philippines</td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
   }
 
   function useGeneratedEmail(t) {
@@ -2333,13 +2364,23 @@ async function init(supabase) {
       const raw = htmlMode ? $("#inbox-html").value : plainTextToHtml($("#inbox-body").value);
       const html = raw.trim() ? withSignature(raw) : "";
       const box = htmlMode ? $("#inbox-html-preview") : $("#inbox-text-preview");
-      if (!html.trim()) { box.innerHTML = '<p class="dash-empty">Nothing to preview yet.</p>'; return; }
+      if (!html.trim()) {
+        box.innerHTML = '<p class="dash-empty">' + (htmlMode ? "Pick a template or draft with AI above, and the email appears here." : "Nothing to preview yet.") + "</p>";
+        return;
+      }
       renderEmailBody(box, { html_body: html });
     }, 200);
   }
 
   $$("[data-compose-mode]").forEach((chip) => chip.addEventListener("click", () => setComposeMode(chip.dataset.composeMode)));
   $("#inbox-html").addEventListener("input", renderComposePreview);
+  $("#inbox-html-toggle").addEventListener("click", () => {
+    const code = $("#inbox-html-code");
+    code.hidden = !code.hidden;
+    $("#inbox-html-toggle").textContent = code.hidden ? "Edit HTML code" : "Hide HTML code";
+    $("#inbox-html-toggle").setAttribute("aria-expanded", String(!code.hidden));
+    if (!code.hidden) $("#inbox-html").focus();
+  });
   $("#inbox-body").addEventListener("input", renderComposePreview);
   $("#inbox-sig-on").addEventListener("change", renderComposePreview);
   $("#inbox-sig-edit").addEventListener("click", () => { const ed = $("#inbox-sig-editor"); ed.hidden = !ed.hidden; });

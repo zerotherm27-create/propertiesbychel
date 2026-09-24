@@ -29,14 +29,15 @@ function normaliseMessageId(value) {
 // plain-text part, so derive one when the caller didn't send it.
 function htmlToText(html) {
   return html
-    .replace(/<(style|script)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<(head|style|script)[\s\S]*?<\/\1>/gi, "")
     .replace(/<a\s[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, "$2 ($1)")
     .replace(/<li[^>]*>/gi, "- ")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/li>/gi, "\n")
     .replace(/<\/(p|div|h[1-6]|tr|ul|ol)>/gi, "\n\n")
     .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ").replace(/&middot;/g, "\u00b7").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&")
     .replace(/\n{3,}/g, "\n\n")
     .trim();

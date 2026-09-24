@@ -48,10 +48,15 @@ pass) was replaced per the repo convention; it is in git history at
   migration; that table is public-read/owner-write, fine because a signature goes out in
   every email anyway), same markup, "Include signature" checkbox per message, appended in
   both modes (inside `</body>` when the HTML has one) and shown in the preview. HTML mode: pick a saved template or "Draft with
-  AI" (existing `/generate-email-template` endpoint on the Railway agent), edit the HTML,
-  live preview. The template renderer mirrors `renderTemplateEmailHtml` in
-  `api/run-flows.js` so an email looks identical composed here or sent by a flow; merge
-  fields fill from the lead whose email matches the To address (else `firstName` → "there").
+  AI" (existing `/generate-email-template` endpoint on the Railway agent). The **preview is the
+  main view**; the code sits behind an "Edit HTML code" toggle. Generated emails use a branded,
+  email-safe shell (`renderTemplateHtml` in `js/dashboard.js`): table layout, inline styles,
+  web-safe fonts, site palette from `DESIGN.md` (ink-navy type and button, warm-paper card on
+  parchment, one short brass rule, square corners), logo from
+  `https://www.propertiesbychel.com/images/logo-navy.png`, tagline footer. It leaves a
+  `<!--signature-->` marker so the signature lands inside the card. Merge fields fill from the
+  lead whose email matches the To address (else `firstName` → "there"). **Flow emails sent by
+  `api/run-flows.js` still use the older plain layout** — the two no longer match.
 - **Untrusted HTML:** received mail and the compose preview render only in
   `<iframe sandbox="allow-popups" srcdoc>` with `referrerpolicy="no-referrer"` and a CSP
   meta (`default-src 'none'; img-src https: data:; style-src 'unsafe-inline'`) — no
