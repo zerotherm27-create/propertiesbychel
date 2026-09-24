@@ -25,6 +25,20 @@ function normaliseMessageId(value) {
   return id.startsWith("<") ? id : `<${id}>`;
 }
 
+// HTML-only mail scores worse with spam filters than mail with a matching
+// plain-text part, so derive one when the caller didn't send it.
+function htmlToText(html) {
+  return html
+    .replace(/<(style|script)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function POST(request) {
   const from = process.env.RESEND_FROM_EMAIL;
   if (!process.env.RESEND_API_KEY || !from) {
@@ -64,12 +78,17 @@ export async function POST(request) {
     if (!parentId) return jsonResponse({ error: "Invalid parentMessageId" }, 400);
   }
 
+  const text = textBody || htmlToText(htmlBody);
+
   const message = {
     from,
     to: to.trim(),
     subject: subject.trim(),
     html: htmlBody,
-    ...(textBody ? { text: textBody } : {}),
+    // Where the recipient's replies go. Must be an address Resend receives
+    // for (the normal From address may route to another mail provider).
+    ...(process.env.RESEND_REPLY_TO ? { replyTo: process.env.RESEND_REPLY_TO } : {}),
+    ...(text ? { text } : {}),
     ...(parentId ? { headers: { "In-Reply-To": parentId, References: parentId } } : {})
   };
 
@@ -102,7 +121,7 @@ export async function POST(request) {
       to_address: to.trim(),
       subject: subject.trim(),
       html_body: htmlBody,
-      text_body: textBody || null,
+      text_body: text || null,
       status: "SENT"
     })
   });
