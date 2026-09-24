@@ -18,7 +18,7 @@ import {
 
 export async function POST(request) {
   try {
-    if (shouldSkip(request)) return noContent();
+    if (await shouldSkip(request)) return noContent();
     const db = serviceClient();
     if (!db) return noContent();
 

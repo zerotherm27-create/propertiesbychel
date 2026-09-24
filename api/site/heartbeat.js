@@ -10,7 +10,7 @@ import {
 
 export async function POST(request) {
   try {
-    if (shouldSkip(request)) return noContent();
+    if (await shouldSkip(request)) return noContent();
     const id = readSessionId(request);
     const db = serviceClient();
     if (!id || !db) return noContent();

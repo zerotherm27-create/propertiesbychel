@@ -3,6 +3,14 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "crons": [
-    { "path": "/api/run-flows", "schedule": "0 1 * * *" }
-  ]
+    {
+      "path": "/api/run-flows",
+      "schedule": "0 1 * * *"
+    }
+  ],
+  "functions": {
+    "api/site/*.js": {
+      "includeFiles": "node_modules/ua-parser-js/**"
+    }
+  }
 }

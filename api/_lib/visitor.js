@@ -4,7 +4,23 @@
 // no visitor login), so this must only ever run server-side.
 
 import { UAParser } from "ua-parser-js";
-import { isBot, isAICrawler } from "ua-parser-js/bot-detection";
+
+// The bot list lives in a submodule that Vercel's bundler once failed to package (the function
+// crashed on load). It is imported lazily and defensively — and vercel.json now includes the
+// package explicitly — so a missing file can only weaken bot filtering to the regex below, never
+// take the endpoint down. (No top-level await: it isn't safe in every build output.)
+let botCheck;
+async function loadBotCheck() {
+  if (botCheck !== undefined) return botCheck;
+  try {
+    const bots = await import("ua-parser-js/bot-detection");
+    botCheck = (ua) => bots.isBot(ua) || bots.isAICrawler(ua);
+  } catch (err) {
+    console.error("ua-parser-js/bot-detection unavailable, using the regex backstop only", err && err.message);
+    botCheck = null;
+  }
+  return botCheck;
+}
 
 const SUPABASE_URL_FALLBACK = "https://ndoiommnmkeoukxbnobp.supabase.co";
 
@@ -31,10 +47,12 @@ export function sessionCookie(request, id) {
   return `${SESSION_COOKIE}=${id}; Path=/; Max-Age=${SESSION_TTL_SECONDS}; HttpOnly; SameSite=Lax${secure}`;
 }
 
-export function shouldSkip(request) {
+export async function shouldSkip(request) {
   const ua = request.headers.get("user-agent");
   if (!ua) return true;
-  return isBot(ua) || isAICrawler(ua) || /bot|crawl|spider|slurp|headless|lighthouse|preview/i.test(ua);
+  if (/bot|crawl|spider|slurp|headless|lighthouse|preview|curl|wget|python-requests|httpclient/i.test(ua)) return true;
+  const check = await loadBotCheck();
+  return check ? check(ua) : false;
 }
 
 // iPadOS Safari sends a Macintosh user agent; the client reports touch support so
