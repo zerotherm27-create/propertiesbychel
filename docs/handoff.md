@@ -1,168 +1,124 @@
-# Handoff — AI email automation system (flows, templates, autonomous sending) + SEO pass
+# Handoff — headless email Inbox & Outbox (Resend)
 
-Covers the build-out of a GHL-style email automation system for the dashboard — manual/
-batch lead entry, AI-drafted one-off emails, a reusable template library, a visual
-drag-and-drop nurture-flow builder with branching, and a fully autonomous cron engine
-that sends without human review — plus a hardening pass that fixed 10 real bugs in that
-engine, and a separate but same-session SEO/structured-data pass. Eight commits on
-`main`, in order:
+A mailbox inside the owner dashboard: receive email, send one-off email (formatted text or
+HTML, with a saved signature), see delivery status, and reply in-thread. No external email UI — Resend is the
+transport, Supabase is the store, `dashboard.html` is the interface. Three commits on `main`:
 
-- [`2da687e`](https://github.com/zerotherm27-create/propertiesbychel/commit/2da687e) — manual/batch lead entry, AI-drafted one-off lead emails (Milestone 1)
-- [`58a27f3`](https://github.com/zerotherm27-create/propertiesbychel/commit/58a27f3) — email template library + visual, branching flow builder (Milestone 3a/3b; supersedes an earlier linear-sequence design that never shipped)
-- [`e185bea`](https://github.com/zerotherm27-create/propertiesbychel/commit/e185bea) — the autonomous flow-sending engine, `api/run-flows.js` (Milestone 3c)
-- [`1d8d3f5`](https://github.com/zerotherm27-create/propertiesbychel/commit/1d8d3f5) — AI generation for flows (Quick Generate / Custom AI)
-- [`1781bc8`](https://github.com/zerotherm27-create/propertiesbychel/commit/1781bc8) — hierarchical canvas layout + branching in AI-generated flows
-- [`a4ecb53`](https://github.com/zerotherm27-create/propertiesbychel/commit/a4ecb53) — fix Compose Email sending raw text as if it were already HTML
-- [`123565f`](https://github.com/zerotherm27-create/propertiesbychel/commit/123565f) — dynamic sitemap, per-page meta tags, JSON-LD (separate SEO deliverable, same session)
-- [`e14e0b9`](https://github.com/zerotherm27-create/propertiesbychel/commit/e14e0b9) — fix 10 bugs found in a full code-review audit of the automation system
+- [`aa21204`](https://github.com/zerotherm27-create/propertiesbychel/commit/aa21204) — schema, webhook, send endpoint, Inbox tab, middleware fix
+- [`709be23`](https://github.com/zerotherm27-create/propertiesbychel/commit/709be23) — plain-text alternative on every send; optional `RESEND_REPLY_TO`
+- [`52ffbeb`](https://github.com/zerotherm27-create/propertiesbychel/commit/52ffbeb) — HTML compose mode with template + AI generators
+- the commit after it (see `git log`) — formatting toolbar for plain-text compose, and the saved email signature
 
-## What was built
+The previous handoff (the flows/templates/autonomous-sending system and its 10-bug audit
+pass) was replaced per the repo convention; it is in git history at
+[`a6fc425`](https://github.com/zerotherm27-create/propertiesbychel/commit/a6fc425)
+(`git show a6fc425:docs/handoff.md`).
 
-**Manual/batch lead entry.** The Leads tab in `dashboard.html` gained a paste-in batch
-importer (`js/dashboard.js`: `parseLeadRows`, `splitDelimitedLine`, `LEAD_COLUMN_ALIASES`)
-alongside the existing single-lead form.
+## How it works
 
-**Compose Email.** From a lead's detail panel: draft with AI (via the Railway content
-agent, `server/lib/leads.js`) or write by hand, review, edit, send via Resend
-(`api/send-lead-email.js`). Every send is logged to `lead_email_log` for an audit trail.
-This is the only send path with a human in the loop.
+- **Store:** `public.email_messages` (`supabase/migration-email-messages.sql`) — one row per
+  email, `direction` INBOUND/OUTBOUND, `status` SENT/DELIVERED/BOUNCED/RECEIVED/FAILED,
+  `resend_id` (unique, so webhook retries upsert instead of duplicating), `message_id` and
+  `in_reply_to` for threading, nullable `lead_id`. Owner-only RLS (`is_owner()`).
+  Deliberately separate from `lead_email_log`, which stays the lead-scoped audit log for
+  flow/one-off lead sends.
+- **Inbound — `api/webhooks/resend.js`:** verifies the Svix signature on the raw body
+  (`resend.webhooks.verify`), then on `email.received` fetches the full body with
+  `resend.emails.receiving.get` (the webhook payload omits it), links a lead by sender
+  address if one matches, and upserts an INBOUND row. Also handles `email.sent` (backfills
+  the outbound Message-ID, which Resend only reveals here), `email.delivered`,
+  `email.bounced`, `email.failed` (status updates that never downgrade a later state).
+  Writes with `SUPABASE_SERVICE_ROLE_KEY` — no user session on a webhook.
+- **Outbound — `api/dashboard/email/send.js`:** owner-only (`api/_lib/owner-auth.js`, the
+  same check as `send-lead-email.js`). Takes `{ to, subject, htmlBody, textBody?,
+  parentMessageId? }`, validates (single-line subject, single recipient, header-safe
+  Message-ID), sends via the Resend SDK, then logs with the caller's own token so RLS
+  applies. Always sends a plain-text part (derived from the HTML if none given). Sets
+  `In-Reply-To`/`References` from `parentMessageId`, and `Reply-To` from `RESEND_REPLY_TO`
+  when set. If logging fails after a successful send it returns success plus a warning
+  rather than an error the owner might retry into a duplicate.
+- **Dashboard — Inbox tab** (`dashboard.html`, `js/dashboard.js`, "inbox" section): list with
+  All/Inbound/Outbound filter, detail pane, compose panel, Reply (prefills To/Re:/parent).
+  Compose has a Plain text / HTML toggle. **Plain text mode** has a formatting toolbar
+  (bold, italic, link, heading, bulleted/numbered list; Ctrl/Cmd+B/I/K) that writes light
+  markup (`**bold**`, `*italic*`, `[text](url)`, `- ` / `1. ` lists, `# ` heading) converted to
+  HTML on send by `plainTextToHtml` — everything is HTML-escaped first and only
+  `http(s):`/`mailto:` links are allowed, so typed text can't inject markup — with a live
+  preview. **Signature:** one saved block (`site_settings` key `email_signature`, so no
+  migration; that table is public-read/owner-write, fine because a signature goes out in
+  every email anyway), same markup, "Include signature" checkbox per message, appended in
+  both modes (inside `</body>` when the HTML has one) and shown in the preview. HTML mode: pick a saved template or "Draft with
+  AI" (existing `/generate-email-template` endpoint on the Railway agent), edit the HTML,
+  live preview. The template renderer mirrors `renderTemplateEmailHtml` in
+  `api/run-flows.js` so an email looks identical composed here or sent by a flow; merge
+  fields fill from the lead whose email matches the To address (else `firstName` → "there").
+- **Untrusted HTML:** received mail and the compose preview render only in
+  `<iframe sandbox="allow-popups" srcdoc>` with `referrerpolicy="no-referrer"` and a CSP
+  meta (`default-src 'none'; img-src https: data:; style-src 'unsafe-inline'`) — no
+  `allow-scripts`, no `allow-same-origin`, never `innerHTML`. Checked in a browser with a
+  hostile payload: nothing ran, parent page untouched.
+- **`middleware.js`:** `/api/` is now a passthrough prefix. Without it, coming-soon mode
+  rewrites third-party POSTs (the webhook, the cron) to the holding page.
 
-**Email template library.** `email_templates` table (category-tagged: general/buyer/
-seller/investor/foreign-buyer), a dashboard editor with mail-merge variables
-(`{firstName}`, `{intent}`, `{districts}`, `{budgetRange}`, `{timeframe}`, `{status}`,
-`{listingTitle}`) and a live preview, plus AI drafting (`server/lib/templates.js`,
-`POST /generate-email-template` on the content agent).
+## Configuration state (as of 2026-09-24)
 
-**Visual flow builder.** A Drawflow canvas (vendored locally, `js/vendor/drawflow.min.js`
-+ `css/vendor/drawflow.min.css`) with four node types — Trigger, Wait (day count from
-enrollment), Send Email (picks a template), Condition (checks `leads.status`, two
-outputs: Yes/No) — laid out hierarchically (trunk + left/right branches) rather than a
-flat horizontal chain. Flows save as Drawflow's own `export()` JSON into
-`email_flows.graph`. "AI generation" (Quick Generate / Custom AI) drafts a full flow —
-spine + one optional branch point — as new templates and a wired-up graph in one action
-(`server/lib/flows.js`).
+- **Env vars (Vercel, Production):** `RESEND_API_KEY` (must be Full access to read received
+  mail), `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `OWNER_EMAIL`. Optional `RESEND_REPLY_TO` — the user added it by hand
+  (`replies@prenaevi.resend.app`); I could not read it back (the Vercel MCP is 403 for env
+  vars), so confirm a real reply carries it.
+- **Resend webhook** → `https://www.propertiesbychel.com/api/webhooks/resend` (**must be
+  `www`**: the bare domain 308-redirects and Resend does not follow redirects — this was
+  the cause of every event stuck at "Attempting" until fixed). Events: `email.received`,
+  `email.sent`, `email.delivered`, `email.bounced`, `email.failed`. A replayed event returned
+  200 in production, which also proves the signing secret is right.
+- **Receiving:** the domain is set up for sending only. Inbound works through Resend's
+  managed address `<anything>@prenaevi.resend.app` (no DNS). A test email to
+  `test@prenaevi.resend.app` appeared in Resend → Emails → Receiving and produced a 200
+  webhook hit. **Not directly verified:** that the row landed in `email_messages` and shows
+  in the Inbox tab (no Supabase access from the session), and that the migration was run.
+- **DNS (GoDaddy):** DKIM (`resend._domainkey`) and SPF/return-path (`send.` subdomain) were
+  already present; a DMARC record was added — `_dmarc` TXT
+  `v=DMARC1; p=none; rua=mailto:concierge@propertiesbychel.com` (verified resolving).
+  **Root MX is Mailgun** (LeadConnector); do not point Resend inbound at the root domain.
 
-**The autonomous engine, `api/run-flows.js`.** A Vercel Cron job (`vercel.json`, daily —
-the Hobby plan rejects sub-daily schedules at deploy time, not just runtime) that walks
-every due `lead_flow_enrollments` row through its flow's graph and sends via Resend with
-**no human review** — the one send path with nobody looking at the message first. Uses
-`SUPABASE_SERVICE_ROLE_KEY` (bypasses RLS entirely) since there's no logged-in owner
-session to authenticate as; that key must only ever live as a Vercel env var, never
-client-side or on Railway.
+## Known limitations
 
-**The bug-fix pass (`e14e0b9`), all found by an 8-angle code-review audit and each
-verified against the actual source + a mocked test harness before/after:**
-- A failed send's dedup log row was only marked `failed`, never cleared, so a retry's
-  insert 409'd against it and was misread as "already sent" — fixed by checking the
-  existing row's *status* before deciding duplicate vs. legitimate retry.
-- `flow.active` was fetched but never checked — turning a flow off didn't stop leads
-  already enrolled from continuing to receive emails. Now skipped (not cancelled) while
-  inactive, so it resumes cleanly on reactivation.
-- Every permanent failure collapsed into a bare `cancelled` with no reason — now writes
-  `cancel_reason` (missing template, opted out, no email, flow/lead deleted, repeated
-  send failure), shown in the dashboard's enrollment list.
-- Transient send failures retried hourly forever with no cap — now stop and cancel
-  (`cancel_reason: send_failed_repeatedly`) after 6 attempts.
-- A Wait node's due time is now clamped to `max(enrolled_at + delay_days,
-  node_entered_at)`, so a bad or non-ascending `delay_days` (a hand-edit, or an AI branch
-  that didn't keep counting from enrollment) can't fire several emails back-to-back in
-  one tick.
-- Condition values are now filtered against the real `leads.status` enum both server-side
-  (AI drafting, `server/lib/flows.js`) and in the dashboard's node config (checkboxes,
-  not free text) — a hallucinated/mistyped status used to silently and permanently route
-  every lead down the "No" branch.
-- The cron's own paragraph renderer didn't convert a lone `\n` to `<br>`, unlike the
-  manual-compose renderer — the same template body looked fine in the dashboard preview
-  but rendered as one run-on line when actually sent autonomously. Now identical.
-- A whitespace-only Compose Email body passed validation and silently sent a blank email
-  — now rejected with a 400.
-- The flow-voice AI prompt and the Wait-node UI copy both promised `delay_days: 0` sends
-  "as soon as enrolled" — false, since the cron only runs once a day. Copy fixed in
-  `server/lib/style.js` and `js/dashboard.js` to stop promising immediacy.
-- Enrollments were processed one at a time with a fresh flow/lead/template fetch per
-  enrollment (N+1). Now batch-fetches flows/leads once per run and caches templates in a
-  `Map`, cutting redundant Supabase reads under real load.
+- **Replies to dashboard mail only reach the Inbox if `Reply-To` is an address Resend
+  receives for.** `concierge@propertiesbychel.com` routes to Mailgun, so without
+  `RESEND_REPLY_TO` a reply never arrives. The `resend.app` Reply-To is visible to
+  recipients; a custom inbound subdomain would look better but needs DNS (below).
+- **End-to-end reply loop unverified:** compose → Gmail → reply → appears Inbound has not
+  been run yet.
+- **Only Inbox-sent and inbound mail is recorded.** Flow emails, lead auto-replies
+  (`notify-lead.js`) and `send-lead-email.js` sends do not appear here; their delivery events
+  hit the webhook, find no row, get a 5xx for 5 minutes (so Resend retries, covering the race
+  with the send endpoint's insert), then a 200 — expect some retry noise in Resend's log.
+- **Attachments are not stored or shown.**
+- **The dashboard's service worker (`dashboard-sw.js`) is stale-while-revalidate**, so the first
+  load after a deploy can still show the previous dashboard version; a second refresh picks up
+  the new one. Local testing needs the service worker unregistered too.
+- The signature applies to Inbox compose only; the lead-detail "Compose Email"
+  (`api/send-lead-email.js`) and flow emails don't add it.
+- **Those other send paths are still HTML-only with no `List-Unsubscribe`** — a deliverability
+  weak spot noted but not changed.
+- **Duplicated code grew:** `requireOwner` now exists in `api/send-lead-email.js`,
+  `server/lib/auth.js` and `api/_lib/owner-auth.js`; `renderTemplateHtml` (dashboard) mirrors
+  `renderTemplateEmailHtml` (`api/run-flows.js`) by hand.
+- **`js/dashboard.js` (~2,400 lines) and `dashboard.html` are far past the 500-line guideline.**
+- A bounced `email.bounced` event seen during testing was a mistyped recipient, not a bug.
 
-**SEO pass (`123565f`), unrelated to the automation system but done the same session:**
-dynamic `/sitemap.xml` generated by `middleware.js` from live Supabase data (replacing a
-static file); per-page `<title>`/description/canonical/OG/Twitter meta tags and
-RealEstateListing/Article JSON-LD patched server-side on first load for listing,
-development, and article pages (`middleware.js`'s `servePatchedTemplate`); a client-side
-fallback in `js/articles.js` for the same tags. Also closed an XSS gap found in passing —
-JSON-LD content wasn't escaping `</script>` sequences before embedding.
+## Not pursued
 
-## Files touched
-
-- `api/run-flows.js` — new; the autonomous cron engine (Milestone 3c + the bug-fix pass)
-- `api/send-lead-email.js` — Compose Email send endpoint; HTML-escaping fix, blank-body
-  validation
-- `server/lib/flows.js`, `server/lib/templates.js` — new; AI drafting for flows/templates
-- `server/lib/style.js` — `EMAIL_TEMPLATE_VOICE`, `FLOW_VOICE` prompt sections
-- `server/index.js` — `/generate-flow`, `/generate-email-template` routes
-- `js/dashboard.js` (now ~2,130 lines — already over the repo's 500-line guideline before
-  this work, grew further; see Known limitations), `dashboard.html` (~930 lines) — Leads
-  batch import, Compose Email UI, Templates UI, Flow Builder UI (canvas, node config,
-  AI-generate buttons), Active Enrollments list
-- `js/vendor/drawflow.min.js`, `css/vendor/drawflow.min.css` — new, vendored
-- `supabase/migration-email-templates.sql`, `migration-email-flows.sql`,
-  `migration-flow-enrollment-reason.sql` — new; the last one (`cancel_reason`,
-  `send_retry_count` on `lead_flow_enrollments`) **must be run manually** in the Supabase
-  SQL editor — it wasn't run automatically and the code degrades silently (writes to
-  those columns just no-op) until it is
-- `vercel.json` — the `run-flows` cron entry
-- `middleware.js`, `article.html`, `js/articles.js`, `sitemap.xml` (deleted, now dynamic) —
-  the SEO pass
-
-## Known limitations / things to check
-
-- **The autonomous engine has no way to distinguish "genuinely waiting on Day 7" from
-  "wedged and retrying uselessly"** for a couple of edge cases the bug-fix pass didn't
-  touch: an unrecognized node type, or the 20-hop cycle-detection cap being hit, both
-  just retry hourly forever with no terminal state or dashboard signal — unlike the send-
-  failure path, which now does cap and surface (see Possible Future Work).
-- **No cycle detection at flow-save time.** A miswired Drawflow connection (condition's
-  "No" output looped back to an earlier node) is caught at runtime by the 20-hop cap, not
-  rejected when the flow is saved. A human building a flow could create this by accident.
-- **`escapeHtml`, `extractJson`, and the Resend-send wrapper are each duplicated 2–7
-  times** across `api/*.js` and `server/lib/*.js` — flagged by the audit, deliberately
-  left as-is (spun off as [a separate suggested cleanup task](../CLAUDE.md), not part of
-  this fix pass) since it's a maintenance-risk finding, not a live bug.
-- **`js/dashboard.js`/`dashboard.html` exceed the repo's 500-line CLAUDE.md guideline**
-  (2,130 / 930 lines) — pre-existing before this work, grew further with the Templates
-  and Flow Builder UI added in-place rather than split into their own modules.
-- **Condition nodes only ever check `leads.status`** — the `{field, operator, value}`
-  shape looks like a general rule engine but every call site (UI, AI prompt, executor)
-  hardcodes `field: "status", operator: "in"`. Fine today; don't assume other
-  fields/operators work without adding real support for them first.
-- **Resend has no open-tracking on the free tier**, so "did the lead engage with this
-  email" can't drive a condition — status has to stay a manual dashboard update.
-- The Vercel Hobby plan's once-daily cron means Wait-node timing is accurate to within a
-  day, not to the hour, regardless of the `delay_days` value entered.
-
-## Not pursued (discussed, deliberately skipped)
-
-- **Retry cap / terminal state for the two edge cases named above** (unrecognized node
-  type, hop-cap cycles) — the audit flagged both, but only the send-failure retry cap
-  (the one with a real-world trigger — a bad email address or a Resend outage) made the
-  fix pass; the other two need a schema-level `stuck`/`needs_review` status, a larger
-  change than a quick fix.
-- **Deduplicating `escapeHtml`/`extractJson`/the Resend wrapper** — real, flagged, spun
-  off as its own suggested task rather than bundled into the bug-fix commit.
-- **Sub-daily cron scheduling** — technically wanted (so `delay_days: 0` really would
-  read as "immediate"), blocked by the Vercel Hobby plan; worked around with a copy fix
-  instead of a scheduling workaround.
+- Migrating existing flow/lead sends onto the shared inbox table.
+- Storing attachments; threading UI beyond `In-Reply-To`/`References`.
+- A custom inbound subdomain — needs DNS records the assistant can't add.
 
 ## Possible future work
 
-- Add a `stuck`/`needs_review` enrollment status for the unrecognized-node-type and
-  hop-cap-cycle cases, surfaced in the dashboard the same way `cancel_reason` now is.
-- Cycle-detect a flow's graph at save time in `js/dashboard.js`, before it ever reaches
-  the cron engine.
-- Factor `escapeHtml`, `extractJson`, and the Resend POST wrapper into shared modules
-  (`api/_lib/`, `server/lib/ai.js`) — see the spun-off cleanup task.
-- Split `js/dashboard.js` into per-feature modules (Leads, Templates, Flow Builder) now
-  that it's grown well past the file-size guideline.
-- If Resend's paid tier or a future plan adds open-tracking, extend Condition nodes to
-  check engagement, not just pipeline status.
-- Upgrade off the Vercel Hobby plan if true sub-daily (or hourly) flow timing becomes a
-  real product requirement.
+- Set up `inbox.propertiesbychel.com` (add in Resend with Receiving on, add its records at
+  GoDaddy) and switch `RESEND_REPLY_TO` to it.
+- After a few weeks of clean DMARC reports, tighten `p=none` to `quarantine`.
+- Log flow/auto-reply sends into `email_messages` and add `List-Unsubscribe` + a plain-text
+  part to them.
+- Consolidate the duplicated owner-auth and template renderers; split `js/dashboard.js`.

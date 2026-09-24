@@ -110,6 +110,7 @@ async function init(supabase) {
     loadFlows();
     loadEnrollments();
     loadTemplates();
+    loadSignature();
     if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto, showToast });
   }
 
@@ -2188,6 +2189,7 @@ async function init(supabase) {
     $("#inbox-compose").hidden = false;
     const f = $("#inbox-compose-form");
     f.reset();
+    syncSignatureField();
     f.dataset.parentMessageId = "";
     setComposeMode("text");
     $("#inbox-gen-status").textContent = "";
@@ -2204,12 +2206,72 @@ async function init(supabase) {
     }
   }
 
-  // The compose box is plain text; convert to real HTML here so the owner never
-  // authors (or accidentally breaks) markup. Same paragraph rules as
-  // api/send-lead-email.js.
+  // The plain-text compose box takes light markup (**bold**, *italic*, [text](url),
+  // "- " / "1. " lists, "# " heading); convert to real HTML here so the owner never
+  // authors raw markup. Everything is HTML-escaped first, and only http(s)/mailto
+  // links are allowed, so nothing typed can inject tags or scripts.
+  function inlineFormat(text) {
+    return esc(text)
+      .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g, '<a href="$2">$1</a>')
+      .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
+  }
   function plainTextToHtml(text) {
-    return String(text || "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
-      .map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+    return String(text || "").split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).map((block) => {
+      const lines = block.split("\n");
+      if (lines.every((l) => /^[-*] /.test(l))) return "<ul>" + lines.map((l) => "<li>" + inlineFormat(l.slice(2)) + "</li>").join("") + "</ul>";
+      if (lines.every((l) => /^\d+\. /.test(l))) return "<ol>" + lines.map((l) => "<li>" + inlineFormat(l.replace(/^\d+\. /, "")) + "</li>").join("") + "</ol>";
+      if (/^#{1,3} /.test(block) && lines.length === 1) return "<h2>" + inlineFormat(block.replace(/^#{1,3} /, "")) + "</h2>";
+      return "<p>" + lines.map(inlineFormat).join("<br>") + "</p>";
+    }).join("");
+  }
+
+  /* Signature: one saved block (site_settings.email_signature), appended to every
+   * message when "Include signature" is on. Same light markup as the message body. */
+  let signatureText = "";
+  async function loadSignature() {
+    const { data } = await supabase.from("site_settings").select("value").eq("key", "email_signature").maybeSingle();
+    signatureText = (data && data.value && data.value.text) || "";
+    syncSignatureField();
+  }
+  function syncSignatureField() { $("#inbox-sig-text").value = signatureText; }
+  function signatureHtml() {
+    if (!$("#inbox-sig-on").checked || !signatureText.trim()) return "";
+    return '<div style="margin-top:24px;color:#555">' + plainTextToHtml(signatureText) + "</div>";
+  }
+  // In HTML mode the body may be a full document; put the signature inside it.
+  function withSignature(bodyHtml) {
+    const sig = signatureHtml();
+    if (!sig) return bodyHtml;
+    const i = bodyHtml.toLowerCase().lastIndexOf("</body>");
+    return i === -1 ? bodyHtml + sig : bodyHtml.slice(0, i) + sig + bodyHtml.slice(i);
+  }
+
+  // Formatting toolbar: wraps the selection (or inserts a placeholder) in the textarea.
+  function applyFormat(kind) {
+    const ta = $("#inbox-body");
+    const { selectionStart: a, selectionEnd: b, value } = ta;
+    const sel = value.slice(a, b);
+    let out, from, to;
+    const wrap = (mark, ph) => { const t = sel || ph; out = mark + t + mark; from = a + mark.length; to = from + t.length; };
+    if (kind === "bold") wrap("**", "bold text");
+    else if (kind === "italic") wrap("*", "italic text");
+    else if (kind === "link") {
+      const url = prompt("Link address (https://…)", "https://");
+      if (!url || !/^(https?:\/\/|mailto:)/.test(url.trim())) return;
+      const label = sel || "link text";
+      out = `[${label}](${url.trim()})`; from = a + 1; to = from + label.length;
+    } else {
+      const prefix = kind === "heading" ? "# " : null;
+      const text = sel || (kind === "heading" ? "Heading" : "Item");
+      const lines = text.split("\n").map((l, i) => (prefix || (kind === "ol" ? `${i + 1}. ` : "- ")) + l);
+      const lead = a > 0 && value[a - 1] !== "\n" ? "\n\n" : "";
+      out = lead + lines.join("\n"); from = a + lead.length; to = a + out.length;
+    }
+    ta.setRangeText(out, a, b, "end");
+    ta.focus();
+    ta.setSelectionRange(from, to);
+    renderComposePreview();
   }
 
   /* HTML compose mode: a template or an AI draft becomes editable HTML with a live preview. */
@@ -2218,7 +2280,8 @@ async function init(supabase) {
     $$("[data-compose-mode]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.composeMode === mode)));
     $("#inbox-mode-text").hidden = mode !== "text";
     $("#inbox-mode-html").hidden = mode !== "html";
-    if (mode === "html") { populateComposeTemplates(); renderComposePreview(); }
+    if (mode === "html") populateComposeTemplates();
+    renderComposePreview();
   }
 
   function populateComposeTemplates() {
@@ -2266,8 +2329,10 @@ async function init(supabase) {
   function renderComposePreview() {
     clearTimeout(composePreviewTimer);
     composePreviewTimer = setTimeout(() => {
-      const html = $("#inbox-html").value;
-      const box = $("#inbox-html-preview");
+      const htmlMode = $("#inbox-compose-form").dataset.mode === "html";
+      const raw = htmlMode ? $("#inbox-html").value : plainTextToHtml($("#inbox-body").value);
+      const html = raw.trim() ? withSignature(raw) : "";
+      const box = htmlMode ? $("#inbox-html-preview") : $("#inbox-text-preview");
       if (!html.trim()) { box.innerHTML = '<p class="dash-empty">Nothing to preview yet.</p>'; return; }
       renderEmailBody(box, { html_body: html });
     }, 200);
@@ -2275,6 +2340,22 @@ async function init(supabase) {
 
   $$("[data-compose-mode]").forEach((chip) => chip.addEventListener("click", () => setComposeMode(chip.dataset.composeMode)));
   $("#inbox-html").addEventListener("input", renderComposePreview);
+  $("#inbox-body").addEventListener("input", renderComposePreview);
+  $("#inbox-sig-on").addEventListener("change", renderComposePreview);
+  $("#inbox-sig-edit").addEventListener("click", () => { const ed = $("#inbox-sig-editor"); ed.hidden = !ed.hidden; });
+  $("#inbox-sig-text").addEventListener("input", (e) => { signatureText = e.target.value; renderComposePreview(); });
+  $("#inbox-sig-save").addEventListener("click", async () => {
+    const status = $("#inbox-sig-status");
+    status.textContent = "Saving…";
+    const { error } = await supabase.from("site_settings").upsert({ key: "email_signature", value: { text: signatureText } });
+    status.textContent = error ? "Could not save: " + error.message : "Saved.";
+  });
+  $$("[data-fmt]").forEach((btn) => btn.addEventListener("click", () => applyFormat(btn.dataset.fmt)));
+  $("#inbox-body").addEventListener("keydown", (e) => {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    const kind = { b: "bold", i: "italic", k: "link" }[e.key.toLowerCase()];
+    if (kind) { e.preventDefault(); applyFormat(kind); }
+  });
   $("#inbox-template").addEventListener("change", (e) => {
     const t = templates.find((x) => x.id === e.target.value);
     if (t) { useGeneratedEmail(t); $("#inbox-gen-status").textContent = `Loaded "${t.name}". Edit the HTML below if you like.`; }
@@ -2340,9 +2421,9 @@ async function init(supabase) {
         headers: { "Content-Type": "application/json", ...(await listingAuthHeader()) },
         body: JSON.stringify({
           to, subject,
-          // HTML mode sends the markup as-is (the server derives the plain-text part);
-          // plain mode is escaped into paragraphs first.
-          ...(htmlMode ? { htmlBody: text } : { htmlBody: plainTextToHtml(text), textBody: text }),
+          // HTML mode sends the markup as-is; plain mode converts the light markup first.
+          // Either way the server derives the plain-text part.
+          htmlBody: withSignature(htmlMode ? text : plainTextToHtml(text)),
           parentMessageId: f.dataset.parentMessageId || undefined
         })
       });
@@ -2350,6 +2431,7 @@ async function init(supabase) {
       if (!res.ok) throw new Error(out.error || "Send failed");
       showToast(out.warning || "Sent");
       f.reset();
+      syncSignatureField();
       $("#inbox-compose").hidden = true;
       $("#inbox-placeholder").hidden = false;
       loadInbox();
