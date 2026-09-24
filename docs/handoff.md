@@ -19,8 +19,15 @@ HTML layout with no `List-Unsubscribe`.
   created_at`, so the heartbeat only bumps `last_seen_at`. **RLS is on with an owner-only
   policy** — the playbook says "no RLS", which on Supabase would leave both tables open to the
   public anon key.
-- **Capture — `js/visit.js`** (loaded on every public page by a two-line loader appended to
-  `js/site.js`; the coming-soon page includes it directly). Posts one page view per load to
+- **Cookie notice — `js/consent.js`** (loaded by the same `js/site.js` loader; the coming-soon page
+  includes it directly). A small on-brand notice (warm-paper card, brass label, square outlined
+  Decline / Accept of equal weight) until the visitor chooses. **Nothing is recorded and no cookie
+  is set until Accept.** The choice lives in `localStorage` key `pbc_consent` (`{v, t}`), expires
+  after 12 months, and is changeable from a "Cookies" link the script adds to every page footer
+  and from the button in the legal page's Cookies section. Browsers sending Do Not Track / GPC see
+  no choice at all and are never recorded. Withdrawing consent stops the heartbeat and POSTs
+  `{optout:true}` to `/api/site/visit`, which expires the httpOnly cookie (script can't).
+- **Capture — `js/visit.js`** (gated on that consent). Posts one page view per load to
   `/api/site/visit` and beacons `/api/site/heartbeat` every 15 s while the tab is visible and on
   page hide. Sends only the path, `?slug=`, `utm_*` tags, referrer, and a touch flag. Skips
   `/dashboard`, browsers sending Do Not Track / Global Privacy Control, and any browser where the
@@ -48,8 +55,11 @@ HTML layout with no `List-Unsubscribe`.
   (visitors + pageviews), ranked bar-lists for every breakdown, a recent-visitors table, a range
   selector, auto-refresh every 30 s while the tab is open, and a clear message if the migration
   hasn't been run. Every visitor-controlled string goes through `esc()`.
-- **Privacy notice — `legal.html`** now discloses the visit statistics, the 30-minute session
-  cookie, and the Do Not Track / GPC behaviour, without claiming a retention period.
+- **Privacy notice + Cookies section — `legal.html`** discloses the visit statistics, and a new
+  `#cookies` section documents `pbc_sid` (purpose, httpOnly, 30-minute expiry), the `pbc_consent`
+  choice (12 months), what isn't used (advertising/marketing/social cookies, third-party
+  analytics), how to change or withdraw the choice, and the DNT/GPC behaviour. No data-retention
+  period is claimed because no deletion job exists.
 
 ## Verification done
 
@@ -71,8 +81,13 @@ been run when this shipped.
 - Sessions with a single page view and no heartbeat show ~0 s, which pulls the average down.
 - The owner's own visits count unless they tick the exclude box on each browser.
 - Bounce rate is a deliberate simplification (single page view), not GA4's "engaged session".
-- No retention/cleanup job; rows accumulate. A cookie is set for every counted visitor, which
-  some jurisdictions expect consent for — no consent banner was added.
+- No retention/cleanup job; rows accumulate.
+- **Consent means lower counts:** visitors who decline, ignore the notice, or send DNT/GPC are not
+  recorded, so the numbers understate real traffic. That is deliberate. The choice lives in
+  localStorage, so a browser that blocks storage is asked on every page and can only be recorded
+  for the page it accepts on.
+- Pre-existing visitors are asked once too; an old session cookie from before the notice expires on
+  its own within 30 minutes (or is cleared if they decline).
 - Hourly/daily buckets are hardcoded to UTC+8.
 - Aggregation is in application code; very high traffic would need SQL aggregates (a 60k-row cap
   is flagged in the UI when hit).
@@ -82,5 +97,4 @@ been run when this shipped.
 - Once real rows exist, map Vercel's region codes to readable names.
 - Link a session to a lead when a visitor submits an enquiry (`lead_id`, from the playbook).
 - Retention job (e.g. delete sessions older than N months) and state the period in the notice.
-- A cookie/consent notice if visitors from consent-required regions matter.
 - Split `js/dashboard.js` (still far past the 500-line guideline).

@@ -47,6 +47,12 @@ export function sessionCookie(request, id) {
   return `${SESSION_COOKIE}=${id}; Path=/; Max-Age=${SESSION_TTL_SECONDS}; HttpOnly; SameSite=Lax${secure}`;
 }
 
+// Expires the session cookie (used when a visitor withdraws consent).
+export function clearedSessionCookie(request) {
+  const secure = new URL(request.url).protocol === "https:" ? "; Secure" : "";
+  return `${SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secure}`;
+}
+
 export async function shouldSkip(request) {
   const ua = request.headers.get("user-agent");
   if (!ua) return true;

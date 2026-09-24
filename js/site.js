@@ -291,10 +291,12 @@
   });
 })();
 
-/* First-party visit statistics — see js/visit.js */
+/* Cookie notice and first-party visit statistics — see js/consent.js and js/visit.js */
 (function () {
-  var s = document.createElement("script");
-  s.src = "/js/visit.js?v=2";
-  s.async = true;
-  document.head.appendChild(s);
+  ["consent.js?v=1", "visit.js?v=3"].forEach(function (file) {
+    var s = document.createElement("script");
+    s.src = "/js/" + file;
+    s.async = true;
+    document.head.appendChild(s);
+  });
 })();

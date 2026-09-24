@@ -12,7 +12,7 @@
 // tables from supabase/migration-site-analytics.sql.
 
 import {
-  SESSION_TTL_SECONDS, noContent, readSessionId, sessionCookie, shouldSkip, parseDevice,
+  SESSION_TTL_SECONDS, noContent, readSessionId, sessionCookie, clearedSessionCookie, shouldSkip, parseDevice,
   readGeo, normalisePath, pickUtm, cleanReferrer, serviceClient
 } from "../_lib/visitor.js";
 
@@ -29,6 +29,9 @@ export async function POST(request) {
     } catch {
       body = {};
     }
+    // The visitor withdrew their cookie consent: expire the session cookie, record nothing.
+    if (body.optout === true) return noContent({ "Set-Cookie": clearedSessionCookie(request) });
+
     const path = normalisePath(body.path, body.query);
     const nowIso = new Date().toISOString();
 
