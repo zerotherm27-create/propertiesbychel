@@ -10,6 +10,19 @@ reply → Inbox loop was never confirmed end to end; whether `RESEND_REPLY_TO` t
 the `email_messages` migration was run are unverified; flow/lead emails still use the plainer
 HTML layout with no `List-Unsubscribe`.
 
+## Also shipped after the Inbox handoff: organizing the Inbox
+
+`supabase/migration-email-organize.sql` (**run by hand**, after `migration-email-messages.sql`) adds
+`is_read`, `is_starred`, `is_archived`, `deleted_at` to `email_messages`; existing owner-only RLS
+covers them, so the dashboard updates rows directly with supabase-js. The Inbox tab gained folders
+(Inbox = inbound, not archived · Sent · Starred · Archive · Trash · All mail), search over
+sender/recipient/subject, unread counts (folder chip + nav badge, and opening a message marks it
+read), star, archive, mark read/unread, bulk select, and delete. **Delete moves to Trash
+(`deleted_at`), which is restorable; only "Delete forever" / "Empty trash" removes rows**, behind a
+confirm. Without the migration the Inbox still works (it retries with the basic columns and shows
+a note). Known gaps: search covers loaded rows only (latest 500) and not message bodies; Trash is
+never auto-purged; a Resend webhook retry after "Delete forever" could re-insert an inbound message.
+
 ## What was built
 
 - **Data — `supabase/migration-site-analytics.sql` (must be run by hand in the Supabase SQL

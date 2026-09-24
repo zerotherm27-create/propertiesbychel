@@ -111,6 +111,10 @@ async function init(supabase) {
     loadEnrollments();
     loadTemplates();
     loadSignature();
+    loadInbox();
+    setInterval(() => {
+      if (document.visibilityState === "visible" && !$("#tab-inbox").hidden && !inboxChecked.size) loadInbox();
+    }, 45000);
     if (window.DashboardAnalytics) window.DashboardAnalytics.init({ $, $$, esc, authHeader: listingAuthHeader });
     if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto, showToast });
   }
@@ -2105,37 +2109,177 @@ async function init(supabase) {
 
   /* ————— inbox (Resend inbound + one-off outbound) ————— */
   let inboxRows = [];
-  let inboxFilter = "all";
+  let inboxFolder = "inbox";
+  let inboxQuery = "";
   let inboxSelected = null;
   let inboxReplyTo = null;
+  let organizeReady = true; // false until migration-email-organize.sql has been run
+  const inboxChecked = new Set();
 
   const INBOX_STATUS_LABELS = { SENT: "Sent", DELIVERED: "Delivered", BOUNCED: "Bounced", RECEIVED: "Received", FAILED: "Failed" };
   const bareAddress = (v) => { const m = String(v || "").match(/<([^>]+)>/); return (m ? m[1] : String(v || "")).trim(); };
+  const BASE_COLUMNS = "id,direction,from_address,to_address,subject,status,created_at";
+  const IN_FOLDER = {
+    inbox: (r) => !r.deleted_at && r.direction === "INBOUND" && !r.is_archived,
+    sent: (r) => !r.deleted_at && r.direction === "OUTBOUND",
+    starred: (r) => !r.deleted_at && r.is_starred,
+    archive: (r) => !r.deleted_at && r.is_archived,
+    trash: (r) => !!r.deleted_at,
+    all: (r) => !r.deleted_at
+  };
+  const isUnread = (r) => r.direction === "INBOUND" && !r.is_read;
+  const FOLDER_EMPTY = { inbox: "Your inbox is empty.", sent: "Nothing sent yet.", starred: "No starred messages.", archive: "Nothing archived.", trash: "Trash is empty.", all: "No messages yet." };
 
   async function loadInbox() {
-    // Bodies are fetched only when a message is opened.
-    const { data, error } = await supabase
-      .from("email_messages")
-      .select("id,direction,from_address,to_address,subject,status,created_at")
-      .order("created_at", { ascending: false })
-      .limit(200);
+    // Bodies are fetched only when a message is opened. If the organize migration hasn't been
+    // run yet, fall back to the basic columns so the inbox still works.
+    let { data, error } = await supabase.from("email_messages")
+      .select(BASE_COLUMNS + ",is_read,is_starred,is_archived,deleted_at")
+      .order("created_at", { ascending: false }).limit(500);
+    organizeReady = true;
+    if (error && /column|42703|does not exist/i.test((error.code || "") + " " + (error.message || ""))) {
+      organizeReady = false;
+      ({ data, error } = await supabase.from("email_messages").select(BASE_COLUMNS)
+        .order("created_at", { ascending: false }).limit(500));
+    }
     if (error) { $("#inbox-list").innerHTML = `<p class="dash-empty">Could not load messages: ${esc(error.message)}</p>`; return; }
     inboxRows = data || [];
+    if (!organizeReady && !["inbox", "sent", "all"].includes(inboxFolder)) inboxFolder = "inbox";
+    applyOrganizeAvailability();
     renderInboxList();
   }
 
+  function applyOrganizeAvailability() {
+    $$("[data-organize]").forEach((el) => { el.hidden = !organizeReady; });
+    $("#inbox-organize-note").hidden = organizeReady;
+    $$("[data-inbox-folder]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.inboxFolder === inboxFolder)));
+  }
+
+  function updateUnreadBadges() {
+    const n = organizeReady ? inboxRows.filter((r) => IN_FOLDER.inbox(r) && isUnread(r)).length : 0;
+    ["#inbox-unread-badge", "#nav-inbox-badge"].forEach((sel) => {
+      const el = $(sel);
+      el.hidden = !n;
+      el.textContent = n > 99 ? "99+" : String(n);
+    });
+  }
+
+  function visibleInboxRows() {
+    const q = inboxQuery.trim().toLowerCase();
+    return inboxRows.filter((r) => IN_FOLDER[inboxFolder](r) &&
+      (!q || [r.from_address, r.to_address, r.subject].some((v) => String(v || "").toLowerCase().includes(q))));
+  }
+
   function renderInboxList() {
-    const rows = inboxRows.filter((r) => inboxFilter === "all" || r.direction === inboxFilter);
+    const rows = visibleInboxRows();
+    [...inboxChecked].forEach((id) => { if (!rows.some((r) => r.id === id)) inboxChecked.delete(id); });
     $("#inbox-list").innerHTML = rows.length
       ? rows.map((r) => {
           const who = r.direction === "INBOUND" ? r.from_address : "To: " + r.to_address;
-          return `<button type="button" class="inbox-item" data-inbox-id="${esc(r.id)}" aria-current="${r.id === inboxSelected}">
-            <div class="inbox-item__top"><span class="dash-row__name">${esc(who)}</span><span class="dash-row__meta">${esc(new Date(r.created_at).toLocaleString())}</span></div>
-            <div class="inbox-item__subject">${esc(r.subject || "(no subject)")}</div>
-            <span class="dash-status">${esc(r.direction === "INBOUND" ? "Inbound" : "Outbound")} · ${esc(INBOX_STATUS_LABELS[r.status] || r.status)}</span>
-          </button>`;
+          const organize = organizeReady
+            ? `<input type="checkbox" class="inbox-check" data-inbox-check aria-label="Select message" ${inboxChecked.has(r.id) ? "checked" : ""}>
+               <button type="button" class="inbox-star" data-inbox-star aria-pressed="${!!r.is_starred}" aria-label="${r.is_starred ? "Unstar" : "Star"}">${r.is_starred ? "★" : "☆"}</button>`
+            : `<span></span><span></span>`;
+          return `<div class="inbox-item${isUnread(r) ? " is-unread" : ""}" data-inbox-row="${esc(r.id)}" aria-current="${r.id === inboxSelected}">
+            ${organize}
+            <button type="button" class="inbox-open" data-inbox-id="${esc(r.id)}">
+              <div class="inbox-item__top"><span class="dash-row__name">${esc(who)}</span><span class="dash-row__meta">${esc(new Date(r.created_at).toLocaleString())}</span></div>
+              <div class="inbox-item__subject">${esc(r.subject || "(no subject)")}</div>
+              <span class="dash-status">${esc(r.direction === "INBOUND" ? "Inbound" : "Outbound")} · ${esc(INBOX_STATUS_LABELS[r.status] || r.status)}</span>
+            </button>
+          </div>`;
         }).join("")
-      : `<p class="dash-empty">No messages yet.</p>`;
+      : `<p class="dash-empty">${esc(inboxQuery.trim() ? "No messages match your search." : FOLDER_EMPTY[inboxFolder])}</p>`;
+    if (inboxRows.length >= 500) $("#inbox-list").insertAdjacentHTML("beforeend", '<p class="field__note">Showing the latest 500 messages.</p>');
+    updateUnreadBadges();
+    renderBulkBar(rows);
+  }
+
+  /* — organize actions — */
+  const chunk = (ids, n) => { const out = []; for (let i = 0; i < ids.length; i += n) out.push(ids.slice(i, i + n)); return out; };
+
+  async function updateMessages(ids, patch) {
+    for (const part of chunk(ids, 50)) {
+      const { error } = await supabase.from("email_messages").update(patch).in("id", part);
+      if (error) { showToast("Could not update: " + error.message, true); return false; }
+    }
+    inboxRows.forEach((r) => { if (ids.includes(r.id)) Object.assign(r, patch); });
+    return true;
+  }
+
+  async function deleteForever(ids) {
+    for (const part of chunk(ids, 50)) {
+      const { error } = await supabase.from("email_messages").delete().in("id", part);
+      if (error) { showToast("Could not delete: " + error.message, true); return false; }
+    }
+    inboxRows = inboxRows.filter((r) => !ids.includes(r.id));
+    return true;
+  }
+
+  // Run one action on a set of message ids, then refresh the list and the open message.
+  async function runInboxAction(action, ids) {
+    if (!ids.length || !organizeReady) return;
+    const now = new Date().toISOString();
+    let ok = false;
+    if (action === "archive") ok = await updateMessages(ids, { is_archived: true });
+    else if (action === "unarchive") ok = await updateMessages(ids, { is_archived: false });
+    else if (action === "read") ok = await updateMessages(ids, { is_read: true });
+    else if (action === "unread") ok = await updateMessages(ids, { is_read: false });
+    else if (action === "star") ok = await updateMessages(ids, { is_starred: true });
+    else if (action === "unstar") ok = await updateMessages(ids, { is_starred: false });
+    else if (action === "trash") ok = await updateMessages(ids, { deleted_at: now });
+    else if (action === "restore") ok = await updateMessages(ids, { deleted_at: null });
+    else if (action === "forever") {
+      if (!confirm(`Permanently delete ${ids.length === 1 ? "this message" : ids.length + " messages"}? This cannot be undone.`)) return;
+      ok = await deleteForever(ids);
+    }
+    if (!ok) return;
+    ids.forEach((id) => inboxChecked.delete(id));
+    const msgs = { trash: "Moved to Trash", restore: "Restored", forever: "Deleted forever", archive: "Archived", unarchive: "Moved to Inbox" };
+    if (msgs[action]) showToast(msgs[action] + (ids.length > 1 ? ` (${ids.length})` : ""));
+    // Close the open message if it just left this folder.
+    const open = inboxRows.find((r) => r.id === inboxSelected);
+    if (inboxSelected && (!open || !IN_FOLDER[inboxFolder](open))) closeInboxDetail();
+    else if (open) renderDetailActions(open);
+    renderInboxList();
+  }
+
+  function actionButtons(r, extra) {
+    const b = (action, label) => `<button type="button" class="btn" data-inbox-action="${action}">${label}</button>`;
+    if (extra.trash) return b("restore", "Restore") + b("forever", "Delete forever");
+    return [r.is_archived ? b("unarchive", "Move to inbox") : b("archive", "Archive"), b("trash", "Delete")].join("");
+  }
+
+  function renderBulkBar(rows) {
+    const box = $("#inbox-bulk-actions");
+    const n = inboxChecked.size;
+    $("#inbox-select-all").checked = rows.length > 0 && rows.every((r) => inboxChecked.has(r.id));
+    const b = (action, label) => `<button type="button" class="btn" data-bulk-action="${action}">${label}</button>`;
+    if (inboxFolder === "trash") {
+      box.innerHTML = (n ? b("restore", `Restore (${n})`) + b("forever", `Delete forever (${n})`) : "") + (rows.length ? b("empty", "Empty trash") : "");
+    } else {
+      box.innerHTML = n
+        ? b("archive", "Archive") + b("unarchive", "Move to inbox") + b("read", "Mark read") + b("unread", "Mark unread") + b("star", "Star") + b("trash", `Delete (${n})`)
+        : "";
+    }
+  }
+
+  function renderDetailActions(msg) {
+    const box = $("#inbox-detail-actions");
+    if (!organizeReady) { box.innerHTML = ""; return; }
+    const trashed = !!msg.deleted_at;
+    box.innerHTML = trashed
+      ? actionButtons(msg, { trash: true })
+      : `<button type="button" class="btn" data-inbox-action="${msg.is_starred ? "unstar" : "star"}">${msg.is_starred ? "★ Starred" : "☆ Star"}</button>` +
+        actionButtons(msg, {}) +
+        (msg.direction === "INBOUND" ? '<button type="button" class="btn" data-inbox-action="unread">Mark unread</button>' : "");
+  }
+
+  function closeInboxDetail() {
+    inboxSelected = null;
+    inboxReplyTo = null;
+    $("#inbox-detail").hidden = true;
+    $("#inbox-placeholder").hidden = false;
   }
 
   // Email HTML is untrusted: a sandboxed iframe with no allow-scripts and no
@@ -2170,6 +2314,15 @@ async function init(supabase) {
     const { data: msg, error } = await supabase.from("email_messages").select("*").eq("id", id).single();
     if (error || !msg) { showToast("Could not open message", true); return; }
     inboxReplyTo = msg;
+    if (organizeReady && msg.direction === "INBOUND" && !msg.is_read) {
+      // Opening a message marks it read (quietly; the list re-renders below).
+      supabase.from("email_messages").update({ is_read: true }).eq("id", id).then(() => {});
+      const row = inboxRows.find((r) => r.id === id);
+      if (row) row.is_read = true;
+      msg.is_read = true;
+      renderInboxList();
+    }
+    renderDetailActions(msg);
     $("#inbox-placeholder").hidden = true;
     $("#inbox-compose").hidden = true;
     $("#inbox-detail").hidden = false;
@@ -2428,16 +2581,48 @@ ${button}
     }
   });
 
-  $$("[data-inbox-filter]").forEach((chip) => {
+  $$("[data-inbox-folder]").forEach((chip) => {
     chip.addEventListener("click", () => {
-      inboxFilter = chip.dataset.inboxFilter;
-      $$("[data-inbox-filter]").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+      inboxFolder = chip.dataset.inboxFolder;
+      inboxChecked.clear();
+      $$("[data-inbox-folder]").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+      const open = inboxRows.find((r) => r.id === inboxSelected);
+      if (inboxSelected && (!open || !IN_FOLDER[inboxFolder](open))) closeInboxDetail();
       renderInboxList();
     });
   });
+  $("#inbox-search").addEventListener("input", (e) => { inboxQuery = e.target.value; renderInboxList(); });
+  $("#inbox-select-all").addEventListener("change", (e) => {
+    visibleInboxRows().forEach((r) => (e.target.checked ? inboxChecked.add(r.id) : inboxChecked.delete(r.id)));
+    renderInboxList();
+  });
+  $("#inbox-bulk-actions").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-bulk-action]");
+    if (!btn) return;
+    if (btn.dataset.bulkAction === "empty") {
+      const ids = inboxRows.filter((r) => r.deleted_at).map((r) => r.id);
+      await runInboxAction("forever", ids);
+    } else {
+      await runInboxAction(btn.dataset.bulkAction, [...inboxChecked]);
+    }
+  });
+  $("#inbox-detail-actions").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-inbox-action]");
+    if (btn && inboxSelected) runInboxAction(btn.dataset.inboxAction, [inboxSelected]);
+  });
   $("#inbox-list").addEventListener("click", (e) => {
-    const item = e.target.closest("[data-inbox-id]");
-    if (item) openInboxMessage(item.dataset.inboxId);
+    const row = e.target.closest("[data-inbox-row]");
+    if (!row) return;
+    const id = row.dataset.inboxRow;
+    if (e.target.closest("[data-inbox-star]")) {
+      const r = inboxRows.find((x) => x.id === id);
+      if (r) runInboxAction(r.is_starred ? "unstar" : "star", [id]);
+    } else if (e.target.closest("[data-inbox-check]")) {
+      if (e.target.checked) inboxChecked.add(id); else inboxChecked.delete(id);
+      renderBulkBar(visibleInboxRows());
+    } else if (e.target.closest("[data-inbox-id]")) {
+      openInboxMessage(id);
+    }
   });
   $("#inbox-compose-btn").addEventListener("click", () => openCompose(null));
   $("#inbox-reply-btn").addEventListener("click", () => { if (inboxReplyTo) openCompose(inboxReplyTo); });

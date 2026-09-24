@@ -123,8 +123,20 @@
   .inbox-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px; align-items: start; }
   @media (max-width: 860px) { .inbox-grid { grid-template-columns: minmax(0, 1fr); } }
   .inbox-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .inbox-item { display: block; width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; border-top: 1px solid var(--a-border); padding: 12px 8px; cursor: pointer; }
+  .inbox-search { width: 100%; }
+  .inbox-badge { display: inline-block; min-width: 18px; margin-left: 6px; padding: 0 6px; border-radius: 9px; background: var(--a-accent); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+  .inbox-bulk { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 0 0 8px; font-size: 13px; color: var(--a-text-2); }
+  .inbox-bulk[hidden], [data-organize][hidden] { display: none; }
+  .inbox-bulk__actions, .inbox-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .inbox-actions { margin: 0 0 12px; }
+  .inbox-bulk .btn, .inbox-actions .btn { padding: 4px 10px; font-size: 12px; }
+  .inbox-item { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: start; gap: 6px 8px; border-top: 1px solid var(--a-border); padding: 10px 6px; }
   .inbox-item:hover, .inbox-item[aria-current="true"] { background: var(--a-surface-2); }
+  .inbox-item.is-unread .dash-row__name, .inbox-item.is-unread .inbox-item__subject { font-weight: 700; color: var(--a-text); }
+  .inbox-check { margin-top: 3px; }
+  .inbox-star { background: none; border: 0; padding: 0; font-size: 16px; line-height: 1.2; cursor: pointer; color: var(--a-text-3); }
+  .inbox-star[aria-pressed="true"] { color: #d4a017; }
+  .inbox-open { display: block; width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; min-width: 0; }
   .inbox-item__top { display: flex; justify-content: space-between; gap: 12px; }
   .inbox-item__subject { font-size: 13px; color: var(--a-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .inbox-frame { width: 100%; height: 460px; border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); background: #fff; }
@@ -299,7 +311,7 @@
     <button class="chip" data-tab="photos" aria-pressed="false">Site Photos</button>
     <button class="chip" data-tab="content" aria-pressed="false">Content</button>
     <button class="chip" data-tab="automation" aria-pressed="false">Automation</button>
-    <button class="chip" data-tab="inbox" aria-pressed="false">Inbox</button>
+    <button class="chip" data-tab="inbox" aria-pressed="false">Inbox<span class="inbox-badge" id="nav-inbox-badge" hidden></span></button>
     <button class="chip" data-tab="analytics" aria-pressed="false">Analytics</button>
   </nav>
 
@@ -964,11 +976,20 @@
           <h2 class="h3">Inbox</h2>
           <button class="btn btn--solid" id="inbox-compose-btn">Compose</button>
         </div>
-        <div class="inbox-filters" role="group" aria-label="Filter messages">
-          <button class="chip" data-inbox-filter="all" aria-pressed="true">All</button>
-          <button class="chip" data-inbox-filter="INBOUND" aria-pressed="false">Inbound</button>
-          <button class="chip" data-inbox-filter="OUTBOUND" aria-pressed="false">Outbound</button>
+        <div class="field" style="margin-bottom:10px"><input type="search" id="inbox-search" class="inbox-search" placeholder="Search sender, recipient or subject" aria-label="Search messages" autocomplete="off"></div>
+        <div class="inbox-filters" role="group" aria-label="Folders">
+          <button class="chip" data-inbox-folder="inbox" aria-pressed="true">Inbox<span class="inbox-badge" id="inbox-unread-badge" hidden></span></button>
+          <button class="chip" data-inbox-folder="sent" aria-pressed="false">Sent</button>
+          <button class="chip" data-inbox-folder="starred" data-organize aria-pressed="false">Starred</button>
+          <button class="chip" data-inbox-folder="archive" data-organize aria-pressed="false">Archive</button>
+          <button class="chip" data-inbox-folder="trash" data-organize aria-pressed="false">Trash</button>
+          <button class="chip" data-inbox-folder="all" aria-pressed="false">All mail</button>
         </div>
+        <div class="inbox-bulk" id="inbox-bulk" data-organize>
+          <label><input type="checkbox" id="inbox-select-all"> Select all</label>
+          <span class="inbox-bulk__actions" id="inbox-bulk-actions"></span>
+        </div>
+        <p class="field__note" id="inbox-organize-note" hidden>Folders, stars, archive and delete need one more database update: run supabase/migration-email-organize.sql in the Supabase SQL Editor, then refresh.</p>
         <div id="inbox-list" class="dash-list"></div>
       </div>
 
@@ -978,6 +999,7 @@
             <h2 class="h3" id="inbox-detail-subject"></h2>
             <button class="btn" id="inbox-reply-btn">Reply</button>
           </div>
+          <div class="inbox-actions" id="inbox-detail-actions" data-organize></div>
           <dl class="inbox-meta" id="inbox-detail-meta"></dl>
           <div id="inbox-detail-body"></div>
         </div>
@@ -1084,7 +1106,7 @@
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
 <script type="module" src="js/dashboard-analytics.js?v=2"></script>
-<script type="module" src="js/dashboard.js?v=48"></script>
+<script type="module" src="js/dashboard.js?v=49"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
