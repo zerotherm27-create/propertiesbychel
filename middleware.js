@@ -9,7 +9,10 @@
 import { get } from "@vercel/edge-config";
 import { rewrite, next } from "@vercel/functions";
 
-const PASSTHROUGH_PREFIXES = ["/css/", "/js/", "/images/"];
+// /api/ must pass through: third-party callers (the Resend webhook, the cron)
+// send no preview cookie, so coming-soon mode would rewrite them to the
+// holding page. Each endpoint does its own auth.
+const PASSTHROUGH_PREFIXES = ["/css/", "/js/", "/images/", "/api/"];
 const PASSTHROUGH_PATHS = new Set([
   "/dashboard",
   "/coming-soon",

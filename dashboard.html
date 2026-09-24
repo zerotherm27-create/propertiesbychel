@@ -100,6 +100,17 @@
   .dash-row__detail dt { color: var(--a-text-3); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
   .dash-row__detail dd { color: var(--a-text-2); font-size: 13px; }
   .dash-empty { border-top: 1px solid var(--a-border); color: var(--a-text-3); font-size: 13px; }
+  .inbox-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px; align-items: start; }
+  @media (max-width: 860px) { .inbox-grid { grid-template-columns: minmax(0, 1fr); } }
+  .inbox-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .inbox-item { display: block; width: 100%; text-align: left; font: inherit; color: inherit; background: none; border: 0; border-top: 1px solid var(--a-border); padding: 12px 8px; cursor: pointer; }
+  .inbox-item:hover, .inbox-item[aria-current="true"] { background: var(--a-surface-2); }
+  .inbox-item__top { display: flex; justify-content: space-between; gap: 12px; }
+  .inbox-item__subject { font-size: 13px; color: var(--a-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .inbox-frame { width: 100%; height: 460px; border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); background: #fff; }
+  .inbox-meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; margin-bottom: 12px; }
+  .inbox-meta dt { color: var(--a-text-3); }
+  .inbox-meta dd { margin: 0; color: var(--a-text-2); overflow-wrap: anywhere; }
 
   /* Status select + generic chips (filters) */
   .dash-status {
@@ -259,6 +270,7 @@
     <button class="chip" data-tab="photos" aria-pressed="false">Site Photos</button>
     <button class="chip" data-tab="content" aria-pressed="false">Content</button>
     <button class="chip" data-tab="automation" aria-pressed="false">Automation</button>
+    <button class="chip" data-tab="inbox" aria-pressed="false">Inbox</button>
   </nav>
 
   <!-- Leads / CRM -->
@@ -913,12 +925,56 @@
       </div>
     </div>
   </section>
+
+  <!-- Inbox -->
+  <section id="tab-inbox" class="dash-tab" hidden>
+    <div class="inbox-grid">
+      <div class="dash-panel">
+        <div class="dash-panel__head">
+          <h2 class="h3">Inbox</h2>
+          <button class="btn btn--solid" id="inbox-compose-btn">Compose</button>
+        </div>
+        <div class="inbox-filters" role="group" aria-label="Filter messages">
+          <button class="chip" data-inbox-filter="all" aria-pressed="true">All</button>
+          <button class="chip" data-inbox-filter="INBOUND" aria-pressed="false">Inbound</button>
+          <button class="chip" data-inbox-filter="OUTBOUND" aria-pressed="false">Outbound</button>
+        </div>
+        <div id="inbox-list" class="dash-list"></div>
+      </div>
+
+      <div>
+        <div class="dash-panel" id="inbox-detail" hidden>
+          <div class="dash-panel__head">
+            <h2 class="h3" id="inbox-detail-subject"></h2>
+            <button class="btn" id="inbox-reply-btn">Reply</button>
+          </div>
+          <dl class="inbox-meta" id="inbox-detail-meta"></dl>
+          <div id="inbox-detail-body"></div>
+        </div>
+
+        <div class="dash-panel" id="inbox-compose" hidden>
+          <div class="dash-panel__head"><h2 class="h3" id="inbox-compose-title">New message</h2></div>
+          <form id="inbox-compose-form" novalidate>
+            <div class="field"><label for="inbox-to">To</label><input id="inbox-to" name="to" type="email" required autocomplete="off"></div>
+            <div class="field"><label for="inbox-subject">Subject</label><input id="inbox-subject" name="subject" required maxlength="300"></div>
+            <div class="field"><label for="inbox-body">Message</label><textarea id="inbox-body" name="body" rows="10" required></textarea>
+              <p class="field__note">Plain text — blank lines become paragraphs.</p></div>
+            <button class="btn btn--solid" type="submit" id="inbox-send-btn">Send</button>
+            <button class="btn" type="button" id="inbox-compose-cancel">Cancel</button>
+            <p class="field__error" id="inbox-compose-error" role="alert"></p>
+          </form>
+        </div>
+
+        <p class="dash-empty" id="inbox-placeholder">Select a message, or compose a new one.</p>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script src="js/supabase-config.js?v=17"></script>
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=42"></script>
+<script type="module" src="js/dashboard.js?v=43"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

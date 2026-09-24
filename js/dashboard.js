@@ -118,8 +118,9 @@ async function init(supabase) {
     chip.addEventListener("click", () => {
       $$(".dash-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       chip.setAttribute("aria-pressed", "true");
-      ["leads", "developments", "listings", "photos", "content", "automation"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
+      ["leads", "developments", "listings", "photos", "content", "automation", "inbox"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
       if (chip.dataset.tab === "automation") loadEnrollments();
+      if (chip.dataset.tab === "inbox") loadInbox();
     });
   });
 
@@ -2097,6 +2098,169 @@ async function init(supabase) {
     if (!patch) return;
     const { error } = await supabase.from("developments").update(patch).eq("id", row.dataset.id);
     if (error) { showToast("Could not update: " + error.message, true); loadDevelopments(); }
+  });
+
+  /* ————— inbox (Resend inbound + one-off outbound) ————— */
+  let inboxRows = [];
+  let inboxFilter = "all";
+  let inboxSelected = null;
+  let inboxReplyTo = null;
+
+  const INBOX_STATUS_LABELS = { SENT: "Sent", DELIVERED: "Delivered", BOUNCED: "Bounced", RECEIVED: "Received", FAILED: "Failed" };
+  const bareAddress = (v) => { const m = String(v || "").match(/<([^>]+)>/); return (m ? m[1] : String(v || "")).trim(); };
+
+  async function loadInbox() {
+    // Bodies are fetched only when a message is opened.
+    const { data, error } = await supabase
+      .from("email_messages")
+      .select("id,direction,from_address,to_address,subject,status,created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) { $("#inbox-list").innerHTML = `<p class="dash-empty">Could not load messages: ${esc(error.message)}</p>`; return; }
+    inboxRows = data || [];
+    renderInboxList();
+  }
+
+  function renderInboxList() {
+    const rows = inboxRows.filter((r) => inboxFilter === "all" || r.direction === inboxFilter);
+    $("#inbox-list").innerHTML = rows.length
+      ? rows.map((r) => {
+          const who = r.direction === "INBOUND" ? r.from_address : "To: " + r.to_address;
+          return `<button type="button" class="inbox-item" data-inbox-id="${esc(r.id)}" aria-current="${r.id === inboxSelected}">
+            <div class="inbox-item__top"><span class="dash-row__name">${esc(who)}</span><span class="dash-row__meta">${esc(new Date(r.created_at).toLocaleString())}</span></div>
+            <div class="inbox-item__subject">${esc(r.subject || "(no subject)")}</div>
+            <span class="dash-status">${esc(r.direction === "INBOUND" ? "Inbound" : "Outbound")} · ${esc(INBOX_STATUS_LABELS[r.status] || r.status)}</span>
+          </button>`;
+        }).join("")
+      : `<p class="dash-empty">No messages yet.</p>`;
+  }
+
+  // Email HTML is untrusted: a sandboxed iframe with no allow-scripts and no
+  // allow-same-origin (so it can't touch this page or its Supabase session),
+  // plus a CSP that blocks scripts/forms/frames even if the sandbox were dropped.
+  function renderEmailBody(container, msg) {
+    container.replaceChildren();
+    if (!msg.html_body) {
+      const pre = document.createElement("pre");
+      pre.style.whiteSpace = "pre-wrap";
+      pre.textContent = msg.text_body || "(empty message)";
+      container.appendChild(pre);
+      return;
+    }
+    const frame = document.createElement("iframe");
+    frame.className = "inbox-frame";
+    frame.title = "Email content";
+    frame.setAttribute("sandbox", "allow-popups");
+    frame.setAttribute("referrerpolicy", "no-referrer");
+    frame.srcdoc =
+      '<!doctype html><meta charset="utf-8">' +
+      '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src https: data:; style-src \'unsafe-inline\'">' +
+      '<base target="_blank">' +
+      '<style>body{font:14px/1.5 system-ui,sans-serif;color:#222;margin:12px;overflow-wrap:anywhere}img{max-width:100%;height:auto}</style>' +
+      msg.html_body;
+    container.appendChild(frame);
+  }
+
+  async function openInboxMessage(id) {
+    inboxSelected = id;
+    renderInboxList();
+    const { data: msg, error } = await supabase.from("email_messages").select("*").eq("id", id).single();
+    if (error || !msg) { showToast("Could not open message", true); return; }
+    inboxReplyTo = msg;
+    $("#inbox-placeholder").hidden = true;
+    $("#inbox-compose").hidden = true;
+    $("#inbox-detail").hidden = false;
+    $("#inbox-detail-subject").textContent = msg.subject || "(no subject)";
+    const meta = $("#inbox-detail-meta");
+    meta.replaceChildren();
+    [["From", msg.from_address], ["To", msg.to_address], ["Date", new Date(msg.created_at).toLocaleString()],
+     ["Status", INBOX_STATUS_LABELS[msg.status] || msg.status]].forEach(([k, v]) => {
+      const dt = document.createElement("dt"); dt.textContent = k;
+      const dd = document.createElement("dd"); dd.textContent = v;
+      meta.append(dt, dd);
+    });
+    renderEmailBody($("#inbox-detail-body"), msg);
+  }
+
+  function openCompose(reply) {
+    $("#inbox-placeholder").hidden = true;
+    $("#inbox-detail").hidden = true;
+    $("#inbox-compose").hidden = false;
+    const f = $("#inbox-compose-form");
+    f.reset();
+    f.dataset.parentMessageId = "";
+    $("#inbox-compose-error").textContent = "";
+    $("#inbox-compose-title").textContent = reply ? "Reply" : "New message";
+    if (reply) {
+      // Reply to the other party: the sender of an inbound message, the recipient of an outbound one.
+      f.to.value = reply.direction === "INBOUND" ? bareAddress(reply.from_address) : bareAddress(reply.to_address);
+      f.subject.value = /^re:/i.test(reply.subject || "") ? reply.subject : "Re: " + (reply.subject || "");
+      f.dataset.parentMessageId = reply.message_id || "";
+      f.body.focus();
+    } else {
+      f.to.focus();
+    }
+  }
+
+  // The compose box is plain text; convert to real HTML here so the owner never
+  // authors (or accidentally breaks) markup. Same paragraph rules as
+  // api/send-lead-email.js.
+  function plainTextToHtml(text) {
+    return String(text || "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+      .map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+  }
+
+  $$("[data-inbox-filter]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      inboxFilter = chip.dataset.inboxFilter;
+      $$("[data-inbox-filter]").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+      renderInboxList();
+    });
+  });
+  $("#inbox-list").addEventListener("click", (e) => {
+    const item = e.target.closest("[data-inbox-id]");
+    if (item) openInboxMessage(item.dataset.inboxId);
+  });
+  $("#inbox-compose-btn").addEventListener("click", () => openCompose(null));
+  $("#inbox-reply-btn").addEventListener("click", () => { if (inboxReplyTo) openCompose(inboxReplyTo); });
+  $("#inbox-compose-cancel").addEventListener("click", () => {
+    $("#inbox-compose").hidden = true;
+    $("#inbox-placeholder").hidden = false;
+  });
+  $("#inbox-compose-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = e.currentTarget;
+    const err = $("#inbox-compose-error");
+    const btn = $("#inbox-send-btn");
+    err.textContent = "";
+    const to = f.to.value.trim();
+    const subject = f.subject.value.trim();
+    const text = f.body.value.trim();
+    if (!to || !subject || !text) { err.textContent = "Recipient, subject and message are all required."; return; }
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    try {
+      const res = await fetch("/api/dashboard/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await listingAuthHeader()) },
+        body: JSON.stringify({
+          to, subject, htmlBody: plainTextToHtml(text), textBody: text,
+          parentMessageId: f.dataset.parentMessageId || undefined
+        })
+      });
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(out.error || "Send failed");
+      showToast(out.warning || "Sent");
+      f.reset();
+      $("#inbox-compose").hidden = true;
+      $("#inbox-placeholder").hidden = false;
+      loadInbox();
+    } catch (ex) {
+      err.textContent = ex.message || "Send failed";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Send";
+    }
   });
 
   /* ————— site photos ————— */
