@@ -290,3 +290,11 @@
     if (e.target.tagName === "IMG") e.preventDefault();
   });
 })();
+
+/* First-party visit statistics — see js/visit.js */
+(function () {
+  var s = document.createElement("script");
+  s.src = "/js/visit.js?v=2";
+  s.async = true;
+  document.head.appendChild(s);
+})();

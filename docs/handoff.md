@@ -1,129 +1,86 @@
-# Handoff — headless email Inbox & Outbox (Resend)
+# Handoff — first-party site analytics (visits, location, devices, sources)
 
-A mailbox inside the owner dashboard: receive email, send one-off email (formatted text or
-HTML, with a saved signature), see delivery status, and reply in-thread. No external email UI — Resend is the
-transport, Supabase is the store, `dashboard.html` is the interface. Three commits on `main`:
+Visitor analytics built into the site and the owner dashboard: no third-party analytics
+service, no advertising tracker, no extra cost. Adapted from `first-party-site-analytics-playbook.md`
+(written for Next.js) to this repo's stack: static HTML + Vercel functions + Supabase.
 
-- [`aa21204`](https://github.com/zerotherm27-create/propertiesbychel/commit/aa21204) — schema, webhook, send endpoint, Inbox tab, middleware fix
-- [`709be23`](https://github.com/zerotherm27-create/propertiesbychel/commit/709be23) — plain-text alternative on every send; optional `RESEND_REPLY_TO`
-- [`52ffbeb`](https://github.com/zerotherm27-create/propertiesbychel/commit/52ffbeb) — HTML compose mode with template + AI generators
-- the commit after it (see `git log`) — formatting toolbar for plain-text compose, and the saved email signature
+The previous handoff (the headless Inbox/Outbox) was replaced per the repo convention; it is
+at `git show d311322:docs/handoff.md`. **Still open from that work:** the compose → Gmail →
+reply → Inbox loop was never confirmed end to end; whether `RESEND_REPLY_TO` took effect and
+the `email_messages` migration was run are unverified; flow/lead emails still use the plainer
+HTML layout with no `List-Unsubscribe`.
 
-The previous handoff (the flows/templates/autonomous-sending system and its 10-bug audit
-pass) was replaced per the repo convention; it is in git history at
-[`a6fc425`](https://github.com/zerotherm27-create/propertiesbychel/commit/a6fc425)
-(`git show a6fc425:docs/handoff.md`).
+## What was built
 
-## How it works
+- **Data — `supabase/migration-site-analytics.sql` (must be run by hand in the Supabase SQL
+  editor before anything records).** `site_sessions` (one row per visit: device type, OS,
+  browser, country, region, city, referrer, utm_*, landing path, page count, duration) and
+  `site_pageviews` (one row per page view). A trigger keeps `duration_seconds = last_seen_at −
+  created_at`, so the heartbeat only bumps `last_seen_at`. **RLS is on with an owner-only
+  policy** — the playbook says "no RLS", which on Supabase would leave both tables open to the
+  public anon key.
+- **Capture — `js/visit.js`** (loaded on every public page by a two-line loader appended to
+  `js/site.js`; the coming-soon page includes it directly). Posts one page view per load to
+  `/api/site/visit` and beacons `/api/site/heartbeat` every 15 s while the tab is visible and on
+  page hide. Sends only the path, `?slug=`, `utm_*` tags, referrer, and a touch flag. Skips
+  `/dashboard`, browsers sending Do Not Track / Global Privacy Control, and any browser where the
+  owner ticked "Don't count visits from this browser" (`localStorage pbc_no_track`).
+- **Endpoints — `api/site/visit.js`, `api/site/heartbeat.js`, helpers in `api/_lib/visitor.js`.**
+  Session = activity inside a sliding 30-minute window, held in an httpOnly, SameSite=Lax,
+  Secure `pbc_sid` cookie. User-agent parsed with `ua-parser-js` (new dependency); bots and empty
+  user agents are dropped (still 204). Location comes from Vercel's `x-vercel-ip-country /
+  -country-region / -city` headers — **the IP address is never stored**. iPadOS reports a Mac
+  user agent, so a Mac UA plus touch support is classed as a tablet. Referrer is kept as
+  origin + path only, and the site's own pages don't count as a referrer. Paths drop the query
+  except `?slug=` (which is what tells one property page from another). Both routes always
+  answer 204 and swallow errors, so analytics can never break a page. Route names are
+  deliberately boring (ad blockers match "track"/"analytics").
+- **Reporting — `api/dashboard/analytics.js`** (`GET ?range=24h|7d|30d|90d`, owner-only, reads
+  with the caller's own token so RLS is the authorization, pages through PostgREST 1,000 rows at
+  a time up to 60k per table). Returns totals (visitors, pageviews, avg session, bounce rate,
+  active now = seen in the last 5 minutes), a zero-filled time series (hourly for 24h, daily
+  otherwise, in Philippine time UTC+8), breakdowns (countries, regions, cities, devices, OS,
+  browsers, top pages, landing pages, traffic sources) and the 30 most recent visitors.
+  Bounce rate = sessions with exactly one page view. Traffic source = `utm_source`, else the
+  referrer's hostname, else "direct".
+- **Dashboard — Analytics tab** (`dashboard.html`, `js/dashboard-analytics.js`, bridged in via
+  `window.DashboardAnalytics` like `dashboard-content.js`): stat cards, an inline-SVG line chart
+  (visitors + pageviews), ranked bar-lists for every breakdown, a recent-visitors table, a range
+  selector, auto-refresh every 30 s while the tab is open, and a clear message if the migration
+  hasn't been run. Every visitor-controlled string goes through `esc()`.
+- **Privacy notice — `legal.html`** now discloses the visit statistics, the 30-minute session
+  cookie, and the Do Not Track / GPC behaviour, without claiming a retention period.
 
-- **Store:** `public.email_messages` (`supabase/migration-email-messages.sql`) — one row per
-  email, `direction` INBOUND/OUTBOUND, `status` SENT/DELIVERED/BOUNCED/RECEIVED/FAILED,
-  `resend_id` (unique, so webhook retries upsert instead of duplicating), `message_id` and
-  `in_reply_to` for threading, nullable `lead_id`. Owner-only RLS (`is_owner()`).
-  Deliberately separate from `lead_email_log`, which stays the lead-scoped audit log for
-  flow/one-off lead sends.
-- **Inbound — `api/webhooks/resend.js`:** verifies the Svix signature on the raw body
-  (`resend.webhooks.verify`), then on `email.received` fetches the full body with
-  `resend.emails.receiving.get` (the webhook payload omits it), links a lead by sender
-  address if one matches, and upserts an INBOUND row. Also handles `email.sent` (backfills
-  the outbound Message-ID, which Resend only reveals here), `email.delivered`,
-  `email.bounced`, `email.failed` (status updates that never downgrade a later state).
-  Writes with `SUPABASE_SERVICE_ROLE_KEY` — no user session on a webhook.
-- **Outbound — `api/dashboard/email/send.js`:** owner-only (`api/_lib/owner-auth.js`, the
-  same check as `send-lead-email.js`). Takes `{ to, subject, htmlBody, textBody?,
-  parentMessageId? }`, validates (single-line subject, single recipient, header-safe
-  Message-ID), sends via the Resend SDK, then logs with the caller's own token so RLS
-  applies. Always sends a plain-text part (derived from the HTML if none given). Sets
-  `In-Reply-To`/`References` from `parentMessageId`, and `Reply-To` from `RESEND_REPLY_TO`
-  when set. If logging fails after a successful send it returns success plus a warning
-  rather than an error the owner might retry into a duplicate.
-- **Dashboard — Inbox tab** (`dashboard.html`, `js/dashboard.js`, "inbox" section): list with
-  All/Inbound/Outbound filter, detail pane, compose panel, Reply (prefills To/Re:/parent).
-  Compose has a Plain text / HTML toggle. **Plain text mode** has a formatting toolbar
-  (bold, italic, link, heading, bulleted/numbered list; Ctrl/Cmd+B/I/K) that writes light
-  markup (`**bold**`, `*italic*`, `[text](url)`, `- ` / `1. ` lists, `# ` heading) converted to
-  HTML on send by `plainTextToHtml` — everything is HTML-escaped first and only
-  `http(s):`/`mailto:` links are allowed, so typed text can't inject markup — with a live
-  preview. **Signature:** one saved block (`site_settings` key `email_signature`, so no
-  migration; that table is public-read/owner-write, fine because a signature goes out in
-  every email anyway), same markup, "Include signature" checkbox per message, appended in
-  both modes (inside `</body>` when the HTML has one) and shown in the preview. HTML mode: pick a saved template or "Draft with
-  AI" (existing `/generate-email-template` endpoint on the Railway agent). The **preview is the
-  main view**; the code sits behind an "Edit HTML code" toggle. Generated emails use a branded,
-  email-safe shell (`renderTemplateHtml` in `js/dashboard.js`): table layout, inline styles,
-  web-safe fonts, site palette from `DESIGN.md` (ink-navy type and button, warm-paper card on
-  parchment, one short brass rule, square corners), logo from
-  `https://www.propertiesbychel.com/images/logo-navy.png`, tagline footer. It leaves a
-  `<!--signature-->` marker so the signature lands inside the card. Merge fields fill from the
-  lead whose email matches the To address (else `firstName` → "there"). **Flow emails sent by
-  `api/run-flows.js` still use the older plain layout** — the two no longer match.
-- **Untrusted HTML:** received mail and the compose preview render only in
-  `<iframe sandbox="allow-popups" srcdoc>` with `referrerpolicy="no-referrer"` and a CSP
-  meta (`default-src 'none'; img-src https: data:; style-src 'unsafe-inline'`) — no
-  `allow-scripts`, no `allow-same-origin`, never `innerHTML`. Checked in a browser with a
-  hostile payload: nothing ran, parent page untouched.
-- **`middleware.js`:** `/api/` is now a passthrough prefix. Without it, coming-soon mode
-  rewrites third-party POSTs (the webhook, the cron) to the holding page.
+## Verification done
 
-## Configuration state (as of 2026-09-24)
-
-- **Env vars (Vercel, Production):** `RESEND_API_KEY` (must be Full access to read received
-  mail), `RESEND_FROM_EMAIL`, `RESEND_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`,
-  `OWNER_EMAIL`. Optional `RESEND_REPLY_TO` — the user added it by hand
-  (`replies@prenaevi.resend.app`); I could not read it back (the Vercel MCP is 403 for env
-  vars), so confirm a real reply carries it.
-- **Resend webhook** → `https://www.propertiesbychel.com/api/webhooks/resend` (**must be
-  `www`**: the bare domain 308-redirects and Resend does not follow redirects — this was
-  the cause of every event stuck at "Attempting" until fixed). Events: `email.received`,
-  `email.sent`, `email.delivered`, `email.bounced`, `email.failed`. A replayed event returned
-  200 in production, which also proves the signing secret is right.
-- **Receiving:** the domain is set up for sending only. Inbound works through Resend's
-  managed address `<anything>@prenaevi.resend.app` (no DNS). A test email to
-  `test@prenaevi.resend.app` appeared in Resend → Emails → Receiving and produced a 200
-  webhook hit. **Not directly verified:** that the row landed in `email_messages` and shows
-  in the Inbox tab (no Supabase access from the session), and that the migration was run.
-- **DNS (GoDaddy):** DKIM (`resend._domainkey`) and SPF/return-path (`send.` subdomain) were
-  already present; a DMARC record was added — `_dmarc` TXT
-  `v=DMARC1; p=none; rua=mailto:concierge@propertiesbychel.com` (verified resolving).
-  **Root MX is Mailgun** (LeadConnector); do not point Resend inbound at the root domain.
+Mocked-database tests (not committed): new/returning/expired sessions, cookie flags, bot and empty-
+UA skipping, referrer/path/utm handling, no IP stored, heartbeat can't revive an expired session,
+DB failure still 204; aggregation paging past 1,000 rows, bucket zero-fill, Manila date rollover,
+auth (401/403), bad range, missing tables → 503 with a hint. In a browser: the tab renders against
+mock data including hostile strings (`<img onerror>`, `<script>`) — they display as text, nothing
+executes. **Not verified against the real database or from real traffic** — the migration hadn't
+been run when this shipped.
 
 ## Known limitations
 
-- **Replies to dashboard mail only reach the Inbox if `Reply-To` is an address Resend
-  receives for.** `concierge@propertiesbychel.com` routes to Mailgun, so without
-  `RESEND_REPLY_TO` a reply never arrives. The `resend.app` Reply-To is visible to
-  recipients; a custom inbound subdomain would look better but needs DNS (below).
-- **End-to-end reply loop unverified:** compose → Gmail → reply → appears Inbound has not
-  been run yet.
-- **Only Inbox-sent and inbound mail is recorded.** Flow emails, lead auto-replies
-  (`notify-lead.js`) and `send-lead-email.js` sends do not appear here; their delivery events
-  hit the webhook, find no row, get a 5xx for 5 minutes (so Resend retries, covering the race
-  with the send endpoint's insert), then a 200 — expect some retry noise in Resend's log.
-- **Attachments are not stored or shown.**
-- **The dashboard's service worker (`dashboard-sw.js`) is stale-while-revalidate**, so the first
-  load after a deploy can still show the previous dashboard version; a second refresh picks up
-  the new one. Local testing needs the service worker unregistered too.
-- The signature applies to Inbox compose only; the lead-detail "Compose Email"
-  (`api/send-lead-email.js`) and flow emails don't add it.
-- **Those other send paths are still HTML-only with no `List-Unsubscribe`** — a deliverability
-  weak spot noted but not changed.
-- **Duplicated code grew:** `requireOwner` now exists in `api/send-lead-email.js`,
-  `server/lib/auth.js` and `api/_lib/owner-auth.js`; `renderTemplateHtml` (dashboard) mirrors
-  `renderTemplateEmailHtml` (`api/run-flows.js`) by hand.
-- **`js/dashboard.js` (~2,400 lines) and `dashboard.html` are far past the 500-line guideline.**
-- A bounced `email.bounced` event seen during testing was a mistyped recipient, not a bug.
-
-## Not pursued
-
-- Migrating existing flow/lead sends onto the shared inbox table.
-- Storing attachments; threading UI beyond `In-Reply-To`/`References`.
-- A custom inbound subdomain — needs DNS records the assistant can't add.
+- **Nothing records until the migration is run.** The visit endpoints silently return 204 when
+  the insert fails.
+- **Region values are shown as the code Vercel reports** (e.g. Metro Manila may appear as "00");
+  no lookup table was written because the real values haven't been seen yet.
+- Geo is approximate (city can be wrong for mobile carriers and VPNs).
+- Sessions with a single page view and no heartbeat show ~0 s, which pulls the average down.
+- The owner's own visits count unless they tick the exclude box on each browser.
+- Bounce rate is a deliberate simplification (single page view), not GA4's "engaged session".
+- No retention/cleanup job; rows accumulate. A cookie is set for every counted visitor, which
+  some jurisdictions expect consent for — no consent banner was added.
+- Hourly/daily buckets are hardcoded to UTC+8.
+- Aggregation is in application code; very high traffic would need SQL aggregates (a 60k-row cap
+  is flagged in the UI when hit).
 
 ## Possible future work
 
-- Set up `inbox.propertiesbychel.com` (add in Resend with Receiving on, add its records at
-  GoDaddy) and switch `RESEND_REPLY_TO` to it.
-- After a few weeks of clean DMARC reports, tighten `p=none` to `quarantine`.
-- Log flow/auto-reply sends into `email_messages` and add `List-Unsubscribe` + a plain-text
-  part to them.
-- Consolidate the duplicated owner-auth and template renderers; split `js/dashboard.js`.
+- Once real rows exist, map Vercel's region codes to readable names.
+- Link a session to a lead when a visitor submits an enquiry (`lead_id`, from the playbook).
+- Retention job (e.g. delete sessions older than N months) and state the period in the notice.
+- A cookie/consent notice if visitors from consent-required regions matter.
+- Split `js/dashboard.js` (still far past the 500-line guideline).

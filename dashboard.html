@@ -100,6 +100,26 @@
   .dash-row__detail dt { color: var(--a-text-3); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
   .dash-row__detail dd { color: var(--a-text-2); font-size: 13px; }
   .dash-empty { border-top: 1px solid var(--a-border); color: var(--a-text-3); font-size: 13px; }
+  .ana-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .ana-head .h3 { margin-right: auto; }
+  .ana-live { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--a-text-2); }
+  .ana-live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--a-text-3); }
+  .ana-live.is-on::before { background: #2e9e5b; }
+  .ana-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+  .ana-chart { width: 100%; height: auto; display: block; }
+  .ana-chart text { font-size: 11px; fill: var(--a-text-3); }
+  .ana-legend { display: flex; gap: 16px; font-size: 12px; color: var(--a-text-2); margin-top: 6px; }
+  .ana-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; vertical-align: -1px; }
+  .ana-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+  .ana-list h3 { font-family: inherit; font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--a-text); }
+  .ana-list ol { list-style: none; margin: 0; padding: 0; }
+  .ana-list li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 8px; font-size: 13px; color: var(--a-text-2);
+    background: linear-gradient(90deg, var(--a-accent-bg) var(--w, 0%), transparent var(--w, 0%)); border-radius: 3px; }
+  .ana-list li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ana-list li span:last-child { color: var(--a-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ana-note { font-size: 12px; color: var(--a-text-3); margin-top: 12px; }
+  .ana-table-wrap { overflow-x: auto; }
+  .ana-table-wrap .dash-table td, .ana-table-wrap .dash-table th { white-space: nowrap; }
   .inbox-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 24px; align-items: start; }
   @media (max-width: 860px) { .inbox-grid { grid-template-columns: minmax(0, 1fr); } }
   .inbox-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -280,6 +300,7 @@
     <button class="chip" data-tab="content" aria-pressed="false">Content</button>
     <button class="chip" data-tab="automation" aria-pressed="false">Automation</button>
     <button class="chip" data-tab="inbox" aria-pressed="false">Inbox</button>
+    <button class="chip" data-tab="analytics" aria-pressed="false">Analytics</button>
   </nav>
 
   <!-- Leads / CRM -->
@@ -1023,12 +1044,47 @@
       </div>
     </div>
   </section>
+
+  <!-- Analytics -->
+  <section id="tab-analytics" class="dash-tab" hidden>
+    <div class="dash-panel">
+      <div class="dash-panel__head ana-head">
+        <h2 class="h3">Site analytics</h2>
+        <span class="ana-live" id="ana-live" role="status">Loading…</span>
+        <div class="inbox-filters" style="margin:0" role="group" aria-label="Date range">
+          <button class="chip" data-ana-range="24h" aria-pressed="false">24 hours</button>
+          <button class="chip" data-ana-range="7d" aria-pressed="true">7 days</button>
+          <button class="chip" data-ana-range="30d" aria-pressed="false">30 days</button>
+          <button class="chip" data-ana-range="90d" aria-pressed="false">90 days</button>
+        </div>
+        <button class="btn" id="ana-refresh">Refresh</button>
+      </div>
+      <p class="dash-empty" id="ana-message" hidden></p>
+      <div id="ana-body" hidden>
+        <div class="ana-stats" id="ana-stats"></div>
+        <div id="ana-chart"></div>
+        <div class="ana-legend"><span><i style="background:var(--a-accent)"></i>Visitors (sessions)</span><span><i style="background:var(--a-text-3)"></i>Pageviews</span></div>
+        <div class="ana-grid" id="ana-lists"></div>
+        <p class="ana-note" id="ana-note"></p>
+      </div>
+    </div>
+    <div class="dash-panel" id="ana-recent-panel" hidden>
+      <div class="dash-panel__head"><h2 class="h3">Recent visitors</h2></div>
+      <div class="ana-table-wrap"><table class="dash-table" id="ana-recent"></table></div>
+      <p class="ana-note">Location is approximate and comes from the visitor's connection; the IP address itself is never stored. Times are Philippine time.</p>
+    </div>
+    <div class="dash-panel">
+      <label class="ana-live" style="gap:8px"><input type="checkbox" id="ana-exclude"> Don't count visits from this browser</label>
+      <p class="ana-note">Tick this on the browser you use to browse your own site, so your visits don't inflate the numbers.</p>
+    </div>
+  </section>
 </main>
 
 <script src="js/supabase-config.js?v=17"></script>
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=47"></script>
+<script type="module" src="js/dashboard-analytics.js?v=2"></script>
+<script type="module" src="js/dashboard.js?v=48"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

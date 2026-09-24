@@ -111,6 +111,7 @@ async function init(supabase) {
     loadEnrollments();
     loadTemplates();
     loadSignature();
+    if (window.DashboardAnalytics) window.DashboardAnalytics.init({ $, $$, esc, authHeader: listingAuthHeader });
     if (window.DashboardContent) window.DashboardContent.init(supabase, { $, $$, esc, uploadPhoto, showToast });
   }
 
@@ -119,9 +120,10 @@ async function init(supabase) {
     chip.addEventListener("click", () => {
       $$(".dash-tabs .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       chip.setAttribute("aria-pressed", "true");
-      ["leads", "developments", "listings", "photos", "content", "automation", "inbox"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
+      ["leads", "developments", "listings", "photos", "content", "automation", "inbox", "analytics"].forEach((t) => { $("#tab-" + t).hidden = t !== chip.dataset.tab; });
       if (chip.dataset.tab === "automation") loadEnrollments();
       if (chip.dataset.tab === "inbox") loadInbox();
+      if (window.DashboardAnalytics) window.DashboardAnalytics[chip.dataset.tab === "analytics" ? "start" : "stop"]();
     });
   });
 

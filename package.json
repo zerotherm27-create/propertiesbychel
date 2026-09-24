@@ -4,6 +4,7 @@
   "dependencies": {
     "@vercel/edge-config": "^1.4.0",
     "@vercel/functions": "^1.6.0",
-    "resend": "^6.28.1"
+    "resend": "^6.28.1",
+    "ua-parser-js": "^2.0.10"
   }
 }
