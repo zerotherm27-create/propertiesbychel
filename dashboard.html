@@ -108,6 +108,8 @@
   .inbox-item__top { display: flex; justify-content: space-between; gap: 12px; }
   .inbox-item__subject { font-size: 13px; color: var(--a-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .inbox-frame { width: 100%; height: 460px; border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); background: #fff; }
+  .inbox-gen { border: 1px solid var(--a-border); border-radius: var(--a-radius-sm); padding: 12px; margin: 12px 0; background: var(--a-surface-2); }
+  .inbox-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
   .inbox-meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; margin-bottom: 12px; }
   .inbox-meta dt { color: var(--a-text-3); }
   .inbox-meta dd { margin: 0; color: var(--a-text-2); overflow-wrap: anywhere; }
@@ -957,8 +959,31 @@
           <form id="inbox-compose-form" novalidate>
             <div class="field"><label for="inbox-to">To</label><input id="inbox-to" name="to" type="email" required autocomplete="off"></div>
             <div class="field"><label for="inbox-subject">Subject</label><input id="inbox-subject" name="subject" required maxlength="300"></div>
-            <div class="field"><label for="inbox-body">Message</label><textarea id="inbox-body" name="body" rows="10" required></textarea>
-              <p class="field__note">Plain text — blank lines become paragraphs.</p></div>
+            <div class="inbox-filters" role="group" aria-label="Message format">
+              <button type="button" class="chip" data-compose-mode="text" aria-pressed="true">Plain text</button>
+              <button type="button" class="chip" data-compose-mode="html" aria-pressed="false">HTML</button>
+            </div>
+            <div id="inbox-mode-text">
+              <div class="field"><label for="inbox-body">Message</label><textarea id="inbox-body" name="body" rows="10"></textarea>
+                <p class="field__note">Plain text — blank lines become paragraphs.</p></div>
+            </div>
+            <div id="inbox-mode-html" hidden>
+              <div class="inbox-gen">
+                <div class="field"><label for="inbox-template">Start from a template</label>
+                  <select id="inbox-template"><option value="">Choose a template…</option></select></div>
+                <div class="field"><label for="inbox-ai-brief">Or draft with AI</label>
+                  <input id="inbox-ai-brief" placeholder="e.g. Follow up after a viewing and invite them to book a second visit" autocomplete="off"></div>
+                <div class="field"><label for="inbox-ai-link">Button link (optional)</label>
+                  <input id="inbox-ai-link" type="url" placeholder="https://" autocomplete="off"></div>
+                <button type="button" class="btn" id="inbox-ai-btn">Draft with AI</button>
+                <span class="field__note" id="inbox-gen-status" role="status"></span>
+                <p class="field__note">Merge fields like {firstName} fill in from the lead whose email matches the To address.</p>
+              </div>
+              <div class="field"><label for="inbox-html">HTML</label>
+                <textarea id="inbox-html" name="html" rows="12" spellcheck="false" class="inbox-code"></textarea></div>
+              <p class="field__note">Preview</p>
+              <div id="inbox-html-preview"></div>
+            </div>
             <button class="btn btn--solid" type="submit" id="inbox-send-btn">Send</button>
             <button class="btn" type="button" id="inbox-compose-cancel">Cancel</button>
             <p class="field__error" id="inbox-compose-error" role="alert"></p>
@@ -974,7 +999,7 @@
 <script src="js/supabase-config.js?v=17"></script>
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
-<script type="module" src="js/dashboard.js?v=43"></script>
+<script type="module" src="js/dashboard.js?v=44"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

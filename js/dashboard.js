@@ -2189,6 +2189,8 @@ async function init(supabase) {
     const f = $("#inbox-compose-form");
     f.reset();
     f.dataset.parentMessageId = "";
+    setComposeMode("text");
+    $("#inbox-gen-status").textContent = "";
     $("#inbox-compose-error").textContent = "";
     $("#inbox-compose-title").textContent = reply ? "Reply" : "New message";
     if (reply) {
@@ -2209,6 +2211,98 @@ async function init(supabase) {
     return String(text || "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
       .map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
   }
+
+  /* HTML compose mode: a template or an AI draft becomes editable HTML with a live preview. */
+  function setComposeMode(mode) {
+    $("#inbox-compose-form").dataset.mode = mode;
+    $$("[data-compose-mode]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.composeMode === mode)));
+    $("#inbox-mode-text").hidden = mode !== "text";
+    $("#inbox-mode-html").hidden = mode !== "html";
+    if (mode === "html") { populateComposeTemplates(); renderComposePreview(); }
+  }
+
+  function populateComposeTemplates() {
+    const select = $("#inbox-template");
+    const current = select.value;
+    select.innerHTML = '<option value="">Choose a template…</option>' +
+      templates.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+    select.value = current;
+  }
+
+  // Merge values for the lead whose email matches the To address; falls back to
+  // the same defaults api/run-flows.js uses (firstName -> "there", rest blank).
+  function composeMergeValues(toAddress) {
+    const lead = leads.find((l) => l.email && l.email.toLowerCase() === toAddress.trim().toLowerCase()) || {};
+    return {
+      firstName: (lead.name || "").trim().split(/\s+/)[0] || "there",
+      intent: lead.intent || "", districts: lead.districts || "", budgetRange: lead.budget_range || "",
+      timeframe: lead.timeframe || "", status: lead.status || "", listingTitle: ""
+    };
+  }
+
+  // Same layout as renderTemplateEmailHtml in api/run-flows.js, so a template
+  // looks identical whether it's sent by a flow or composed here. Kept in sync by hand.
+  function renderTemplateHtml(t, values) {
+    const sub = (v) => substituteTemplateVars(v, values);
+    const paragraphs = sub(t.body).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+      .map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+    const image = t.art_image_url ? `<p><img src="${esc(t.art_image_url)}" style="max-width:100%"></p>` : "";
+    const buttonText = sub(t.button_text);
+    const button = buttonText && t.button_url
+      ? `<p><a href="${esc(t.button_url)}" style="display:inline-block;padding:10px 20px;background:#18181b;color:#fff;text-decoration:none;border-radius:6px">${esc(buttonText)}</a></p>`
+      : "";
+    return `${image}<h2>${esc(sub(t.heading))}</h2>${paragraphs}${button}`;
+  }
+
+  function useGeneratedEmail(t) {
+    const f = $("#inbox-compose-form");
+    const values = composeMergeValues(f.to.value);
+    if (t.subject) f.subject.value = substituteTemplateVars(t.subject, values);
+    f.html.value = renderTemplateHtml(t, values);
+    renderComposePreview();
+  }
+
+  let composePreviewTimer = null;
+  function renderComposePreview() {
+    clearTimeout(composePreviewTimer);
+    composePreviewTimer = setTimeout(() => {
+      const html = $("#inbox-html").value;
+      const box = $("#inbox-html-preview");
+      if (!html.trim()) { box.innerHTML = '<p class="dash-empty">Nothing to preview yet.</p>'; return; }
+      renderEmailBody(box, { html_body: html });
+    }, 200);
+  }
+
+  $$("[data-compose-mode]").forEach((chip) => chip.addEventListener("click", () => setComposeMode(chip.dataset.composeMode)));
+  $("#inbox-html").addEventListener("input", renderComposePreview);
+  $("#inbox-template").addEventListener("change", (e) => {
+    const t = templates.find((x) => x.id === e.target.value);
+    if (t) { useGeneratedEmail(t); $("#inbox-gen-status").textContent = `Loaded "${t.name}". Edit the HTML below if you like.`; }
+  });
+  $("#inbox-ai-btn").addEventListener("click", async () => {
+    const status = $("#inbox-gen-status");
+    const brief = $("#inbox-ai-brief").value.trim();
+    if (!brief) { status.textContent = "Describe what the email should say first."; return; }
+    if (!AGENT_URL) { status.textContent = "The AI agent isn't configured."; return; }
+    const btn = $("#inbox-ai-btn");
+    btn.disabled = true;
+    status.textContent = "Drafting…";
+    try {
+      const r = await fetch(AGENT_URL + "/generate-email-template", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(await listingAuthHeader()) },
+        body: JSON.stringify({ name: "Dashboard email", category: "general", angle: brief })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Draft failed");
+      useGeneratedEmail({ ...data, button_url: $("#inbox-ai-link").value.trim() });
+      status.textContent = "Draft ready. Review and edit before sending.";
+    } catch (ex) {
+      status.textContent = "Could not draft: " + (ex.message || ex);
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   $$("[data-inbox-filter]").forEach((chip) => {
     chip.addEventListener("click", () => {
@@ -2235,7 +2329,8 @@ async function init(supabase) {
     err.textContent = "";
     const to = f.to.value.trim();
     const subject = f.subject.value.trim();
-    const text = f.body.value.trim();
+    const htmlMode = f.dataset.mode === "html";
+    const text = htmlMode ? f.html.value.trim() : f.body.value.trim();
     if (!to || !subject || !text) { err.textContent = "Recipient, subject and message are all required."; return; }
     btn.disabled = true;
     btn.textContent = "Sending…";
@@ -2244,7 +2339,10 @@ async function init(supabase) {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(await listingAuthHeader()) },
         body: JSON.stringify({
-          to, subject, htmlBody: plainTextToHtml(text), textBody: text,
+          to, subject,
+          // HTML mode sends the markup as-is (the server derives the plain-text part);
+          // plain mode is escaped into paragraphs first.
+          ...(htmlMode ? { htmlBody: text } : { htmlBody: plainTextToHtml(text), textBody: text }),
           parentMessageId: f.dataset.parentMessageId || undefined
         })
       });
