@@ -70,7 +70,7 @@ function patchMetaTags(html, meta) {
   const esc = escapeHtmlAttr;
   let out = html;
   const set = (pattern, value) => { out = out.replace(pattern, value); };
-  if (meta.title) set(/<title[^>]*>[^<]*<\/title>/, `<title>${esc(meta.title)}</title>`);
+  if (meta.title) set(/(<title[^>]*>)[^<]*(<\/title>)/, `$1${esc(meta.title)}$2`);
   if (meta.description) {
     set(/(<meta[^>]*name="description"[^>]*content=")[^"]*(")/, `$1${esc(meta.description)}$2`);
     set(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc(meta.description)}$2`);
