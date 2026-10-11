@@ -79,6 +79,25 @@
   .ft-near ul { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
   .ft-near li { padding: var(--space-1) 0; color: var(--ink); }
   .ft-points { max-width: 44rem; margin: var(--space-12) auto 0; }
+
+  /* Construction updates — a month-by-month archive, deliberately separate from the photo galleries. */
+  .ft-cu-chips { display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap; margin-top: var(--space-10); }
+  .ft-cu-chip {
+    font: inherit; font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase;
+    padding: var(--space-2) var(--space-5); background: transparent; color: var(--ink-faint); cursor: pointer;
+    border: var(--rule) solid var(--line);
+  }
+  .ft-cu-chip[aria-selected="true"] { color: var(--ink); border-color: var(--ink); }
+  .ft-cu-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-8) var(--space-5); }
+  .ft-cu-grid[hidden] { display: none; }
+  @media (max-width: 60rem) { .ft-cu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 40rem) { .ft-cu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ft-cu-card { display: flex; flex-direction: column; gap: var(--space-2); text-align: left; font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: zoom-in; }
+  .ft-cu-card__media { display: block; aspect-ratio: 4/3; }
+  .ft-cu-card__media img { width: 100%; height: 100%; object-fit: cover; }
+  .ft-cu-card__month { font-family: var(--font-display); font-size: var(--text-h3); color: var(--ink); margin-top: var(--space-2); }
+  .ft-cu-card__meta { font-size: var(--text-sm); color: var(--ink-faint); }
+  .ft-cu-card:focus-visible, .ft-cu-chip:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
 </style>
 </head>
 <body>
@@ -156,7 +175,7 @@
           <tr><th scope="row">Sizes</th><td>55.5 – 154 sqm</td></tr>
           <tr><th scope="row">Amenity ground</th><td>3,000 sqm</td></tr>
           <tr><th scope="row">Completion</th><td>December 2027</td></tr>
-          <tr><th scope="row">Construction</th><td>43.75% overall, as of March 2026 (developer’s latest published update)</td></tr>
+          <tr><th scope="row">Construction</th><td>46.40% overall, as of June 2026 (developer’s latest published update)</td></tr>
         </tbody>
       </table>
       <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint);text-align:center">Figures are the developer’s published specifications. Pricing, availability, and terms are confirmed on enquiry.</p>
@@ -398,6 +417,252 @@
     </div>
   </section>
 
+  <!-- Construction updates (kept apart from the photo gallery) -->
+  <section id="construction" class="section" aria-labelledby="ft-cu-h">
+    <div class="shell">
+      <div style="text-align:center;max-width:44rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">Site Progress</p>
+        <h2 class="h2 mt-8" id="ft-cu-h">Construction updates</h2>
+        <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint)">The developer’s published progress photos, September 2022 to June 2026. Percentages on each month are the published project completion; captions inside the viewer carry the developer’s own wording, which can quote the residential building’s completion instead.</p>
+      </div>
+      <div class="ft-cu-chips" role="tablist" aria-label="Year">
+        <button type="button" class="ft-cu-chip" role="tab" aria-selected="true" aria-controls="ft-cu-2026" data-year="2026">2026</button><button type="button" class="ft-cu-chip" role="tab" aria-selected="false" aria-controls="ft-cu-2025" data-year="2025">2025</button><button type="button" class="ft-cu-chip" role="tab" aria-selected="false" aria-controls="ft-cu-2024" data-year="2024">2024</button><button type="button" class="ft-cu-chip" role="tab" aria-selected="false" aria-controls="ft-cu-2023" data-year="2023">2023</button><button type="button" class="ft-cu-chip" role="tab" aria-selected="false" aria-controls="ft-cu-2022" data-year="2022">2022</button>
+      </div>
+      <div class="ft-cu mt-12" id="ft-cu">
+        <div class="ft-cu-grid" role="tabpanel" id="ft-cu-2026" data-year="2026">
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2026-06-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2026 · 46.40% project completion · Residential building, overall completion - 54.80%&quot;}]" aria-label="Open 1 photo from June 2026">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2026-06-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">June 2026</span>
+            <span class="ft-cu-card__meta">46.40% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2026-05-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2026 · 45.43% project completion · Fortis residences (residential building), overall completion - 52.60%&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2026-05-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2026 · 45.43% project completion · Fortis residences (residential building), overall completion - 52.60%&quot;}]" aria-label="Open 2 photos from May 2026">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2026-05-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">May 2026</span>
+            <span class="ft-cu-card__meta">45.43% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2026-04-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2026 · 44.71% project completion · Fortis residences, overall completion - 52.40% (residential building)&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2026-04-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2026 · 44.71% project completion · Fortis residences, overall completion - 52.40% (residential building)&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2026-04-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2026 · 44.71% project completion · Fortis residences, overall completion - 52.40% (residential building)&quot;}]" aria-label="Open 3 photos from April 2026">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2026-04-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">April 2026</span>
+            <span class="ft-cu-card__meta">44.71% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2026-03-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2026 · 43.75% project completion · Fortis Residences, Overall Completion - 52.22%&quot;}]" aria-label="Open 1 photo from March 2026">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2026-03-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">March 2026</span>
+            <span class="ft-cu-card__meta">43.75% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2026-02-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2026 · 42.68% project completion · Fortis Residences, Overall Completion - 51.37%&quot;}]" aria-label="Open 1 photo from February 2026">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2026-02-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">February 2026</span>
+            <span class="ft-cu-card__meta">42.68% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2026-01-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2026 · 40.71% project completion · Fortis Residences, Overall Completion - 49.85&quot;}]" aria-label="Open 1 photo from January 2026">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2026-01-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">January 2026</span>
+            <span class="ft-cu-card__meta">40.71% project · 1 photo</span>
+          </button>
+        </div>
+        <div class="ft-cu-grid" role="tabpanel" id="ft-cu-2025" data-year="2025" hidden>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-12-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2025 · 37.95% project completion&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-12-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2025 · 37.95% project completion&quot;}]" aria-label="Open 2 photos from December 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-12-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">December 2025</span>
+            <span class="ft-cu-card__meta">37.95% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-11-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2025 · 35.56% project completion&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-11-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2025 · 35.56% project completion&quot;}]" aria-label="Open 2 photos from November 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-11-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">November 2025</span>
+            <span class="ft-cu-card__meta">35.56% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-10-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2025 · 34.23% project completion · Fortis Residences - Roof Deck&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-10-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2025 · 34.23% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from October 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-10-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">October 2025</span>
+            <span class="ft-cu-card__meta">34.23% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-09-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2025 · 33.78% project completion&quot;}]" aria-label="Open 1 photo from September 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-09-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">September 2025</span>
+            <span class="ft-cu-card__meta">33.78% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-08-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2025 · Lower Roof deck Rebar Installation&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-08-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2025 · Commercial Building Excavation Works&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-08-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2025 · Commercial Building Area 2 Rebar Works&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-08-4.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2025&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-08-5.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2025 · 28F Elevator Lobby CHB Laying&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-08-6.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2025 · 3rd Atrium Low Walls Skim coat Application&quot;}]" aria-label="Open 6 photos from August 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-08-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">August 2025</span>
+            <span class="ft-cu-card__meta">Project figure not published · 6 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-07-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2025 · 33.28% project completion&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-07-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2025 · 33.28% project completion · 20F CHB Laying&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-07-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2025 · 33.28% project completion · 11F Unit Skim Coat Application&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-07-4.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2025 · 33.28% project completion · 3rd Atrium Hallway Railings Installation&quot;}]" aria-label="Open 4 photos from July 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-07-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">July 2025</span>
+            <span class="ft-cu-card__meta">33.28% project · 4 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-06-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2025 · 32.29% project completion · Front Wing Residential Building&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-06-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2025 · 32.29% project completion · Residential and Commercial Building Front View&quot;}]" aria-label="Open 2 photos from June 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-06-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">June 2025</span>
+            <span class="ft-cu-card__meta">32.29% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-05-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2025 · 31.46% project completion&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-05-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2025 · 31.46% project completion&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-05-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2025 · 31.46% project completion&quot;}]" aria-label="Open 3 photos from May 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-05-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">May 2025</span>
+            <span class="ft-cu-card__meta">31.46% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-04-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2025 · 30.26% project completion&quot;}]" aria-label="Open 1 photo from April 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-04-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">April 2025</span>
+            <span class="ft-cu-card__meta">30.26% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-03-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2025 · 27.94% project completion&quot;}]" aria-label="Open 1 photo from March 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-03-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">March 2025</span>
+            <span class="ft-cu-card__meta">27.94% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-02-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2025 · 27.73% project completion · Fortis Residences&quot;}]" aria-label="Open 1 photo from February 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-02-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">February 2025</span>
+            <span class="ft-cu-card__meta">27.73% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2025-01-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2025 · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2025-01-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2025 · Fortis Residences&quot;}]" aria-label="Open 2 photos from January 2025">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2025-01-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">January 2025</span>
+            <span class="ft-cu-card__meta">Project figure not published · 2 photos</span>
+          </button>
+        </div>
+        <div class="ft-cu-grid" role="tabpanel" id="ft-cu-2024" data-year="2024" hidden>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-12-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2024 · 25.15% project completion · Fortis Residences&quot;}]" aria-label="Open 1 photo from December 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-12-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">December 2024</span>
+            <span class="ft-cu-card__meta">25.15% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-11-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2024 · 23.65% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-11-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2024 · 23.65% project completion · Fortis Residences - Commercial Building (Basement)&quot;}]" aria-label="Open 2 photos from November 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-11-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">November 2024</span>
+            <span class="ft-cu-card__meta">23.65% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-10-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2024 · 22.29% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-10-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2024 · 22.29% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-10-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2024 · 22.29% project completion · Fortis Residences&quot;}]" aria-label="Open 3 photos from October 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-10-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">October 2024</span>
+            <span class="ft-cu-card__meta">22.29% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-08-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2024 · 19.37% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-08-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2024 · 19.37% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from August 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-08-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">August 2024</span>
+            <span class="ft-cu-card__meta">19.37% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-07-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2024 · 14.19% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-07-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2024 · 14.19% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from July 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-07-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">July 2024</span>
+            <span class="ft-cu-card__meta">14.19% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-06-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2024 · 14.04% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-06-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2024 · 14.04% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from June 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-06-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">June 2024</span>
+            <span class="ft-cu-card__meta">14.04% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-05-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2024 · 13.34% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-05-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2024 · 13.34% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from May 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-05-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">May 2024</span>
+            <span class="ft-cu-card__meta">13.34% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-04-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2024 · 13.11% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-04-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2024 · 13.11% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-04-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2024 · 13.11% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-04-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, April 2024 · 13.11% project completion · Fortis Residences&quot;}]" aria-label="Open 4 photos from April 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-04-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">April 2024</span>
+            <span class="ft-cu-card__meta">13.11% project · 4 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-03-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2024 · 12.62% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-03-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2024 · 12.62% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-03-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2024 · 12.62% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-03-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2024 · 12.62% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-03-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2024 · 12.62% project completion · Fortis Residences&quot;}]" aria-label="Open 5 photos from March 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-03-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">March 2024</span>
+            <span class="ft-cu-card__meta">12.62% project · 5 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-02-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2024 · 11.42% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-02-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2024 · 11.42% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-02-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2024 · 11.42% project completion · Fortis Residences&quot;}]" aria-label="Open 3 photos from February 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-02-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">February 2024</span>
+            <span class="ft-cu-card__meta">11.42% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2024-01-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2024 · 10.42% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2024-01-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2024 · 10.42% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from January 2024">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2024-01-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">January 2024</span>
+            <span class="ft-cu-card__meta">10.42% project · 2 photos</span>
+          </button>
+        </div>
+        <div class="ft-cu-grid" role="tabpanel" id="ft-cu-2023" data-year="2023" hidden>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-12-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2023 · 9.49% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-12-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2023 · 9.49% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-12-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2023 · 9.49% project completion · Fortis Residences&quot;}]" aria-label="Open 3 photos from December 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-12-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">December 2023</span>
+            <span class="ft-cu-card__meta">9.49% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-11-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2023 · 8.54% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-11-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2023 · 8.54% project completion · Fortis Residences - Ground flr. Aerial View&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-11-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2023 · 8.54% project completion · Fortis Residences&quot;}]" aria-label="Open 3 photos from November 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-11-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">November 2023</span>
+            <span class="ft-cu-card__meta">8.54% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-10-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2023 · 7.62% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-10-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2023 · 7.62% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from October 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-10-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">October 2023</span>
+            <span class="ft-cu-card__meta">7.62% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-09-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2023 · 6.69% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-09-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2023 · 6.69% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-09-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2023 · 6.69% project completion · Fortis Residences - Basement 4 (Top View)&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-09-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2023 · 6.69% project completion · Fortis Residences&quot;}]" aria-label="Open 4 photos from September 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-09-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">September 2023</span>
+            <span class="ft-cu-card__meta">6.69% project · 4 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-08-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2023 · 6.14% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-08-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2023 · 6.14% project completion · Fortis Residences - Basement Parking 6&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-08-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, August 2023 · 6.14% project completion · Fortis Residences - Basement Parking 4&quot;}]" aria-label="Open 3 photos from August 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-08-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">August 2023</span>
+            <span class="ft-cu-card__meta">6.14% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-07-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2023 · 5.33% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-07-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2023 · 5.33% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-07-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2023 · 5.33% project completion · Fortis Residences - Basement 5&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-07-4.jpg&quot;, &quot;alt&quot;: &quot;Construction update, July 2023 · 5.33% project completion · Fortis Residences - Basement 4&quot;}]" aria-label="Open 4 photos from July 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-07-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">July 2023</span>
+            <span class="ft-cu-card__meta">5.33% project · 4 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-06-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2023 · 4.49% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-06-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2023 · 4.49% project completion · Fortis Residences - Basement 6&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-06-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, June 2023 · 4.49% project completion · Fortis Residences - Basement 5&quot;}]" aria-label="Open 3 photos from June 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-06-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">June 2023</span>
+            <span class="ft-cu-card__meta">4.49% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-05-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2023 · 3.29% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-05-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2023 · 3.29% project completion · Fortis Residences - Slope Protection&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-05-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, May 2023 · 3.29% project completion · Fortis Residences - Building Basement&quot;}]" aria-label="Open 3 photos from May 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-05-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">May 2023</span>
+            <span class="ft-cu-card__meta">3.29% project · 3 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-03-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, March 2023 · 2.58% project completion · Fortis Residences&quot;}]" aria-label="Open 1 photo from March 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-03-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">March 2023</span>
+            <span class="ft-cu-card__meta">2.58% project · 1 photo</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-02-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2023 · 2.23% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-02-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, February 2023 · 2.23% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from February 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-02-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">February 2023</span>
+            <span class="ft-cu-card__meta">2.23% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2023-01-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2023 · 2.05% project completion · Fortis Residences&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2023-01-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, January 2023 · 2.05% project completion · Fortis Residences&quot;}]" aria-label="Open 2 photos from January 2023">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2023-01-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">January 2023</span>
+            <span class="ft-cu-card__meta">2.05% project · 2 photos</span>
+          </button>
+        </div>
+        <div class="ft-cu-grid" role="tabpanel" id="ft-cu-2022" data-year="2022" hidden>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2022-12-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2022 · 1.69% project completion · Fortis Residences - On going Excavation and Soil Nailing&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-12-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, December 2022 · 1.69% project completion · Fortis Residences - On going Excavation and Soil Nailing&quot;}]" aria-label="Open 2 photos from December 2022">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2022-12-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">December 2022</span>
+            <span class="ft-cu-card__meta">1.69% project · 2 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2022-11-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2022 · 1.20% project completion · Fortis Residences - On going Excavation and Soil Nailing&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-11-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2022 · 1.20% project completion · Fortis Residences - On going Excavation and Soil Nailing&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-11-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2022 · 1.20% project completion · Fortis Residences - On going Excavation and Soil Nailing&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-11-4.jpg&quot;, &quot;alt&quot;: &quot;Construction update, November 2022 · 1.20% project completion · Fortis Residences - On going Excavation and Soil Nailing&quot;}]" aria-label="Open 4 photos from November 2022">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2022-11-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">November 2022</span>
+            <span class="ft-cu-card__meta">1.20% project · 4 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2022-10-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Excavation&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Facing Roadway&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Gate Entrance&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-4.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Service Entrance&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-5.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Slope Protection Works&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-6.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Wash Bay&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Excavation&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Gate Entrance&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-10-5.jpg&quot;, &quot;alt&quot;: &quot;Construction update, October 2022 · 0.36% project completion · Fortis Residences - Slope Protection Works&quot;}]" aria-label="Open 9 photos from October 2022">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2022-10-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">October 2022</span>
+            <span class="ft-cu-card__meta">0.36% project · 9 photos</span>
+          </button>
+          <button type="button" class="ft-cu-card" data-photos="[{&quot;url&quot;: &quot;images/fortis-construction/2022-09-1.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2022 · 0.24% project completion · Fortis Residences - Excavation Works&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-09-2.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2022 · 0.24% project completion · Fortis Residences - Excavation Works&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-09-3.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2022 · 0.24% project completion · Fortis Residences - Rebar Insertion&quot;}, {&quot;url&quot;: &quot;images/fortis-construction/2022-09-4.jpg&quot;, &quot;alt&quot;: &quot;Construction update, September 2022 · 0.24% project completion · Fortis Residences - Rebar Grouting&quot;}]" aria-label="Open 4 photos from September 2022">
+            <span class="frame ft-cu-card__media"><img src="images/fortis-construction/2022-09-1-t.jpg" alt="" loading="lazy"></span>
+            <span class="ft-cu-card__month">September 2022</span>
+            <span class="ft-cu-card__meta">0.24% project · 4 photos</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- About -->
   <section class="section band text-center" aria-labelledby="ft-about-h">
     <div class="shell" style="max-width:44rem" data-reveal>
@@ -614,6 +879,28 @@
       });
     });
   });
+
+
+  /* — Construction updates: year tabs, and each month opens its own photo set in the lightbox — */
+  var cuRoot = document.getElementById("ft-cu");
+  if (cuRoot) {
+    var chipEls = document.querySelectorAll(".ft-cu-chip");
+    Array.prototype.forEach.call(chipEls, function (chip) {
+      chip.addEventListener("click", function () {
+        Array.prototype.forEach.call(chipEls, function (c) { c.setAttribute("aria-selected", c === chip ? "true" : "false"); });
+        Array.prototype.forEach.call(cuRoot.querySelectorAll(".ft-cu-grid"), function (p) {
+          p.hidden = p.getAttribute("data-year") !== chip.getAttribute("data-year");
+        });
+      });
+    });
+    Array.prototype.forEach.call(cuRoot.querySelectorAll(".ft-cu-card"), function (card) {
+      card.addEventListener("click", function () {
+        try { items = JSON.parse(card.getAttribute("data-photos")); } catch (e) { return; }
+        activeKind = "photo";
+        openGallery(0);
+      });
+    });
+  }
 
   lightboxClose.addEventListener("click", closeGallery);
   lightboxPrev.addEventListener("click", function () { showSlide(currentIndex - 1); });
