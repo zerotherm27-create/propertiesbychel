@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fortis Residences by DMCI Homes · Properties by Chel</title>
+<meta name="description" content="Fortis Residences by DMCI Homes Exclusive — a high-rise condominium on Chino Roces Avenue in the Makati Southwest Gateway. One-, two-, and three-bedroom residences from 55.5 to 154 sqm, set for completion in December 2027.">
+<link rel="canonical" href="https://www.propertiesbychel.com/fortis-residences">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.propertiesbychel.com/fortis-residences">
+<meta property="og:site_name" content="Properties by Chel">
+<meta property="og:title" content="Fortis Residences by DMCI Homes · Properties by Chel">
+<meta property="og:description" content="A high-rise on Chino Roces Avenue in the Makati Southwest Gateway. Residences from 55.5 to 154 sqm, set for completion in December 2027.">
+<meta property="og:image" content="https://static.wixstatic.com/media/3ea2d9_a05205c59f6146779904ba7f7bdf67f6~mv2.jpg/v1/fit/w_1200,h_630,q_80/fortis-residences.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fortis Residences by DMCI Homes · Properties by Chel">
+<meta name="twitter:description" content="A high-rise on Chino Roces Avenue in the Makati Southwest Gateway. Residences from 55.5 to 154 sqm, set for completion in December 2027.">
+<meta name="twitter:image" content="https://static.wixstatic.com/media/3ea2d9_a05205c59f6146779904ba7f7bdf67f6~mv2.jpg/v1/fit/w_1200,h_630,q_80/fortis-residences.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css?v=47">
+<link rel="icon" href="images/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<style>
+  /* page-scoped composition helpers, tokens only — same pattern as the-arton.html */
+  .ft-status-banner {
+    background: var(--espresso); color: var(--on-espresso); padding: var(--space-4) var(--margin);
+    text-align: center; font-size: var(--text-sm); margin-top: 6.5rem;
+    opacity: 0; transition: opacity var(--dur) var(--ease-out);
+  }
+  .ft-status-banner.is-in { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .ft-status-banner { transition: none; } }
+  .ft-status-banner a { color: var(--brass); text-decoration: underline; }
+
+  .ft-hero { max-width: 44rem; margin-inline: auto; text-align: center; padding-top: var(--space-12); }
+  .ft-hero .eyebrow { justify-content: center; margin-inline: auto; }
+  .ft-hero .lede { margin-inline: auto; }
+  .ft-hero__media { max-width: 56rem; margin: var(--space-12) auto 0; aspect-ratio: 16/9; }
+  .ft-caption { font-size: var(--text-sm); color: var(--ink-faint); text-align: center; margin-top: var(--space-4); }
+
+  /* Plans are drawings on a landscape sheet: shown uncropped on a light ground, full size in the lightbox. */
+  .ft-plans {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-12) var(--space-10); margin-top: var(--space-16);
+  }
+  @media (max-width: 48rem) { .ft-plans { grid-template-columns: 1fr; gap: var(--space-10); } }
+  .ft-plan { cursor: zoom-in; }
+  .ft-plan__frame { aspect-ratio: 3508/2480; background: var(--paper); }
+  .ft-plan__frame img { object-fit: contain; }
+  .ft-plan figcaption { padding-top: 0; }
+  .ft-plan__cap {
+    display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4);
+    margin-top: var(--space-4); padding-top: var(--space-4); border-top: var(--rule) solid var(--line);
+  }
+  .ft-plan__name { font-family: var(--font-display); font-size: var(--text-h3); color: var(--ink); }
+  .ft-plan__sqm {
+    font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps);
+    text-transform: uppercase; color: var(--ink-faint); white-space: nowrap;
+  }
+  .ft-plan__band { display: block; font-size: var(--text-sm); color: var(--ink-faint); margin-top: var(--space-2); }
+  .gallery-lightbox.is-land .gallery-lightbox__frame { max-width: min(64rem, calc(82vh * 1.414)); background: var(--paper); }
+  .gallery-lightbox.is-land .gallery-lightbox__frame img { max-height: 82vh; }
+
+  .ft-sdps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); max-width: 64rem; margin: var(--space-8) auto 0; }
+  @media (max-width: 48rem) { .ft-sdps { grid-template-columns: 1fr; } }
+  .ft-sdp { cursor: zoom-in; }
+  .ft-sdp__frame { aspect-ratio: 16/9; background: var(--paper); }
+  .ft-sdp__frame img { object-fit: contain; }
+  .ft-sdp__cap { text-align: center; font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); margin-top: var(--space-3); }
+
+  .ft-near-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-10) var(--space-8); margin-top: var(--space-12); }
+  @media (max-width: 60rem) { .ft-near-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 36rem) { .ft-near-grid { grid-template-columns: 1fr; } }
+  .ft-near__h { font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); padding-bottom: var(--space-3); border-bottom: var(--rule) solid var(--line); }
+  .ft-near ul { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+  .ft-near li { padding: var(--space-1) 0; color: var(--ink); }
+  .ft-points { max-width: 44rem; margin: var(--space-12) auto 0; }
+</style>
+</head>
+<body>
+<a class="visually-hidden" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="masthead__inner shell">
+    <a class="masthead__mark" href="/">
+      <img class="masthead__logo masthead__logo--navy" src="images/logo-navy.png" alt="Properties by Chel" width="73" height="34">
+      <img class="masthead__logo masthead__logo--white" src="images/logo-white.png" alt="Properties by Chel" width="73" height="34">
+    </a>
+    <nav class="masthead__nav" aria-label="Primary">
+      <a href="properties">Collections</a>
+      <a href="developer">Developer</a>
+      <a href="insights">Insights</a>
+      <a href="about">About</a>
+      <a class="masthead__cta" href="presentation">Private Presentation</a>
+    </nav>
+    <button class="masthead__toggle" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menu" tabindex="-1">
+  <div class="menu-overlay__head">
+    <img class="menu-overlay__logo" src="images/logo-white.png" alt="Properties by Chel" width="60" height="28">
+    <button class="masthead__toggle" data-menu-close>Close</button>
+  </div>
+  <ul class="menu-overlay__list">
+    <li><a href="/">Home</a></li>
+    <li><a href="properties">Collections</a></li>
+    <li><a href="developer">Developer</a></li>
+    <li><a href="insights">Insights</a></li>
+    <li><a href="sellers">For Sellers</a></li>
+    <li><a href="foreign-buyers">Foreign Buyer Guidance</a></li>
+    <li><a href="about">About Chel</a></li>
+    <li><a href="presentation">Private Presentation</a></li>
+    <li><a href="contact">Contact</a></li>
+  </ul>
+  <div class="menu-overlay__foot">
+    <span>Makati City, Philippines</span>
+    <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a>
+  </div>
+</div>
+
+<main id="main">
+
+  <div id="ft-status-banner" class="ft-status-banner" hidden role="status">
+    <div class="shell">This development is no longer actively marketed. <a href="presentation?listing=fortis-residences">Contact us</a> for current availability.</div>
+  </div>
+
+  <!-- Hero -->
+  <section class="section section--tight ft-hero" aria-labelledby="ft-h">
+    <p class="eyebrow">Chino Roces Avenue, Makati City</p>
+    <h1 class="display mt-8" id="ft-h">Fortis Residences</h1>
+    <p class="lede mt-8"><strong style="color:var(--ink);font-weight:500">One address, inside Makati’s Southwest Gateway.</strong> A high-rise from DMCI Homes Exclusive, the developer’s premium line, with residences of 55.5 to 154 sqm — a scale of home the developer notes is uncommon in Makati — and a 3,000 sqm amenity ground.</p>
+    <div class="ft-hero__media frame frame--corners" data-reveal>
+      <img src="https://static.wixstatic.com/media/3ea2d9_a05205c59f6146779904ba7f7bdf67f6~mv2.jpg/v1/fit/w_2000,h_1200,q_85/fortis-residences.jpg" alt="Sky deck pool at Fortis Residences, architect's perspective" loading="lazy">
+    </div>
+    <p class="ft-caption">Architect’s perspective — the sky deck pool.</p>
+  </section>
+
+  <!-- The record -->
+  <section class="section section--tight" aria-labelledby="ft-record-h">
+    <div class="shell" style="max-width:44rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">The Record</p>
+        <h2 class="h2 mt-8" id="ft-record-h">What the developer publishes</h2>
+      </div>
+      <table class="spec mt-12">
+        <tbody>
+          <tr><th scope="row">Developer</th><td>DMCI Homes · DMCI Homes Exclusive</td></tr>
+          <tr><th scope="row">Address</th><td>Chino Roces Avenue, Makati City</td></tr>
+          <tr><th scope="row">District</th><td>Makati Southwest Gateway, a special mixed-use zone</td></tr>
+          <tr><th scope="row">Configurations</th><td>One-, two-, and three-bedroom</td></tr>
+          <tr><th scope="row">Sizes</th><td>55.5 – 154 sqm</td></tr>
+          <tr><th scope="row">Amenity ground</th><td>3,000 sqm</td></tr>
+          <tr><th scope="row">Completion</th><td>December 2027</td></tr>
+          <tr><th scope="row">Construction</th><td>43.75% overall, as of March 2026 (developer’s latest published update)</td></tr>
+        </tbody>
+      </table>
+      <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint);text-align:center">Figures are the developer’s published specifications. Pricing, availability, and terms are confirmed on enquiry.</p>
+      <p class="mt-8" style="text-align:center"><a class="link-line link-line--brass" href="https://www.flipsnack.com/5FF7A5FF8D6/ftr-brochure-updated-09162025_compressed" target="_blank" rel="noopener">View the developer’s brochure <span class="arr">→</span></a></p>
+    </div>
+  </section>
+
+  <!-- Units -->
+  <section id="units" class="section band-parchment" aria-labelledby="ft-units-h">
+    <div class="shell" style="max-width:72rem">
+      <div style="text-align:center;max-width:44rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">Our Units</p>
+        <h2 class="h2 mt-8" id="ft-units-h">Twelve published plans</h2>
+        <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint)">Select any plan to open it full size. Areas are the approximate gross floor areas stated on each drawing; the developer notes dimensions may vary with actual site conditions.</p>
+      </div>
+
+      <div class="ft-plans" data-reveal-stagger id="ft-plans-grid">
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_29f3b7b0bc1c4ac4a60107fe7bb1bbfa~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="One Bedroom · Unit A floor plan at Fortis Residences — approx. 55.5 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">One Bedroom · Unit A</span><span class="ft-plan__sqm">55.5 sqm</span></span>
+            <span class="ft-plan__band">End unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_0405878254034e2eac0ab97f2ebc19a3~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit A floor plan at Fortis Residences — approx. 72.5 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit A</span><span class="ft-plan__sqm">72.5 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_e835643cd23d4a8a9c53287391c690ad~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit B floor plan at Fortis Residences — approx. 91 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit B</span><span class="ft-plan__sqm">91 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_036f9d3c0fc74b1585dbf4e077d6c998~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit C floor plan at Fortis Residences — approx. 86 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit C</span><span class="ft-plan__sqm">86 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_8100eb9457dd436ca29a5498840f6173~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit D floor plan at Fortis Residences — approx. 93.5 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit D</span><span class="ft-plan__sqm">93.5 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_5cfe366c61d144ada4455383eda1dc9d~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit E floor plan at Fortis Residences — approx. 95 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit E</span><span class="ft-plan__sqm">95 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_4bd7571fc2a74e5f81803990bb189499~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit F floor plan at Fortis Residences — approx. 100 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit F</span><span class="ft-plan__sqm">100 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_f17554f77607498398eaebdeda17af3e~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Two Bedroom · Unit G floor plan at Fortis Residences — approx. 102 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Two Bedroom · Unit G</span><span class="ft-plan__sqm">102 sqm</span></span>
+            <span class="ft-plan__band">Inner unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_ae31b103d42548b1a9771b1e0768b00b~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Three Bedroom · Unit A floor plan at Fortis Residences — approx. 152.5 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Three Bedroom · Unit A</span><span class="ft-plan__sqm">152.5 sqm</span></span>
+            <span class="ft-plan__band">End unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_081e58662b534eb295b703828d37a822~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Three Bedroom · Unit B floor plan at Fortis Residences — approx. 143.5 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Three Bedroom · Unit B</span><span class="ft-plan__sqm">143.5 sqm</span></span>
+            <span class="ft-plan__band">End unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_11af5e5e4610470981b05f9be7c1c597~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Three Bedroom · Unit C floor plan at Fortis Residences — approx. 154 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Three Bedroom · Unit C</span><span class="ft-plan__sqm">154 sqm</span></span>
+            <span class="ft-plan__band">End unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+        <figure class="ft-plan" data-reveal>
+          <div class="frame ft-plan__frame"><img src="https://static.wixstatic.com/media/3ea2d9_66792cdfef574ae5b629ac141571a0d3~mv2.jpg/v1/fit/w_2400,h_2400,q_90/fortis-residences.jpg" alt="Three Bedroom · Unit D floor plan at Fortis Residences — approx. 145 sqm gross floor area" loading="lazy"></div>
+          <figcaption>
+            <span class="ft-plan__cap"><span class="ft-plan__name">Three Bedroom · Unit D</span><span class="ft-plan__sqm">145 sqm</span></span>
+            <span class="ft-plan__band">End unit · approx. gross floor area</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mt-16" style="max-width:40rem;margin-inline:auto">
+        <table class="spec">
+          <tbody>
+            <tr><th scope="row">1BR</th><td>55.5 sqm · one plan (Unit A)</td></tr>
+            <tr><th scope="row">2BR</th><td>72.5 – 102 sqm · seven plans (Units A – G)</td></tr>
+            <tr><th scope="row">3BR</th><td>143.5 – 154 sqm · four plans (Units A – D)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ft-points">
+        <h3 style="text-align:center;font-size:var(--text-caps);font-weight:600;letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--ink-faint)">Inside every unit</h3>
+        <table class="spec mt-8">
+          <tbody>
+            <tr><th scope="row">Cooling</th><td>Split-type air-conditioning in the bedrooms and living area</td></tr>
+            <tr><th scope="row">Kitchen &amp; bath</th><td>Rangehood · water heating system</td></tr>
+            <tr><th scope="row">Storage</th><td>Cabinet system in all bedrooms</td></tr>
+            <tr><th scope="row">Access &amp; connectivity</th><td>Digital lockset · Wi-Fi connectivity</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-12" style="text-align:center"><a class="btn" href="presentation?listing=fortis-residences">Private Presentation</a></p>
+    </div>
+  </section>
+
+  <!-- Amenities -->
+  <section id="amenities" class="section" aria-labelledby="ft-amenities-h">
+    <div class="shell" style="text-align:center;max-width:40rem;margin-inline:auto" data-reveal>
+      <p class="eyebrow" style="justify-content:center">Our Amenities</p>
+      <h2 class="h2 mt-8" id="ft-amenities-h">Resort living, set in green</h2>
+      <p class="prose mt-8">Resort-inspired amenities set within verdant landscapes, across a 3,000 sqm amenity ground: pools and decks, lounges framed by wide views, a sky patio, and a basketball court.</p>
+    </div>
+    <div class="shell mt-16">
+      <div class="photo-grid" data-reveal-stagger id="ft-render-grid">
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_a05205c59f6146779904ba7f7bdf67f6~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Sky deck pool at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_987edb9558774f488fbd42da69d92b9a~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Pool deck at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_e501e4c2dc6f4a7aa2d2ac2f882ac89d~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Leisure pool at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_91a12d14380c4d5c8ec242b45c653ccd~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Sky lounge at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_53189d6c005242cfb926969a0eba5286~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Open lounge at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_9f9ae1835f8d4d329e015919e977ffb7~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Sky patio at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_b396d6a1232b4771a251afb5c8634d62~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Basketball court at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_3126504566f84bd1afe7f21fbd8a6b9d~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Reception lobby at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_10c4f8063a9d4a1eb0c39da943208d33~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Promenade lobby entrance at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_50633cf22f714dbdb2185ee9f35b0174~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Master bedroom at Fortis Residences, architect's perspective" loading="lazy"></div></figure>
+      </div>
+      <p class="ft-caption">All views on this page are the developer’s architect’s perspectives unless marked otherwise.</p>
+    </div>
+  </section>
+
+  <!-- Location -->
+  <section id="location" class="section band-parchment" aria-labelledby="ft-location-h">
+    <div class="shell">
+      <div style="text-align:center;max-width:48rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">A Connected Address</p>
+        <h2 class="h2 mt-8" id="ft-location-h">Makati Southwest Gateway</h2>
+        <p class="lede mt-8" style="margin-inline:auto">Chino Roces Avenue is being remodelled by the Makati City Government into a mixed-use zone of residential and commercial space, with portions to be redeveloped as the Venir, Central, and Cielo zones. Fortis Residences is organically connected to the Makati CBD, with access to BGC and Pasay City.</p>
+      </div>
+      <div class="grid-12 mt-16">
+        <div class="col-span-6">
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Developer showroom</span><span class="index-row__meta">Bangkal, Makati</span></div>
+          <div class="index-row"><span class="index-row__title" style="font-size:1.25rem">Developer showroom</span><span class="index-row__meta">Oak Harbor Residences, Parañaque</span></div>
+          <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint)">Showrooms are at 1321 Apolinario St., Brgy. Bangkal, Makati City, and at Oak Harbor Residences on Jackson Avenue, Asiaworld, Parañaque City.</p>
+          <div class="mt-8">
+            <a class="link-line link-line--brass" href="https://www.google.com/maps/dir//Chino+Roces+Avenue,+Makati+City" target="_blank" rel="noopener">Get directions <span class="arr">→</span></a>
+          </div>
+        </div>
+        <div class="col-span-5 col-start-8">
+          <div id="ft-map" style="height:360px;border:var(--rule) solid var(--line)"></div>
+        </div>
+      </div>
+
+      <div class="ft-near-grid" data-reveal>
+          <div class="ft-near"><h3 class="ft-near__h">Dining</h3><ul><li>Little Tokyo</li><li>M Dining</li><li>Ginza Modern Japanese Dining</li><li>TOYO Eatery</li><li>Beso Beso</li></ul></div>
+          <div class="ft-near"><h3 class="ft-near__h">Art galleries &amp; museums</h3><ul><li>Silverlens</li><li>Vinyl on Vinyl Gallery</li><li>Leon Gallery</li><li>Modeka Creative Space</li><li>Finale Art File</li><li>Art Cube Gallery</li><li>Arinformal</li></ul></div>
+          <div class="ft-near"><h3 class="ft-near__h">Health centers</h3><ul><li>Makati Medical Center</li><li>Asian Eye Institute</li><li>Makati Life Medical Center</li></ul></div>
+          <div class="ft-near"><h3 class="ft-near__h">Schools</h3><ul><li>Don Bosco Technical Institute Makati</li><li>Assumption College</li><li>Colegio de San Agustin</li><li>Makati Hope Christian School</li><li>Asian Institute of Management</li><li>De La Salle University – Makati</li><li>Far Eastern University Makati</li><li>Ateneo Graduate School of Makati</li></ul></div>
+          <div class="ft-near"><h3 class="ft-near__h">Shopping &amp; leisure</h3><ul><li>Alphaland Southgate Mall</li><li>Waltermart Makati</li><li>Makati Cinema Square</li><li>Greenbelt</li><li>Glorietta</li><li>SM Makati</li><li>Cash &amp; Carry</li><li>Paseo de Magallanes</li></ul></div>
+          <div class="ft-near"><h3 class="ft-near__h">Transit &amp; districts</h3><ul><li>Ninoy Aquino International Airport</li><li>NAIA Terminal 3</li><li>MRT Magallanes Station</li><li>LRT Taft Station</li><li>Makati CBD</li><li>BGC</li><li>Aseana CBD</li><li>Entertainment City</li><li>The Bay Area</li></ul></div>
+      </div>
+
+      <div class="mt-20" data-reveal>
+        <div style="text-align:center;max-width:40rem;margin-inline:auto">
+          <h3 style="font-size:var(--text-caps);font-weight:600;letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--ink-faint)">Site Development Plan</h3>
+        </div>
+        <div class="ft-sdps" id="ft-sdp-grid">
+          <figure class="ft-sdp" data-reveal><div class="frame frame--corners ft-sdp__frame"><img src="https://static.wixstatic.com/media/3ea2d9_f14ecccd757040c5b529780c8f01bc97~mv2.jpg/v1/fit/w_2000,h_2000,q_88/fortis-residences.jpg" alt="Site development plan, ground floor, Fortis Residences — architect's perspective" loading="lazy"></div><figcaption class="ft-sdp__cap">Ground floor</figcaption></figure>
+          <figure class="ft-sdp" data-reveal><div class="frame frame--corners ft-sdp__frame"><img src="https://static.wixstatic.com/media/3ea2d9_102fa8d0c9f74ad8a1d13c294c6d6c4b~mv2.jpg/v1/fit/w_2000,h_2000,q_88/fortis-residences.jpg" alt="Site development plan, roof deck, Fortis Residences — architect's perspective" loading="lazy"></div><figcaption class="ft-sdp__cap">Roof deck</figcaption></figure>
+        </div>
+      </div>
+
+      <div class="photo-grid mt-20" data-reveal-stagger id="ft-street-grid" style="max-width:56rem;margin-inline:auto">
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_778879335ac64ee88c342e7ce6fde79d~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Chino Roces Avenue streetscape, architect's perspective" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_90647a34e0ad4373b674f40f4a1acf5d~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Chino Roces Avenue streetscape at the junction, architect's perspective" loading="lazy"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Built in -->
+  <section class="section" aria-labelledby="ft-built-h">
+    <div class="shell" style="max-width:44rem">
+      <div style="text-align:center">
+        <p class="eyebrow" style="justify-content:center">Built In</p>
+        <h2 class="h2 mt-8" id="ft-built-h">Future-ready, with service</h2>
+      </div>
+      <table class="spec mt-12">
+        <tbody>
+          <tr><th scope="row">Design</th><td>Lumiventt Design Technology</td></tr>
+          <tr><th scope="row">Water</th><td>Full water recycling capability</td></tr>
+          <tr><th scope="row">Mobility</th><td>E-charging stations for vehicles</td></tr>
+          <tr><th scope="row">Service</th><td>24/7 concierge, housekeeping, and security, with a dedicated customer service team</td></tr>
+        </tbody>
+      </table>
+      <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint);text-align:center">As described by the developer for the completed building.</p>
+    </div>
+  </section>
+
+  <!-- Showroom -->
+  <section id="gallery" class="section band-parchment" aria-labelledby="ft-gallery-h">
+    <div class="shell">
+      <div style="text-align:center;max-width:40rem;margin-inline:auto">
+        <p class="eyebrow" style="justify-content:center">Photos</p>
+        <h2 class="h2 mt-8" id="ft-gallery-h">In the showroom</h2>
+        <p class="mt-8" style="font-size:var(--text-sm);color:var(--ink-faint)">Interiors from the developer’s showroom gallery, shown under its invitation to visit the showrooms in Parañaque and Makati.</p>
+      </div>
+      <div class="photo-grid mt-16" data-reveal-stagger id="ft-show-grid">
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_18e342f445b14503b1f3df6cf45ccd44~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 1 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_7757094c57d349a2867182586e65d8f6~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 2 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_6b305549f9db4685956c62601cc4020d~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 3 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_dce73cc0db944512a4e27e068e4a9009~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 4 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_a16236a2e5244f02b3e0631239246164~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 5 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_b625e9a8704f41c6a43d9a7fc8c7297f~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 6 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_bd05c655761640228c5e24203a3cf93a~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 7 of 8, Fortis Residences" loading="lazy"></div></figure>
+        <figure data-reveal><div class="frame frame--hover"><img src="https://static.wixstatic.com/media/3ea2d9_d0e2ccc3592449729ef99798f79bdd3c~mv2.jpg/v1/fit/w_1600,h_1600,q_85/fortis-residences.jpg" alt="Showroom interior 8 of 8, Fortis Residences" loading="lazy"></div></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section band text-center" aria-labelledby="ft-about-h">
+    <div class="shell" style="max-width:44rem" data-reveal>
+      <p class="eyebrow eyebrow--bare" style="justify-content:center">The Developer</p>
+      <h2 class="h2 mt-8" id="ft-about-h">DMCI Homes Exclusive</h2>
+      <p class="lede mt-8" style="margin-inline:auto">DMCI Homes Exclusive is the premium brand of DMCI Homes, built on the construction expertise of DM Consunji, Inc. Its properties are designed to hold an inherent rarity, whether in location, master plan, or development features. Fortis Residences is the second project in the line, after Oak Harbor Residences in Asiaworld, Parañaque.</p>
+      <div class="mt-12" style="display:flex;gap:var(--space-6);justify-content:center;flex-wrap:wrap">
+        <a class="btn btn--on-dark" href="presentation?listing=fortis-residences">Request a private presentation</a>
+        <a class="link-line link-line--on-dark" href="properties">Back to the collection <span class="arr">→</span></a>
+      </div>
+      <hr class="rule rule--brass mt-16" style="max-width:2.5rem;margin-inline:auto">
+    </div>
+  </section>
+
+</main>
+
+<div class="gallery-lightbox" id="gallery-lightbox" hidden>
+  <button type="button" class="gallery-lightbox__close" id="gallery-lightbox-close" aria-label="Close gallery">×</button>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--prev" id="gallery-lightbox-prev" aria-label="Previous photo">‹</button>
+  <div class="gallery-lightbox__frame frame frame--corners">
+    <img id="gallery-lightbox-img" src="" alt="">
+  </div>
+  <button type="button" class="gallery-lightbox__nav gallery-lightbox__nav--next" id="gallery-lightbox-next" aria-label="Next photo">›</button>
+  <p class="gallery-lightbox__caption" id="gallery-lightbox-caption"></p>
+</div>
+
+<footer class="footer">
+  <div class="shell">
+    <img class="footer__logo" src="images/logo-white.png" alt="Properties by Chel" width="90" height="42">
+    <p class="footer__statement">Considered advice for <em>considered</em> property.</p>
+    <div class="footer__grid">
+      <div>
+        <h4>The Practice</h4>
+        <address>
+          Properties by Chel, Private Real Estate Advisory<br>
+          Makati City, Metro Manila, Philippines<br>
+          PRC-licensed real estate broker<br>
+          License details furnished on enquiry
+        </address>
+      </div>
+      <div>
+        <h4>Portfolio</h4>
+        <ul>
+          <li><a href="properties">Collections</a></li>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="sellers">For Sellers</a></li>
+          <li><a href="foreign-buyers">Foreign Buyers</a></li>
+          <li><a href="https://allabodeph.com" target="_blank" rel="noopener">All Abode PH ↗</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Advisory</h4>
+        <ul>
+          <li><a href="insights">Insights</a></li>
+          <li><a href="about">About Chel</a></li>
+          <li><a href="contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Enquiries</h4>
+        <address>
+          <a href="mailto:concierge@propertiesbychel.com">concierge@propertiesbychel.com</a><br>
+          Direct line shared upon introduction<br>
+          <a href="presentation">Request a private presentation</a>
+        </address>
+        <div class="footer__social">
+          <a href="https://www.linkedin.com/in/aremchelcruzado/" target="_blank" rel="noopener" aria-label="Chel Cruzado on LinkedIn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7.5" y1="10.5" x2="7.5" y2="16.5"/><circle cx="7.5" cy="7" r="0.75" fill="currentColor" stroke="none"/><path d="M11.5 16.5v-4c0-1.4.9-2.3 2.2-2.3s2.3 1 2.3 2.3v4"/><line x1="11.5" y1="10.5" x2="11.5" y2="16.5"/></svg>
+          </a>
+          <a href="https://www.facebook.com/propertiesbychelcruzado" target="_blank" rel="noopener" aria-label="Properties by Chel on Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M14 21v-6.5h2.2l.3-2.7H14V10c0-.8.2-1.3 1.4-1.3H16.5V6.3C16.1 6.2 15.2 6 14.2 6c-2.1 0-3.5 1.3-3.5 3.6v2.2H8.5v2.7h2.2V21"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <span>© 2026 Properties by Chel · All rights reserved</span>
+      <span><a href="legal#privacy">Privacy</a> &nbsp;·&nbsp; <a href="legal#terms">Terms</a> &nbsp;·&nbsp; <a href="contact">Contact</a></span>
+    </div>
+  </div>
+</footer>
+<script src="js/supabase-config.js?v=17"></script>
+<script src="js/site.js?v=27"></script>
+<script src="js/vendor/motion.js?v=1"></script>
+<script src="js/motion-enhance.js?v=4"></script>
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fadeIn(el) {
+    if (reduceMotion) { el.classList.add("is-in"); return; }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add("is-in"); });
+    });
+  }
+
+  /* — Reflect the dashboard-managed development's published status — */
+  var sb = window.SUPABASE_CONFIG || {};
+  if (sb.url && sb.anonKey) {
+    fetch(sb.url + "/rest/v1/developments?select=published&slug=eq.fortis-residences&limit=1", {
+      headers: { apikey: sb.anonKey, Authorization: "Bearer " + sb.anonKey }
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        var d = rows[0];
+        if (d && d.published === false) {
+          var banner = document.getElementById("ft-status-banner");
+          banner.hidden = false;
+          fadeIn(banner);
+        }
+      })
+      .catch(function () { /* fail open — page stays as-is if the check can't run */ });
+  }
+
+  /* — Gallery lightbox — reuses the shared .photo-grid / .gallery-lightbox
+     visual pattern from the site's generic listing/development pages, wired locally
+     since this static page doesn't run through js/listings.js's Supabase-driven flow. */
+  var items = [];
+  var activeKind = "";
+  var lightbox = document.getElementById("gallery-lightbox");
+  var lightboxImg = document.getElementById("gallery-lightbox-img");
+  var lightboxCaption = document.getElementById("gallery-lightbox-caption");
+  var lightboxClose = document.getElementById("gallery-lightbox-close");
+  var lightboxPrev = document.getElementById("gallery-lightbox-prev");
+  var lightboxNext = document.getElementById("gallery-lightbox-next");
+  var currentIndex = 0;
+  var lastFocused = null;
+
+  function showSlide(i) {
+    currentIndex = (i + items.length) % items.length;
+    var item = items[currentIndex];
+    lightboxImg.src = item.url;
+    lightboxImg.alt = item.alt;
+    lightboxCaption.textContent = items.length > 1
+      ? item.alt + " · " + (currentIndex + 1) + " / " + items.length
+      : item.alt;
+  }
+  function openGallery(index) {
+    lastFocused = document.activeElement;
+    showSlide(index);
+    lightbox.classList.toggle("is-land", activeKind === "plan" || activeKind === "sdp");
+    // A single-image set has nothing to page through.
+    lightboxPrev.hidden = lightboxNext.hidden = items.length < 2;
+    lightbox.hidden = false;
+    fadeIn(lightbox);
+    lightboxClose.focus();
+  }
+  function closeGallery() {
+    lightbox.classList.remove("is-in");
+    if (reduceMotion) {
+      lightbox.hidden = true;
+      lightboxImg.src = "";
+    } else {
+      var onEnd = function (e) {
+        if (e.target !== lightbox) return;
+        lightbox.removeEventListener("transitionend", onEnd);
+        lightbox.hidden = true;
+        lightboxImg.src = "";
+      };
+      lightbox.addEventListener("transitionend", onEnd);
+    }
+    if (lastFocused) lastFocused.focus();
+  }
+
+  /* Five sets feed the one lightbox — floor plans, site plans, and three photo sets.
+     Whichever set is clicked becomes the active set. */
+  [
+    { id: "ft-plans-grid", kind: "plan", item: "figure" },
+    { id: "ft-sdp-grid", kind: "sdp", item: "figure" },
+    { id: "ft-render-grid", kind: "photo", item: "figure" },
+    { id: "ft-street-grid", kind: "photo", item: "figure" },
+    { id: "ft-show-grid", kind: "photo", item: "figure" }
+  ].forEach(function (set) {
+    var root = document.getElementById(set.id);
+    if (!root) return;
+    var setItems = Array.prototype.map.call(root.querySelectorAll("img"), function (img) {
+      return { url: img.src, alt: img.alt };
+    });
+    Array.prototype.forEach.call(root.querySelectorAll(set.item), function (el, i) {
+      el.addEventListener("click", function () {
+        items = setItems;
+        activeKind = set.kind;
+        openGallery(i);
+      });
+    });
+  });
+
+  lightboxClose.addEventListener("click", closeGallery);
+  lightboxPrev.addEventListener("click", function () { showSlide(currentIndex - 1); });
+  lightboxNext.addEventListener("click", function () { showSlide(currentIndex + 1); });
+  lightbox.addEventListener("click", function (e) { if (e.target === lightbox) closeGallery(); });
+  document.addEventListener("keydown", function (e) {
+    if (lightbox.hidden) return;
+    if (e.key === "Escape") closeGallery();
+    if (e.key === "ArrowLeft") showSlide(currentIndex - 1);
+    if (e.key === "ArrowRight") showSlide(currentIndex + 1);
+  });
+
+  /* — Brand-styled map, same treatment as the dashboard-managed development pages — */
+  var mapConfig = window.GOOGLE_MAPS_CONFIG || {};
+  var mapEl = document.getElementById("ft-map");
+  if (mapEl && mapConfig.apiKey) {
+    var BRAND_MAP_STYLE = [
+      { elementType: "geometry", stylers: [{ color: "#f1eee6" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#5f5e5a" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#faf8f4" }] },
+      { featureType: "poi", stylers: [{ visibility: "off" }] },
+      { featureType: "transit", stylers: [{ visibility: "off" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#e3ded1" }] },
+      { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8a6b14" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#d4c9a8" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9d3d9" }] },
+      { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#c9c4b5" }] }
+    ];
+    var BRAND_PIN_ICON = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">' +
+      '<path d="M15 0C6.7 0 0 6.7 0 15c0 10.5 15 25 15 25s15-14.5 15-25C30 6.7 23.3 0 15 0z" fill="#8A6B14"/>' +
+      '<circle cx="15" cy="15" r="5.5" fill="#FAF8F4"/></svg>'
+    );
+    var center = { lat: 14.5424841, lng: 121.0168226 };
+    var cbName = "__initFtMap";
+    window[cbName] = function () {
+      var map = new google.maps.Map(mapEl, {
+        center: center, zoom: 15, disableDefaultUI: true, zoomControl: true, styles: BRAND_MAP_STYLE
+      });
+      new google.maps.Marker({ position: center, map: map, icon: BRAND_PIN_ICON });
+    };
+    var script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(mapConfig.apiKey) + "&callback=" + cbName;
+    script.async = true;
+    document.head.appendChild(script);
+  }
+})();
+</script>
+</body>
+</html>
