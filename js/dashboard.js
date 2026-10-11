@@ -2552,6 +2552,20 @@ ${button}
     const kind = { b: "bold", i: "italic", k: "link" }[e.key.toLowerCase()];
     if (kind) { e.preventDefault(); applyFormat(kind); }
   });
+  // Blank canvas: a minimal skeleton in the code editor, with the live preview below it.
+  $("#inbox-blank-btn").addEventListener("click", () => {
+    const ta = $("#inbox-html");
+    if (ta.value.trim() && !confirm("Replace the current HTML with a blank email?")) return;
+    ta.value = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#222">\n  <p>Hi,</p>\n  <p></p>\n</div>\n' + EMAIL_SIGNATURE_MARKER;
+    $("#inbox-template").value = "";
+    $("#inbox-html-code").hidden = false;
+    $("#inbox-html-toggle").textContent = "Hide HTML code";
+    $("#inbox-html-toggle").setAttribute("aria-expanded", "true");
+    $("#inbox-gen-status").textContent = "Blank email ready. Type your HTML below; the preview updates as you go.";
+    renderComposePreview();
+    ta.focus();
+    ta.setSelectionRange(ta.value.indexOf("<p></p>") + 3, ta.value.indexOf("<p></p>") + 3);
+  });
   $("#inbox-template").addEventListener("change", (e) => {
     const t = templates.find((x) => x.id === e.target.value);
     if (t) { useGeneratedEmail(t); $("#inbox-gen-status").textContent = `Loaded "${t.name}". Edit the HTML below if you like.`; }
