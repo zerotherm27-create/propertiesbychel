@@ -17,6 +17,15 @@ const MAX_SUBJECT = 300;
 const MAX_BODY = 500_000;
 const EMAIL_RE = /^[^\s@<>,;"]+@[^\s@<>,;"]+\.[^\s@<>,;"]+$/;
 
+// Pasted addresses often arrive as "Name <a@b.com>", "mailto:a@b.com" or with
+// invisible characters (zero-width / non-breaking spaces); reduce to the bare address.
+function bareAddress(value) {
+  let v = String(value || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00A0]/g, " ").trim();
+  const m = v.match(/<([^<>]+)>/);
+  if (m) v = m[1];
+  return v.replace(/^mailto:/i, "").trim();
+}
+
 // Message-IDs go straight into a header, so reject anything that could break
 // out of it, and normalise to the <id> form the RFC requires.
 function normaliseMessageId(value) {
@@ -61,7 +70,8 @@ export async function POST(request) {
   }
   const { to, subject, htmlBody, textBody, parentMessageId } = payload || {};
 
-  if (typeof to !== "string" || !EMAIL_RE.test(to.trim())) {
+  const toAddress = typeof to === "string" ? bareAddress(to) : "";
+  if (!EMAIL_RE.test(toAddress)) {
     return jsonResponse({ error: "A valid recipient address is required" }, 400);
   }
   if (typeof subject !== "string" || !subject.trim() || /[\r\n]/.test(subject)) {
@@ -84,14 +94,20 @@ export async function POST(request) {
 
   const text = textBody || htmlToText(htmlBody);
 
+  // A malformed RESEND_REPLY_TO (stray quotes/whitespace) makes Resend reject the whole
+  // send, so strip those and drop the header rather than fail if it still isn't an address.
+  const replyTo = bareAddress(String(process.env.RESEND_REPLY_TO || "").replace(/^["'\s]+|["'\s]+$/g, ""));
+  const replyToValid = EMAIL_RE.test(replyTo);
+  if (process.env.RESEND_REPLY_TO && !replyToValid) console.warn("RESEND_REPLY_TO is not a valid address; sending without Reply-To");
+
   const message = {
     from,
-    to: to.trim(),
+    to: toAddress,
     subject: subject.trim(),
     html: htmlBody,
     // Where the recipient's replies go. Must be an address Resend receives
     // for (the normal From address may route to another mail provider).
-    ...(process.env.RESEND_REPLY_TO ? { replyTo: process.env.RESEND_REPLY_TO } : {}),
+    ...(replyToValid ? { replyTo } : {}),
     ...(text ? { text } : {}),
     ...(parentId ? { headers: { "In-Reply-To": parentId, References: parentId } } : {})
   };
@@ -122,7 +138,7 @@ export async function POST(request) {
       in_reply_to: parentId,
       direction: "OUTBOUND",
       from_address: from,
-      to_address: to.trim(),
+      to_address: toAddress,
       subject: subject.trim(),
       html_body: htmlBody,
       text_body: text || null,

@@ -2636,7 +2636,7 @@ ${button}
     const err = $("#inbox-compose-error");
     const btn = $("#inbox-send-btn");
     err.textContent = "";
-    const to = f.to.value.trim();
+    const to = bareAddress(f.to.value.replace(/[\u200B-\u200D\u2060\uFEFF]/g, ""));
     const subject = f.subject.value.trim();
     const htmlMode = f.dataset.mode === "html";
     const text = htmlMode ? f.html.value.trim() : f.body.value.trim();
