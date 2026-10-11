@@ -39,6 +39,7 @@
   .ft-hero .eyebrow { justify-content: center; margin-inline: auto; }
   .ft-hero .lede { margin-inline: auto; }
   .ft-hero__media { max-width: 56rem; margin: var(--space-12) auto 0; aspect-ratio: 16/9; }
+  .ft-hero__media video { width: 100%; height: 100%; object-fit: cover; display: block; }
   .ft-caption { font-size: var(--text-sm); color: var(--ink-faint); text-align: center; margin-top: var(--space-4); }
 
   /* Plans are drawings on a landscape sheet: shown uncropped on a light ground, full size in the lightbox. */
@@ -134,9 +135,9 @@
     <h1 class="display mt-8" id="ft-h">Fortis Residences</h1>
     <p class="lede mt-8"><strong style="color:var(--ink);font-weight:500">One address, inside Makati’s Southwest Gateway.</strong> A high-rise from DMCI Homes Exclusive, the developer’s premium line, with residences of 55.5 to 154 sqm — a scale of home the developer notes is uncommon in Makati — and a 3,000 sqm amenity ground.</p>
     <div class="ft-hero__media frame frame--corners" data-reveal>
-      <img src="https://static.wixstatic.com/media/3ea2d9_a05205c59f6146779904ba7f7bdf67f6~mv2.jpg/v1/fit/w_2000,h_1200,q_85/fortis-residences.jpg" alt="Sky deck pool at Fortis Residences, architect's perspective" loading="lazy">
+      <video id="ft-hero-video" src="https://video.wixstatic.com/video/3ea2d9_2bbd61d9024f4d7e988eade5e4e45a98/720p/mp4/file.mp4" poster="https://static.wixstatic.com/media/3ea2d9_2bbd61d9024f4d7e988eade5e4e45a98f000.jpg/v1/fit/w_2000,h_1200,q_85/fortis-residences.jpg" muted loop playsinline preload="metadata" aria-label="Fortis Residences, developer's film" title="Fortis Residences"></video>
     </div>
-    <p class="ft-caption">Architect’s perspective — the sky deck pool.</p>
+    <p class="ft-caption">The developer’s film of Fortis Residences.</p>
   </section>
 
   <!-- The record -->
@@ -510,6 +511,35 @@
         }
       })
       .catch(function () { /* fail open — page stays as-is if the check can't run */ });
+  }
+
+  /* — Hero film: muted loop; stays on its poster for reduced-motion or data-saver visitors — */
+  var heroVideo = document.getElementById("ft-hero-video");
+  if (heroVideo) {
+    var saveData = navigator.connection && navigator.connection.saveData;
+    if (reduceMotion || saveData) {
+      heroVideo.controls = true;
+    } else {
+      heroVideo.muted = true;
+      var playHero = function () {
+        var started = heroVideo.play();
+        if (started && started.catch) {
+          started.catch(function () {
+            // Refused (e.g. page not visible yet): retry when it becomes visible, else offer controls.
+            if (document.visibilityState === "hidden") {
+              document.addEventListener("visibilitychange", function retry() {
+                if (document.visibilityState !== "visible") return;
+                document.removeEventListener("visibilitychange", retry);
+                playHero();
+              });
+            } else {
+              heroVideo.controls = true;
+            }
+          });
+        }
+      };
+      playHero();
+    }
   }
 
   /* — Gallery lightbox — reuses the shared .photo-grid / .gallery-lightbox
