@@ -5,11 +5,11 @@ service, no advertising tracker, no extra cost. Adapted from `first-party-site-a
 (written for Next.js) to this repo's stack: static HTML + Vercel functions + Supabase.
 
 The previous handoff (the headless Inbox/Outbox) was replaced per the repo convention; it is
-at `git show d311322:docs/handoff.md`. **Still open from that work:** the reply half of the loop
-(recipient replies in Gmail → appears in the Inbox) is not explicitly confirmed — sending from the
-Inbox was confirmed working on 2026-10-12 after the fixes below, but check that a reply lands and
-that the `email_messages` migration was run; flow/lead emails still use the plainer HTML layout
-with no `List-Unsubscribe`.
+at `git show d311322:docs/handoff.md`. **Confirmed 2026-10-12:** sending from the Inbox works and a
+reply to it appears in the Inbox (compose → Gmail → reply → Inbox loop verified by the owner, after
+the `RESEND_REPLY_TO` fix below). **Still open:** whether the `email_messages` migration was run on
+every environment is unchecked; flow/lead emails still use the plainer HTML layout with no
+`List-Unsubscribe`.
 
 ## Also shipped after the Inbox handoff: organizing the Inbox
 
