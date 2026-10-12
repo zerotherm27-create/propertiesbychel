@@ -2347,6 +2347,7 @@ async function init(supabase) {
     syncSignatureField();
     f.dataset.parentMessageId = "";
     setComposeMode("text");
+    setBlankFields(false);
     $("#inbox-html-code").hidden = true;
     $("#inbox-html-toggle").textContent = "Edit HTML code";
     $("#inbox-html-toggle").setAttribute("aria-expanded", "false");
@@ -2508,6 +2509,7 @@ ${button}
     const values = composeMergeValues(f.to.value);
     if (t.subject) f.subject.value = substituteTemplateVars(t.subject, values);
     f.html.value = renderTemplateHtml(t, values);
+    setBlankFields(false);
     renderComposePreview();
   }
 
@@ -2528,7 +2530,7 @@ ${button}
   }
 
   $$("[data-compose-mode]").forEach((chip) => chip.addEventListener("click", () => setComposeMode(chip.dataset.composeMode)));
-  $("#inbox-html").addEventListener("input", renderComposePreview);
+  $("#inbox-html").addEventListener("input", () => { setBlankFields(false); renderComposePreview(); });
   $("#inbox-html-toggle").addEventListener("click", () => {
     const code = $("#inbox-html-code");
     code.hidden = !code.hidden;
@@ -2552,15 +2554,45 @@ ${button}
     const kind = { b: "bold", i: "italic", k: "link" }[e.key.toLowerCase()];
     if (kind) { e.preventDefault(); applyFormat(kind); }
   });
-  // Blank canvas, either inside the branded template shell or as a bare skeleton.
-  // Both open the code editor with the live preview below it.
+  // Blank canvas. Branded: plain fields (heading, message, button) generate the HTML in
+  // the template layout, so the code stays out of the way. Bare: raw skeleton in the editor.
+  const blankFieldIds = ["#inbox-blank-heading", "#inbox-blank-body", "#inbox-blank-btn-text", "#inbox-blank-btn-url"];
+  function setBlankFields(on) {
+    $("#inbox-blank-fields").hidden = !on;
+    if (!on) blankFieldIds.forEach((id) => { $(id).value = ""; });
+  }
+  function syncBlankFields() {
+    if ($("#inbox-blank-fields").hidden) return;
+    const f = $("#inbox-compose-form");
+    const buttonText = $("#inbox-blank-btn-text").value.trim();
+    const buttonUrl = $("#inbox-blank-btn-url").value.trim();
+    f.html.value = renderTemplateHtml({
+      subject: "", heading: $("#inbox-blank-heading").value, body: $("#inbox-blank-body").value,
+      button_text: /^https?:\/\//i.test(buttonUrl) ? buttonText : "", button_url: /^https?:\/\//i.test(buttonUrl) ? buttonUrl : ""
+    }, composeMergeValues(f.to.value));
+    renderComposePreview();
+  }
+  blankFieldIds.forEach((id) => $(id).addEventListener("input", syncBlankFields));
+  $("#inbox-compose-form").to.addEventListener("input", syncBlankFields);
   function startBlankEmail(branded) {
     const ta = $("#inbox-html");
-    if (ta.value.trim() && !confirm("Replace the current HTML with a blank email?")) return;
-    ta.value = branded
-      ? renderTemplateHtml({ subject: "", heading: "", body: "Hi,", button_text: "", button_url: "" }, composeMergeValues($("#inbox-compose-form").to.value))
-      : '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#222">\n  <p>Hi,</p>\n  <p></p>\n</div>\n' + EMAIL_SIGNATURE_MARKER;
+    if (ta.value.trim() && !confirm("Replace the current email with a blank one?")) return;
     $("#inbox-template").value = "";
+    if (branded) {
+      setBlankFields(true);
+      $("#inbox-blank-body").value = "Hi,\n\n";
+      $("#inbox-html-code").hidden = true;
+      $("#inbox-html-toggle").textContent = "Edit HTML code";
+      $("#inbox-html-toggle").setAttribute("aria-expanded", "false");
+      $("#inbox-gen-status").textContent = "";
+      syncBlankFields();
+      const body = $("#inbox-blank-body");
+      body.focus();
+      body.setSelectionRange(body.value.length, body.value.length);
+      return;
+    }
+    setBlankFields(false);
+    ta.value = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#222">\n  <p>Hi,</p>\n  <p></p>\n</div>\n' + EMAIL_SIGNATURE_MARKER;
     $("#inbox-html-code").hidden = false;
     $("#inbox-html-toggle").textContent = "Hide HTML code";
     $("#inbox-html-toggle").setAttribute("aria-expanded", "true");
@@ -2568,7 +2600,7 @@ ${button}
     renderComposePreview();
     ta.focus();
     const i = ta.value.indexOf("Hi,");
-    if (i !== -1) ta.setSelectionRange(i + 3, i + 3);
+    ta.setSelectionRange(i + 3, i + 3);
   }
   $("#inbox-blank-btn").addEventListener("click", () => startBlankEmail(true));
   $("#inbox-blank-plain-btn").addEventListener("click", () => startBlankEmail(false));

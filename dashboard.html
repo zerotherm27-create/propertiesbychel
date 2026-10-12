@@ -1042,6 +1042,17 @@
                 <span class="field__note" id="inbox-gen-status" role="status"></span>
                 <p class="field__note">Merge fields like {firstName} fill in from the lead whose email matches the To address (templates only, not hand-written HTML).</p>
               </div>
+              <div class="inbox-gen" id="inbox-blank-fields" hidden>
+                <div class="field"><label for="inbox-blank-heading">Heading (optional)</label>
+                  <input id="inbox-blank-heading" autocomplete="off"></div>
+                <div class="field"><label for="inbox-blank-body">Message</label>
+                  <textarea id="inbox-blank-body" rows="8" placeholder="Write your message. Leave a blank line between paragraphs."></textarea></div>
+                <div class="field"><label for="inbox-blank-btn-text">Button text (optional)</label>
+                  <input id="inbox-blank-btn-text" autocomplete="off"></div>
+                <div class="field"><label for="inbox-blank-btn-url">Button link</label>
+                  <input id="inbox-blank-btn-url" type="url" placeholder="https://" autocomplete="off"></div>
+                <p class="field__note">Type here and the email below updates. {firstName} fills in from the matching lead. Editing the HTML code directly switches these fields off.</p>
+              </div>
               <p class="field__note">Preview</p>
               <div id="inbox-html-preview" class="inbox-preview"></div>
               <button type="button" class="dash-linkbtn" id="inbox-html-toggle" aria-expanded="false">Edit HTML code</button>
