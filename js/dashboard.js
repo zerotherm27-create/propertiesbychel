@@ -2552,11 +2552,14 @@ ${button}
     const kind = { b: "bold", i: "italic", k: "link" }[e.key.toLowerCase()];
     if (kind) { e.preventDefault(); applyFormat(kind); }
   });
-  // Blank canvas: a minimal skeleton in the code editor, with the live preview below it.
-  $("#inbox-blank-btn").addEventListener("click", () => {
+  // Blank canvas, either inside the branded template shell or as a bare skeleton.
+  // Both open the code editor with the live preview below it.
+  function startBlankEmail(branded) {
     const ta = $("#inbox-html");
     if (ta.value.trim() && !confirm("Replace the current HTML with a blank email?")) return;
-    ta.value = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#222">\n  <p>Hi,</p>\n  <p></p>\n</div>\n' + EMAIL_SIGNATURE_MARKER;
+    ta.value = branded
+      ? renderTemplateHtml({ subject: "", heading: "", body: "Hi,", button_text: "", button_url: "" }, composeMergeValues($("#inbox-compose-form").to.value))
+      : '<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#222">\n  <p>Hi,</p>\n  <p></p>\n</div>\n' + EMAIL_SIGNATURE_MARKER;
     $("#inbox-template").value = "";
     $("#inbox-html-code").hidden = false;
     $("#inbox-html-toggle").textContent = "Hide HTML code";
@@ -2564,8 +2567,11 @@ ${button}
     $("#inbox-gen-status").textContent = "Blank email ready. Type your HTML below; the preview updates as you go.";
     renderComposePreview();
     ta.focus();
-    ta.setSelectionRange(ta.value.indexOf("<p></p>") + 3, ta.value.indexOf("<p></p>") + 3);
-  });
+    const i = ta.value.indexOf("Hi,");
+    if (i !== -1) ta.setSelectionRange(i + 3, i + 3);
+  }
+  $("#inbox-blank-btn").addEventListener("click", () => startBlankEmail(true));
+  $("#inbox-blank-plain-btn").addEventListener("click", () => startBlankEmail(false));
   $("#inbox-template").addEventListener("change", (e) => {
     const t = templates.find((x) => x.id === e.target.value);
     if (t) { useGeneratedEmail(t); $("#inbox-gen-status").textContent = `Loaded "${t.name}". Edit the HTML below if you like.`; }
