@@ -5,10 +5,11 @@ service, no advertising tracker, no extra cost. Adapted from `first-party-site-a
 (written for Next.js) to this repo's stack: static HTML + Vercel functions + Supabase.
 
 The previous handoff (the headless Inbox/Outbox) was replaced per the repo convention; it is
-at `git show d311322:docs/handoff.md`. **Still open from that work:** the compose → Gmail →
-reply → Inbox loop was never confirmed end to end; whether `RESEND_REPLY_TO` took effect and
-the `email_messages` migration was run are unverified; flow/lead emails still use the plainer
-HTML layout with no `List-Unsubscribe`.
+at `git show d311322:docs/handoff.md`. **Still open from that work:** the reply half of the loop
+(recipient replies in Gmail → appears in the Inbox) is not explicitly confirmed — sending from the
+Inbox was confirmed working on 2026-10-12 after the fixes below, but check that a reply lands and
+that the `email_messages` migration was run; flow/lead emails still use the plainer HTML layout
+with no `List-Unsubscribe`.
 
 ## Also shipped after the Inbox handoff: organizing the Inbox
 
@@ -22,6 +23,26 @@ read), star, archive, mark read/unread, bulk select, and delete. **Delete moves 
 confirm. Without the migration the Inbox still works (it retries with the basic columns and shows
 a note). Known gaps: search covers loaded rows only (latest 500) and not message bodies; Trash is
 never auto-purged; a Resend webhook retry after "Delete forever" could re-insert an inbound message.
+
+## Also shipped: Inbox send fixes and blank email compose
+
+- **Send was failing with "Invalid `reply_to` field".** `api/dashboard/email/send.js` passed
+  `RESEND_REPLY_TO` straight to Resend; the production value was malformed. The route now strips
+  quotes/whitespace, validates it, and sends without Reply-To (with a `console.warn`) if it's still
+  not an address. It also reduces the To address to a bare address (handles `Name <addr>`,
+  `mailto:`, zero-width/nbsp characters) before validating; `js/dashboard.js` does the same on submit.
+- **`RESEND_REPLY_TO` is now `inbox@prenaevi.resend.app`** (production, reset 2026-10-12, redeployed).
+  `propertiesbychel.com` has Resend *receiving disabled*, so replies must go to the managed
+  `prenaevi.resend.app` domain (any local part works; a test mail to `test@` arrived 2026-09-24).
+  The dashboard's Resend "Receiving" page looks empty until mail arrives — that's not an error.
+- **HTML compose has two blank options** (Inbox → Compose → HTML): **Start blank** shows plain
+  Heading / Message / Button text / Button link fields that generate the branded template layout
+  live (`renderTemplateHtml`), so no HTML code is shown; **Blank, no layout** opens a bare HTML
+  skeleton in the code editor. Typing in the code editor switches the plain fields off so they can't
+  overwrite hand edits. `{firstName}` etc. fill in for templates and the blank fields (from the lead
+  matching the To address) but **not** for hand-written HTML.
+- Gotcha: `vercel --prod` must run from `/Users/jojo/propertiesbychel`. A stray `/Users/jojo/.vercel`
+  link exists in the home folder and makes the CLI scan `~` (fails on `~/.Trash`); not removed.
 
 ## What was built
 
