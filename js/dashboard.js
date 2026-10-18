@@ -1487,6 +1487,8 @@ async function init(supabase) {
     galleryImages = l && Array.isArray(l.gallery_images) ? l.gallery_images.slice() : [];
     renderGalleryGrid();
     listingLocationPicker.reset(l && l.map_lat != null ? l.map_lat : null, l && l.map_lng != null ? l.map_lng : null);
+    // Open "More details" when this listing already has something in it, so filled values are never hidden.
+    $("#listing-more").open = !!(l && (l.tag || l.development_id || (l.collections || []).length || l.map_lat != null || (Array.isArray(l.location_features) && l.location_features.length)));
     editor.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

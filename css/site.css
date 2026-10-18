@@ -803,3 +803,13 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .dash-gallery-item { border: var(--rule) solid var(--line); padding: var(--space-2); background: var(--surface, #fff); width: 11rem; }
 .dash-gallery-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
 .dash-preview[hidden], .dash-map-preview[hidden] { display: none; }
+
+/* "More details" reads as a button, not a flat header */
+.dash-section--more { border: 0; box-shadow: none; background: none; }
+.dash-section--more > summary { background: var(--ink); color: #fff; padding: var(--space-4) var(--space-6); border: 0; transition: filter var(--dur-fast, .15s) ease; }
+.dash-section--more > summary span { color: color-mix(in oklch, #fff 70%, transparent); }
+.dash-section--more > summary:hover { filter: brightness(1.2); }
+.dash-section--more > summary:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+.dash-section--more > summary::after { content: "Show \25BE"; font-size: var(--text-sm); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+.dash-section--more[open] > summary::after { content: "Hide \25B4"; }
+.dash-section--more > .dash-section__body { border: var(--rule) solid var(--line); border-top: 0; background: var(--surface, #fff); }
