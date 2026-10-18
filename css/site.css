@@ -763,3 +763,15 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .dash-table tbody tr:hover { background: var(--paper-2); }
 .dash-table .dash-linkbtn { font-family: var(--font-display); font-size: var(--text-body); text-decoration: none; }
 .dash-table .dash-linkbtn:hover { text-decoration: underline; }
+
+/* Dashboard: collapsible form sections, drag handle, spotlight panel */
+.dash-section { border: var(--rule) solid var(--line); margin-bottom: var(--space-6); }
+.dash-section > summary { cursor: pointer; padding: var(--space-4) var(--space-5); font-weight: 500; list-style: none; display: flex; gap: var(--space-4); align-items: baseline; }
+.dash-section > summary::-webkit-details-marker { display: none; }
+.dash-section > summary span { font-size: var(--text-sm); color: var(--ink-soft); font-weight: 400; }
+.dash-section__body { padding: 0 var(--space-5) var(--space-5); }
+.dash-handle { cursor: grab; color: var(--ink-soft); user-select: none; padding-right: var(--space-3); }
+.dash-row.is-dragging { opacity: .4; }
+.dash-row.is-over { outline: 1px dashed var(--ink-soft); }
+.dash-spotlight { margin-bottom: var(--space-6); font-size: var(--text-sm); color: var(--ink-soft); }
+.dash-spotlight strong { color: var(--ink); font-weight: 500; }

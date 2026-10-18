@@ -215,8 +215,8 @@
   if (gallery) {
     gallery.setAttribute("data-is-loading", "");
     Promise.all([
-      api("listings?select=*,development:developments(name,slug,bespoke_path,hero_image_url)&published=eq.true&order=sort_order.asc"),
-      api("developments?select=*&published=eq.true&order=sort_order.asc")
+      api("listings?select=*,development:developments(name,slug,bespoke_path,hero_image_url)&published=eq.true&order=sort_order.asc,created_at.desc"),
+      api("developments?select=*&published=eq.true&order=sort_order.asc,created_at.desc")
     ]).then(function (results) {
       gallery.removeAttribute("data-is-loading");
       var combined = results[0].map(function (l) { return { kind: "listing", row: l, sort_order: l.sort_order || 100 }; })
@@ -474,22 +474,30 @@
     }).catch(function () { devDetail.removeAttribute("data-is-loading"); });
   }
 
-  /* — Home spotlight (featured listing OR featured development — whichever
-     has the lower sort_order wins the single slot; a tie favors the listing,
-     matching this section's original listing-only behavior). — */
+  /* — Home spotlight: one slot, rotated daily through every featured listing
+     and development (Manila calendar day, so the dashboard preview agrees).
+     A "spotlight_pin" site setting freezes one item instead. Pool order is
+     sort_order, a tie favoring listings. — */
   var spot = document.querySelector("[data-featured-spotlight]");
   if (spot) {
     spot.setAttribute("data-is-loading", "");
     Promise.all([
-      api("listings?select=*&published=eq.true&featured=eq.true&order=sort_order.asc&limit=1").catch(function () { return []; }),
-      api("developments?select=*&published=eq.true&featured=eq.true&order=sort_order.asc&limit=1").catch(function () { return []; })
+      api("listings?select=*&published=eq.true&featured=eq.true&order=sort_order.asc,created_at.desc").catch(function () { return []; }),
+      api("developments?select=*&published=eq.true&featured=eq.true&order=sort_order.asc,created_at.desc").catch(function () { return []; }),
+      api("site_settings?select=value&key=eq.spotlight_pin").catch(function () { return []; })
     ]).then(function (results) {
       spot.removeAttribute("data-is-loading");
-      var l = results[0][0];
-      var d = results[1][0];
-      var winner = l;
-      var isDev = false;
-      if (d && (!l || (d.sort_order || 100) < (l.sort_order || 100))) { winner = d; isDev = true; }
+      var pool = [];
+      results[0].forEach(function (x) { pool.push({ row: x, isDev: false }); });
+      results[1].forEach(function (x) { pool.push({ row: x, isDev: true }); });
+      pool.sort(function (a, b) { return (a.row.sort_order || 100) - (b.row.sort_order || 100); });
+      if (!pool.length) return;
+      var pinRef = results[2][0] && results[2][0].value && results[2][0].value.ref;
+      var pick = null;
+      if (pinRef) pick = pool.filter(function (x) { return (x.isDev ? "development:" : "listing:") + x.row.id === pinRef; })[0];
+      if (!pick) pick = pool[Math.floor((Date.now() + 8 * 3600000) / 86400000) % pool.length];
+      var winner = pick.row;
+      var isDev = pick.isDev;
       if (!winner) return;
 
       var t = spot.querySelector("[data-f-title]");

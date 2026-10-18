@@ -1196,10 +1196,11 @@ async function init(supabase) {
   let listings = [];
 
   async function loadListings() {
-    const { data, error } = await supabase.from("listings").select("*").order("sort_order", { ascending: true });
+    const { data, error } = await supabase.from("listings").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: false });
     if (error) { $("#listings-list").innerHTML = '<p class="dash-empty">Could not load listings: ' + esc(error.message) + "</p>"; return; }
     listings = data;
     renderListings();
+    renderSpotlight();
   }
 
   const LISTING_STATUS_LABELS = { sale: "For sale", lease: "For lease", investment: "Investment" };
@@ -1210,8 +1211,9 @@ async function init(supabase) {
   function renderListings() {
     if (!listings.length) { $("#listings-list").innerHTML = '<p class="dash-empty">No listings yet. Add the first one.</p>'; return; }
     $("#listings-list").innerHTML = listings.map((l) => `
-      <div class="dash-row" data-id="${l.id}">
+      <div class="dash-row" data-id="${l.id}" draggable="true">
         <div class="dash-row__line">
+          <span class="dash-handle" title="Drag to reorder">⋮⋮</span>
           <span class="dash-row__name">${esc(l.title)}</span>
           <span class="dash-row__meta">${esc(l.price_display || "")} · ${esc(statusArr(l.status).map((s) => LISTING_STATUS_LABELS[s] || s).join(", "))}</span>
           <span class="dash-row__spacer"></span>
@@ -1245,10 +1247,11 @@ async function init(supabase) {
   let developments = [];
 
   async function loadDevelopments() {
-    const { data, error } = await supabase.from("developments").select("*, developer:developers(name)").order("sort_order", { ascending: true });
+    const { data, error } = await supabase.from("developments").select("*, developer:developers(name)").order("sort_order", { ascending: true }).order("created_at", { ascending: false });
     if (error) { $("#developments-list").innerHTML = '<p class="dash-empty">Could not load developments: ' + esc(error.message) + "</p>"; return; }
     developments = data;
     renderDevelopments();
+    renderSpotlight();
     populateDevelopmentPicker();
   }
 
@@ -1256,8 +1259,9 @@ async function init(supabase) {
   function renderDevelopments() {
     if (!developments.length) { $("#developments-list").innerHTML = '<p class="dash-empty">No developments yet. Add the first one.</p>'; return; }
     $("#developments-list").innerHTML = developments.map((d) => `
-      <div class="dash-row" data-id="${d.id}">
+      <div class="dash-row" data-id="${d.id}" draggable="true">
         <div class="dash-row__line">
+          <span class="dash-handle" title="Drag to reorder">⋮⋮</span>
           <span class="dash-row__name">${esc(d.name)}</span>
           <span class="dash-row__meta">${[esc((d.developer && d.developer.name) || d.developer_name || ""), esc(DEV_AVAILABILITY_LABELS[d.availability] || "Selling"), d.bespoke_path ? "Hand-built page " + esc(d.bespoke_path) : ""].filter(Boolean).join(" · ")}</span>
           <span class="dash-row__spacer"></span>
@@ -1267,6 +1271,103 @@ async function init(supabase) {
           <button class="dash-linkbtn" data-del>Delete</button>
         </div>
       </div>`).join("");
+  }
+
+  /* ————— site order (drag to reorder) + homepage spotlight —————
+     Listings and developments share one sort_order scale on /properties, so a
+     drag in either list re-slots only its own kind and renumbers both. */
+  const siteSeq = () => [
+    ...listings.map((row) => ({ kind: "listing", row })),
+    ...developments.map((row) => ({ kind: "development", row }))
+  ].sort((a, b) => (a.row.sort_order || 100) - (b.row.sort_order || 100));
+
+  async function reorderKind(kind, orderedIds) {
+    const pool = kind === "listing" ? listings : developments;
+    const byId = new Map(pool.map((r) => [r.id, r]));
+    const queue = orderedIds.slice();
+    const next = siteSeq().map((it) => (it.kind === kind ? { kind, row: byId.get(queue.shift()) } : it));
+    const table = { listing: "listings", development: "developments" };
+    const jobs = [];
+    next.forEach((it, i) => {
+      const n = (i + 1) * 10;
+      if (it.row.sort_order !== n) {
+        it.row.sort_order = n;
+        jobs.push(supabase.from(table[it.kind]).update({ sort_order: n }).eq("id", it.row.id));
+      }
+    });
+    const results = await Promise.all(jobs);
+    const failed = results.find((r) => r.error);
+    if (failed) showToast("Could not save the new order: " + failed.error.message, true);
+    listings.sort((a, b) => a.sort_order - b.sort_order);
+    developments.sort((a, b) => a.sort_order - b.sort_order);
+    renderListings();
+    renderDevelopments();
+    if (!failed) showToast("Order saved");
+  }
+
+  function wireSortable(containerSel, kind) {
+    const box = $(containerSel);
+    let dragged = null;
+    box.addEventListener("dragstart", (e) => {
+      dragged = e.target.closest(".dash-row");
+      if (!dragged) return;
+      dragged.classList.add("is-dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    box.addEventListener("dragover", (e) => {
+      if (!dragged) return;
+      e.preventDefault();
+      const over = e.target.closest(".dash-row");
+      if (!over || over === dragged) return;
+      const r = over.getBoundingClientRect();
+      over.parentNode.insertBefore(dragged, e.clientY < r.top + r.height / 2 ? over : over.nextSibling);
+    });
+    box.addEventListener("dragend", async () => {
+      if (!dragged) return;
+      dragged.classList.remove("is-dragging");
+      dragged = null;
+      await reorderKind(kind, $$(".dash-row", box).map((r) => r.dataset.id));
+    });
+  }
+  wireSortable("#listings-list", "listing");
+  wireSortable("#developments-list", "development");
+
+  let spotlightPin = null;
+  let spotlightPinLoaded = false;
+  const spotlightName = (it) => (it.kind === "listing" ? it.row.title : it.row.name);
+  const spotlightRef = (it) => it.kind + ":" + it.row.id;
+
+  function renderSpotlight() {
+    const box = $("#spotlight-panel");
+    if (!box) return;
+    if (!spotlightPinLoaded) {
+      spotlightPinLoaded = true;
+      supabase.from("site_settings").select("value").eq("key", "spotlight_pin").maybeSingle().then(({ data }) => {
+        spotlightPin = (data && data.value && data.value.ref) || null;
+        renderSpotlight();
+      });
+    }
+    const pool = siteSeq().filter((it) => it.row.published && it.row.featured);
+    if (!pool.length) {
+      box.innerHTML = "<strong>Homepage spotlight:</strong> nothing featured yet. Tick Featured on a published listing or development to put it on the homepage.";
+      return;
+    }
+    const day = Math.floor((Date.now() + 8 * 3600000) / 86400000);
+    const pinned = spotlightPin && pool.find((it) => spotlightRef(it) === spotlightPin);
+    const today = pinned || pool[day % pool.length];
+    const tomorrow = pool[(day + 1) % pool.length];
+    box.innerHTML = `<strong>Homepage spotlight:</strong> ${pinned ? "pinned to" : "rotating daily through " + pool.length + " featured item" + (pool.length === 1 ? "" : "s") + ". Today:"} <strong>${esc(spotlightName(today))}</strong>${!pinned && pool.length > 1 ? ". Tomorrow: " + esc(spotlightName(tomorrow)) : ""}.
+      <label style="margin-left:var(--space-4)">Pin
+        <select id="spotlight-pin"><option value="">Rotate daily</option>${pool.map((it) => `<option value="${spotlightRef(it)}" ${pinned && spotlightRef(it) === spotlightPin ? "selected" : ""}>${esc(spotlightName(it))}</option>`).join("")}</select>
+      </label>`;
+    $("#spotlight-pin").addEventListener("change", async (e) => {
+      const ref = e.target.value || null;
+      const { error } = await supabase.from("site_settings").upsert({ key: "spotlight_pin", value: { ref } });
+      if (error) { showToast("Could not save: " + error.message, true); return; }
+      spotlightPin = ref;
+      renderSpotlight();
+      showToast(ref ? "Spotlight pinned" : "Spotlight rotates daily");
+    });
   }
 
   function populateDevelopmentPicker() {
@@ -1454,8 +1555,9 @@ async function init(supabase) {
 
   $("#listing-ai-draft-btn").addEventListener("click", async () => {
     const title = form.elements.title.value.trim();
+    const notes = form.elements.listing_notes.value.trim();
     const status = $("#listing-ai-status");
-    if (!title) { status.textContent = "Enter a title first."; return; }
+    if (!title && !notes) { status.textContent = "Add a title or a few notes first."; return; }
     if (!AGENT_URL) { status.textContent = "Content agent isn't configured (contentAgentUrl missing)."; return; }
     status.textContent = "Drafting…";
     $("#listing-ai-draft-btn").disabled = true;
@@ -1467,15 +1569,23 @@ async function init(supabase) {
         price_display: form.elements.price_display.value.trim(),
         meta_line: form.elements.meta_line.value.trim(),
         features: listingLocationPicker.featuresFromForm(),
-        notes: form.elements.listing_notes.value.trim()
+        notes
       });
       const r = await fetch(AGENT_URL + "/generate-listing-description", { method: "POST", headers, body });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || "Draft failed");
-      form.elements.overview.value = data.overview || "";
-      form.elements.meta_description.value = data.meta_description || "";
+      const overwrite = $("#listing-ai-overwrite").checked;
+      let filled = 0;
+      ["title", "tag", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => {
+        const el = form.elements[k];
+        if (data[k] && (overwrite || !el.value.trim())) { el.value = data[k]; filled++; }
+      });
+      (data.features || []).slice(0, 3).forEach((f, i) => {
+        const lab = form.elements["feature_label_" + i], val = form.elements["feature_value_" + i];
+        if (overwrite || (!lab.value.trim() && !val.value.trim())) { lab.value = f.label; val.value = f.value; filled++; }
+      });
       updateMetaCount();
-      status.textContent = "Draft ready. Review below, then save.";
+      status.textContent = filled ? "Drafted " + filled + " field" + (filled === 1 ? "" : "s") + ". Review them, then save." : "Nothing new to fill. Tick “Replace fields I have already filled” to redraft.";
     } catch (ex) {
       status.textContent = "Could not draft: " + (ex.message || ex);
     } finally {

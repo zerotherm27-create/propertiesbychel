@@ -61,8 +61,8 @@ app.post("/generate-listing-description", requireOwner, async (req, res) => {
   const client = getOpenAI();
   if (!client) return res.status(503).json({ error: "OPENAI_API_KEY is not set on this server yet" });
   const { title, location_label, price_display, meta_line, features, notes } = req.body || {};
-  if (!title) {
-    return res.status(400).json({ error: "title is required" });
+  if (!title && !notes) {
+    return res.status(400).json({ error: "title or notes are required" });
   }
   try {
     const draft = await draftListingDescription(client, { title, location_label, price_display, meta_line, features, notes });
