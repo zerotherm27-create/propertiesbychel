@@ -783,3 +783,23 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .room-more__count { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: var(--text-sm); letter-spacing: var(--track-caps); text-transform: uppercase; }
 .dash-room-input { width: 100%; margin-top: var(--space-2); font-size: var(--text-sm); }
 .dash-gallery-item[draggable="true"] { cursor: grab; }
+
+/* Dashboard: make the upload areas and section headers unmistakable */
+.dash-section { border-color: color-mix(in oklch, var(--ink) 18%, transparent); background: var(--surface, #fff); box-shadow: 0 1px 2px rgb(0 0 0 / .05), 0 6px 18px -8px rgb(0 0 0 / .12); }
+.dash-section > summary { background: var(--stone); font-size: 1.0625rem; border-bottom: var(--rule) solid transparent; }
+.dash-section[open] > summary { border-bottom-color: var(--line); }
+.dash-section > summary::after { content: "+"; margin-left: auto; font-size: 1.25rem; color: var(--ink-soft); }
+.dash-section[open] > summary::after { content: "\2212"; }
+.dash-section__body { padding-top: var(--space-6); }
+.dash-upload { border: 2px dashed color-mix(in oklch, var(--brass, #8a6b14) 55%, transparent); background: color-mix(in oklch, var(--brass, #8a6b14) 5%, var(--surface, #fff)); padding: var(--space-6); }
+.dash-upload__head { display: grid; gap: var(--space-1); margin-bottom: var(--space-4); }
+.dash-upload__head strong { font-size: 1.0625rem; }
+.dash-upload__head span { font-size: var(--text-sm); color: var(--ink-soft); }
+.dash-upload input[type="file"] { width: 100%; padding: var(--space-4); border: var(--rule) solid var(--line); background: var(--surface, #fff); font-size: var(--text-sm); }
+.dash-upload input[type="file"]::file-selector-button { margin-right: var(--space-4); padding: var(--space-3) var(--space-6); border: 0; background: var(--ink); color: #fff; font: inherit; font-weight: 600; letter-spacing: .04em; cursor: pointer; }
+.dash-upload__alt { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+.dash-upload__alt input[type="url"] { flex: 1 1 14rem; }
+.dash-gallery-grid { margin-top: var(--space-6); }
+.dash-gallery-item { border: var(--rule) solid var(--line); padding: var(--space-2); background: var(--surface, #fff); width: 11rem; }
+.dash-gallery-item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.dash-preview[hidden], .dash-map-preview[hidden] { display: none; }
