@@ -1408,19 +1408,55 @@ async function init(supabase) {
 
   function renderGalleryGrid() {
     $("#listing-gallery-grid").innerHTML = galleryImages.map((g, i) => `
-      <div class="dash-gallery-item">
-        <img src="${esc(g.url)}" alt="">
+      <div class="dash-gallery-item" draggable="true" data-gi="${i}">
+        <img src="${esc(g.url)}" alt="" draggable="false">
+        <input class="dash-room-input" list="photo-rooms" data-room="${i}" value="${esc(g.room || "")}" placeholder="Room (optional)">
         <button type="button" class="dash-linkbtn" data-remove-gallery="${i}">Remove</button>
       </div>`).join("");
   }
 
   function renderDevGalleryGrid() {
     $("#development-gallery-grid").innerHTML = devGalleryImages.map((g, i) => `
-      <div class="dash-gallery-item">
-        <img src="${esc(g.url)}" alt="">
+      <div class="dash-gallery-item" draggable="true" data-gi="${i}">
+        <img src="${esc(g.url)}" alt="" draggable="false">
+        <input class="dash-room-input" list="photo-rooms" data-room="${i}" value="${esc(g.room || "")}" placeholder="Room (optional)">
         <button type="button" class="dash-linkbtn" data-remove-dev-gallery="${i}">Remove</button>
       </div>`).join("");
   }
+
+  /* Gallery thumbnails: optional room name per photo + drag to reorder. */
+  function wireGalleryEditing(sel, getArr, rerender) {
+    const box = $(sel);
+    box.addEventListener("input", (e) => {
+      const inp = e.target.closest("[data-room]");
+      if (!inp) return;
+      const g = getArr()[Number(inp.dataset.room)];
+      if (!g) return;
+      const v = inp.value.trim();
+      if (v) g.room = v; else delete g.room;
+    });
+    let from = null;
+    box.addEventListener("dragstart", (e) => {
+      const it = e.target.closest(".dash-gallery-item");
+      if (!it || e.target.matches("input")) { e.preventDefault(); return; }
+      from = Number(it.dataset.gi);
+      e.dataTransfer.effectAllowed = "move";
+    });
+    box.addEventListener("dragover", (e) => { if (from !== null) e.preventDefault(); });
+    box.addEventListener("drop", (e) => {
+      const it = e.target.closest(".dash-gallery-item");
+      if (from === null || !it) return;
+      e.preventDefault();
+      const to = Number(it.dataset.gi);
+      const arr = getArr();
+      if (to !== from) arr.splice(to, 0, arr.splice(from, 1)[0]);
+      from = null;
+      rerender();
+    });
+    box.addEventListener("dragend", () => { from = null; });
+  }
+  wireGalleryEditing("#listing-gallery-grid", () => galleryImages, renderGalleryGrid);
+  wireGalleryEditing("#development-gallery-grid", () => devGalleryImages, renderDevGalleryGrid);
 
   function openEditor(l) {
     editor.hidden = false;

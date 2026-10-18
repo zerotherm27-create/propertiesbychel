@@ -733,7 +733,9 @@
             <input type="url" id="listing-gallery-url" placeholder="or paste an image URL, then press Add">
             <button class="btn" type="button" id="listing-gallery-url-add">Add</button>
           </div>
+          <p class="field__note">Optional, for larger units: name the room on each photo (Kitchen, Bedroom 1…) and the page groups them by room. Drag photos to reorder. Leave blank for a simple gallery.</p>
           <div id="listing-gallery-grid" class="dash-gallery-grid"></div>
+          <datalist id="photo-rooms"><option value="Living room"><option value="Dining"><option value="Kitchen"><option value="Primary bedroom"><option value="Bedroom 1"><option value="Bedroom 2"><option value="Bedroom 3"><option value="Maid's room"><option value="Bathroom"><option value="View"><option value="Exterior"><option value="Amenities"></datalist>
         </div>
           <div class="field"><label>Sort order (advanced; drag the list instead)</label><input name="sort_order" type="number" value="100"></div>
           </div>
@@ -1136,7 +1138,7 @@
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
 <script type="module" src="js/dashboard-analytics.js?v=2"></script>
-<script type="module" src="js/dashboard.js?v=50"></script>
+<script type="module" src="js/dashboard.js?v=51"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

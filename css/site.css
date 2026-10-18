@@ -766,12 +766,29 @@ fieldset { border: 0; padding: 0; margin: 0; }
 
 /* Dashboard: collapsible form sections, drag handle, spotlight panel */
 .dash-section { border: var(--rule) solid var(--line); margin-bottom: var(--space-6); }
-.dash-section > summary { cursor: pointer; padding: var(--space-4) var(--space-5); font-weight: 500; list-style: none; display: flex; gap: var(--space-4); align-items: baseline; }
+.dash-section > summary { cursor: pointer; padding: var(--space-4) var(--space-6); font-weight: 500; list-style: none; display: flex; gap: var(--space-4); align-items: baseline; }
 .dash-section > summary::-webkit-details-marker { display: none; }
 .dash-section > summary span { font-size: var(--text-sm); color: var(--ink-soft); font-weight: 400; }
-.dash-section__body { padding: 0 var(--space-5) var(--space-5); }
+.dash-section__body { padding: 0 var(--space-6) var(--space-6); }
 .dash-handle { cursor: grab; color: var(--ink-soft); user-select: none; padding-right: var(--space-3); }
 .dash-row.is-dragging { opacity: .4; }
 .dash-row.is-over { outline: 1px dashed var(--ink-soft); }
 .dash-spotlight { margin-bottom: var(--space-6); font-size: var(--text-sm); color: var(--ink-soft); }
 .dash-spotlight strong { color: var(--ink); font-weight: 500; }
+
+/* Room-grouped gallery (listings/developments whose photos carry a room name) */
+.room-groups { display: grid; gap: var(--space-16); }
+.room-group__title { font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-soft); margin-bottom: var(--space-6); }
+.room-grid { display: grid; gap: var(--space-6); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.room-grid figure { cursor: pointer; }
+.room-grid .frame { aspect-ratio: 4/3; }
+.room-grid--1 { grid-template-columns: minmax(0, 1fr); }
+.room-grid--1 .frame { aspect-ratio: 16/9; }
+@media (min-width: 48rem) {
+  .room-grid--3, .room-grid--4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .room-grid--1 { max-width: 44rem; }
+}
+.room-more .frame img { filter: brightness(.45); }
+.room-more__count { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: var(--text-sm); letter-spacing: var(--track-caps); text-transform: uppercase; }
+.dash-room-input { width: 100%; margin-top: var(--space-2); font-size: var(--text-sm); }
+.dash-gallery-item[draggable="true"] { cursor: grab; }

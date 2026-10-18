@@ -105,10 +105,62 @@
 
     return function (gridEl, list) {
       gridEl.querySelectorAll("figure").forEach(function (fig, i) {
-        fig.addEventListener("click", function () { open(list, i); });
+        var at = fig.hasAttribute("data-i") ? Number(fig.getAttribute("data-i")) : i;
+        fig.addEventListener("click", function () { open(list, at); });
       });
     };
   })();
+
+  /* — Gallery renderer — photos may carry an optional `room` ("Kitchen",
+     "Bedroom 1"). With no rooms set it renders the original mosaic; with rooms
+     it renders one calm section per room (first-appearance order, unlabeled
+     photos first), showing at most ROOM_PREVIEW per room plus a "+N" tile that
+     opens the lightbox at the next photo. Lightbox order follows the groups. — */
+  var ROOM_PREVIEW = 5;
+  function renderGallery(mount, grid, images, fallbackAlt) {
+    var hasRooms = images.some(function (g) { return g && g.room && String(g.room).trim(); });
+    function altOf(g) { return g.alt || fallbackAlt; }
+    var list, html;
+    if (!hasRooms) {
+      list = images.map(function (g) { return { url: g.url, alt: altOf(g) }; });
+      html = images.map(function (g, i) {
+        return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--hover">' +
+          '<img src="' + esc(g.url) + '" alt="' + esc(altOf(g)) + '" loading="lazy"></div></figure>';
+      }).join("");
+    } else {
+      var order = [], groups = {};
+      images.forEach(function (g) {
+        var r = (g.room && String(g.room).trim()) || "";
+        if (!groups[r]) { groups[r] = []; order.push(r); }
+        groups[r].push(g);
+      });
+      order.sort(function (a, b) { return (a === "" ? -1 : 0) - (b === "" ? -1 : 0); });
+      list = [];
+      html = order.map(function (r) {
+        var items = groups[r];
+        var start = list.length;
+        items.forEach(function (g) { list.push({ url: g.url, alt: r ? r + " · " + altOf(g) : altOf(g) }); });
+        var shown = items.length > ROOM_PREVIEW + 1 ? ROOM_PREVIEW : items.length;
+        var figs = items.slice(0, shown).map(function (g, k) {
+          return '<figure data-i="' + (start + k) + '" data-reveal><div class="frame frame--hover">' +
+            '<img src="' + esc(g.url) + '" alt="' + esc(altOf(g)) + '" loading="lazy"></div></figure>';
+        });
+        var more = items.length - shown;
+        if (more > 0) {
+          figs.push('<figure data-i="' + (start + shown) + '" class="room-more" data-reveal><div class="frame">' +
+            '<img src="' + esc(items[shown].url) + '" alt="" loading="lazy"><span class="room-more__count">+' + more + " more</span></div></figure>");
+        }
+        return '<section class="room-group">' + (r ? '<h3 class="room-group__title">' + esc(r) + "</h3>" : "") +
+          '<div class="room-grid room-grid--' + Math.min(shown + (more > 0 ? 1 : 0), 4) + '">' + figs.join("") + "</div></section>";
+      }).join("");
+      grid.classList.remove("photo-grid");
+      grid.classList.add("room-groups");
+    }
+    grid.innerHTML = html;
+    mount.hidden = false;
+    document.dispatchEvent(new CustomEvent("listings:rendered"));
+    if (wirePhotoGridLightbox) wirePhotoGridLightbox(grid, list);
+  }
 
   /* — Brand-styled Google Map (listing detail pages with coordinates set) — */
   var BRAND_MAP_STYLE = [
@@ -287,17 +339,7 @@
         ((dev && Array.isArray(dev.gallery_images)) ? dev.gallery_images : []);
       var galleryMount = document.getElementById("dyn-gallery");
       var galleryGrid = document.getElementById("dyn-gallery-grid");
-      if (galleryMount && galleryGrid && galleryImages.length) {
-        galleryGrid.innerHTML = galleryImages.map(function (g, i) {
-          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--hover">' +
-            '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || l.title) + '" loading="lazy"></div></figure>';
-        }).join("");
-        galleryMount.hidden = false;
-        document.dispatchEvent(new CustomEvent("listings:rendered"));
-        if (wirePhotoGridLightbox) {
-          wirePhotoGridLightbox(galleryGrid, galleryImages.map(function (g) { return { url: g.url, alt: g.alt || l.title }; }));
-        }
-      }
+      if (galleryMount && galleryGrid && galleryImages.length) renderGallery(galleryMount, galleryGrid, galleryImages, l.title);
 
       var overview = document.querySelector("[data-l-overview]");
       if (overview) {
@@ -405,17 +447,7 @@
 
       var galleryMount = document.getElementById("dyn-gallery");
       var galleryGrid = document.getElementById("dyn-gallery-grid");
-      if (galleryMount && galleryGrid && Array.isArray(d.gallery_images) && d.gallery_images.length) {
-        galleryGrid.innerHTML = d.gallery_images.map(function (g, i) {
-          return '<figure data-reveal style="transition-delay:' + (Math.min(i, 11) * 60) + 'ms"><div class="frame frame--hover">' +
-            '<img src="' + esc(g.url) + '" alt="' + esc(g.alt || d.name) + '" loading="lazy"></div></figure>';
-        }).join("");
-        galleryMount.hidden = false;
-        document.dispatchEvent(new CustomEvent("listings:rendered"));
-        if (wirePhotoGridLightbox) {
-          wirePhotoGridLightbox(galleryGrid, d.gallery_images.map(function (g) { return { url: g.url, alt: g.alt || d.name }; }));
-        }
-      }
+      if (galleryMount && galleryGrid && Array.isArray(d.gallery_images) && d.gallery_images.length) renderGallery(galleryMount, galleryGrid, d.gallery_images, d.name);
 
       var overview = document.querySelector("[data-d-overview]");
       if (overview) {
