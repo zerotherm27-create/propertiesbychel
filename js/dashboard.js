@@ -1458,6 +1458,32 @@ async function init(supabase) {
   wireGalleryEditing("#listing-gallery-grid", () => galleryImages, renderGalleryGrid);
   wireGalleryEditing("#development-gallery-grid", () => devGalleryImages, renderDevGalleryGrid);
 
+  /* Room-type suggestions for photo Room boxes: site_settings.room_types, with defaults. */
+  const DEFAULT_ROOM_TYPES = ["Living room", "Dining", "Kitchen", "Primary bedroom", "Bedroom 1", "Bedroom 2", "Bedroom 3", "Maid's room", "Bathroom", "View", "Exterior", "Amenities"];
+  function applyRoomTypes(list) {
+    $("#photo-rooms").innerHTML = list.map((r) => `<option value="${esc(r)}"></option>`).join("");
+    $("#room-types-text").value = list.join("\n");
+  }
+  applyRoomTypes(DEFAULT_ROOM_TYPES);
+  supabase.from("site_settings").select("value").eq("key", "room_types").maybeSingle().then(({ data }) => {
+    const list = data && data.value && data.value.list;
+    if (Array.isArray(list) && list.length) applyRoomTypes(list);
+  });
+  $("#room-types-save").addEventListener("click", async () => {
+    const seen = new Set();
+    const list = $("#room-types-text").value.split("\n").map((x) => x.trim()).filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase()));
+    const { error } = await supabase.from("site_settings").upsert({ key: "room_types", value: { list } });
+    if (error) { showToast("Could not save room types: " + error.message, true); return; }
+    applyRoomTypes(list.length ? list : DEFAULT_ROOM_TYPES);
+    showToast("Room types saved");
+  });
+  $("#room-types-reset").addEventListener("click", async () => {
+    const { error } = await supabase.from("site_settings").delete().eq("key", "room_types");
+    if (error) { showToast("Could not reset: " + error.message, true); return; }
+    applyRoomTypes(DEFAULT_ROOM_TYPES);
+    showToast("Room types reset");
+  });
+
   function openEditor(l) {
     editor.hidden = false;
     $("#editor-title").textContent = l ? "Edit: " + l.title : "New listing";
