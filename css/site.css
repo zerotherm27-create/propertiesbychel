@@ -829,3 +829,24 @@ fieldset { border: 0; padding: 0; margin: 0; }
 }
 .dash-checks input[type="checkbox"]:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 .dash-checks label:has(input:checked) { color: var(--ink); font-weight: 600; }
+
+/* Upload feedback */
+@keyframes dash-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@keyframes dash-sheen { from { background-position: 200% 0; } to { background-position: -100% 0; } }
+@keyframes dash-spin { to { transform: rotate(360deg); } }
+@keyframes dash-pulse { 50% { opacity: .55; } }
+.dash-upload { position: relative; overflow: hidden; }
+.dash-upload.is-uploading { border-style: solid; border-color: var(--brass-deep, var(--brass)); }
+.dash-upload.is-uploading::before { content: ""; position: absolute; top: 0; left: 0; height: 3px; width: 40%; background: var(--brass-deep, var(--brass)); animation: dash-slide 1.1s ease-in-out infinite; }
+.dash-upload.is-uploading input[type="file"]::file-selector-button {
+  background-image: linear-gradient(110deg, transparent 25%, rgb(255 255 255 / .35) 50%, transparent 75%);
+  background-size: 200% 100%; animation: dash-sheen 1.2s linear infinite;
+}
+.dash-upload__status { margin-top: var(--space-3); font-size: var(--text-sm); font-weight: 600; color: var(--brass-deep, var(--ink)); animation: dash-pulse 1.4s ease-in-out infinite; }
+.dash-gallery-item.is-pending { cursor: default; display: grid; gap: var(--space-2); font-size: var(--text-caps); color: var(--ink-soft); text-align: center; }
+.dash-pending__img { aspect-ratio: 4/3; background: linear-gradient(110deg, var(--stone) 30%, color-mix(in oklch, var(--stone) 40%, #fff) 50%, var(--stone) 70%); background-size: 200% 100%; animation: dash-sheen 1.2s linear infinite; }
+.btn.is-busy { pointer-events: none; opacity: .85; position: relative; }
+.btn.is-busy::before { content: ""; display: inline-block; width: .9em; height: .9em; margin-right: .55em; vertical-align: -.1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: dash-spin .7s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .dash-upload.is-uploading::before, .dash-upload.is-uploading input[type="file"]::file-selector-button, .dash-upload__status, .dash-pending__img, .btn.is-busy::before { animation: none; }
+}

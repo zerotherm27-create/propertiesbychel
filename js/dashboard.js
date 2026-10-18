@@ -1406,13 +1406,38 @@ async function init(supabase) {
     $("#dev-new-developer-name").value = "";
   });
 
+  /* Upload feedback: shimmering placeholder tiles + a status line + animated add button. */
+  let pendingL = 0, pendingD = 0;
+  const skeletons = (n) => Array.from({ length: n }, () => '<div class="dash-gallery-item is-pending"><div class="dash-pending__img"></div><span>Uploading…</span></div>').join("");
+  function setUploading(box, on, text) {
+    box.classList.toggle("is-uploading", on);
+    let st = box.querySelector(".dash-upload__status");
+    if (on) {
+      if (!st) { st = document.createElement("p"); st.className = "dash-upload__status"; st.setAttribute("role", "status"); const anchor = box.querySelector(".dash-upload__alt"); if (anchor) anchor.insertAdjacentElement("afterend", st); else box.appendChild(st); }
+      st.textContent = text || "Uploading…";
+    } else if (st) st.remove();
+  }
+  async function uploadMany(files, prefix, box, onEach, setPending) {
+    setPending(files.length);
+    let i = 0;
+    for (const f of files) {
+      i++;
+      setUploading(box, true, "Uploading photo " + i + " of " + files.length + "…");
+      try { onEach(await uploadPhoto(f, prefix)); }
+      catch (ex) { showToast("Could not upload " + f.name + ": " + (ex.message || ex), true); }
+      setPending(files.length - i);
+    }
+    setUploading(box, false);
+  }
+  const busy = (btn, on) => { if (btn) btn.classList.toggle("is-busy", on); };
+
   function renderGalleryGrid() {
     $("#listing-gallery-grid").innerHTML = galleryImages.map((g, i) => `
       <div class="dash-gallery-item" draggable="true" data-gi="${i}">
         <img src="${esc(g.url)}" alt="" draggable="false">
         <input class="dash-room-input" list="photo-rooms" data-room="${i}" value="${esc(g.room || "")}" placeholder="Room (optional)">
         <button type="button" class="dash-linkbtn" data-remove-gallery="${i}">Remove</button>
-      </div>`).join("");
+      </div>`).join("") + skeletons(pendingL);
   }
 
   function renderDevGalleryGrid() {
@@ -1421,7 +1446,7 @@ async function init(supabase) {
         <img src="${esc(g.url)}" alt="" draggable="false">
         <input class="dash-room-input" list="photo-rooms" data-room="${i}" value="${esc(g.room || "")}" placeholder="Room (optional)">
         <button type="button" class="dash-linkbtn" data-remove-dev-gallery="${i}">Remove</button>
-      </div>`).join("");
+      </div>`).join("") + skeletons(pendingD);
   }
 
   /* Gallery thumbnails: optional room name per photo + drag to reorder. */
@@ -1784,18 +1809,13 @@ async function init(supabase) {
   });
 
   $("#listing-gallery-input").addEventListener("change", async () => {
-    const files = Array.from($("#listing-gallery-input").files);
+    const input = $("#listing-gallery-input");
+    const files = Array.from(input.files);
     if (!files.length) return;
-    for (const f of files) {
-      try {
-        const url = await uploadPhoto(f, "listings-gallery");
-        galleryImages.push({ url, alt: "" });
-      } catch (ex) {
-        showToast("Could not upload one of the photos: " + (ex.message || ex), true);
-      }
-    }
-    $("#listing-gallery-input").value = "";
-    renderGalleryGrid();
+    input.value = "";
+    await uploadMany(files, "listings-gallery", input.closest(".dash-upload"),
+      (url) => { galleryImages.push({ url, alt: "" }); },
+      (n) => { pendingL = n; renderGalleryGrid(); });
   });
 
   $("#listing-gallery-url-add").addEventListener("click", () => {
@@ -1814,18 +1834,13 @@ async function init(supabase) {
   });
 
   $("#development-gallery-input").addEventListener("change", async () => {
-    const files = Array.from($("#development-gallery-input").files);
+    const input = $("#development-gallery-input");
+    const files = Array.from(input.files);
     if (!files.length) return;
-    for (const f of files) {
-      try {
-        const url = await uploadPhoto(f, "developments-gallery");
-        devGalleryImages.push({ url, alt: "" });
-      } catch (ex) {
-        showToast("Could not upload one of the photos: " + (ex.message || ex), true);
-      }
-    }
-    $("#development-gallery-input").value = "";
-    renderDevGalleryGrid();
+    input.value = "";
+    await uploadMany(files, "developments-gallery", input.closest(".dash-upload") || input.parentElement,
+      (url) => { devGalleryImages.push({ url, alt: "" }); },
+      (n) => { pendingD = n; renderDevGalleryGrid(); });
   });
 
   $("#development-gallery-url-add").addEventListener("click", () => {
@@ -1897,11 +1912,12 @@ async function init(supabase) {
     return new File([blob], doc.name || (doc.id + ".jpg"), { type: doc.mimeType || blob.type || "image/jpeg" });
   }
 
-  function openDrivePicker(multiple, onFiles) {
+  function openDrivePicker(multiple, onFiles, btn) {
     if (!driveConfig.apiKey || !driveConfig.clientId) {
       showToast("Google Drive isn't configured yet — add GOOGLE_DRIVE_CONFIG in js/supabase-config.js", true);
       return;
     }
+    busy(btn, true);
     loadDrivePicker()
       .then(getDriveAccessToken)
       .then((token) => {
@@ -1911,15 +1927,16 @@ async function init(supabase) {
           .setOAuthToken(token)
           .setDeveloperKey(driveConfig.apiKey)
           .setCallback((data) => {
-            if (data.action !== google.picker.Action.PICKED) return;
+            if (data.action !== google.picker.Action.PICKED) { if (data.action === google.picker.Action.CANCEL) busy(btn, false); return; }
             Promise.all(data.docs.map((doc) => fetchDriveFile(doc, token)))
               .then(onFiles)
-              .catch((ex) => showToast("Could not fetch from Google Drive: " + (ex.message || ex), true));
+              .catch((ex) => showToast("Could not fetch from Google Drive: " + (ex.message || ex), true))
+              .finally(() => busy(btn, false));
           });
         if (multiple) builder.enableFeature(google.picker.Feature.MULTISELECT_ENABLED);
         builder.build().setVisible(true);
       })
-      .catch((ex) => showToast("Google Drive sign-in failed: " + (ex.message || ex), true));
+      .catch((ex) => { busy(btn, false); showToast("Google Drive sign-in failed: " + (ex.message || ex), true); });
   }
 
   function filesIntoInput(input, files) {
@@ -1929,20 +1946,20 @@ async function init(supabase) {
     input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  $("#listing-photo-drive").addEventListener("click", () => {
-    openDrivePicker(false, (files) => filesIntoInput($("#listing-photo"), files));
+  $("#listing-photo-drive").addEventListener("click", (e) => {
+    openDrivePicker(false, (files) => filesIntoInput($("#listing-photo"), files), e.currentTarget);
   });
 
-  $("#listing-gallery-drive").addEventListener("click", () => {
-    openDrivePicker(true, (files) => filesIntoInput($("#listing-gallery-input"), files));
+  $("#listing-gallery-drive").addEventListener("click", (e) => {
+    openDrivePicker(true, (files) => filesIntoInput($("#listing-gallery-input"), files), e.currentTarget);
   });
 
-  $("#development-photo-drive").addEventListener("click", () => {
-    openDrivePicker(false, (files) => filesIntoInput($("#development-photo"), files));
+  $("#development-photo-drive").addEventListener("click", (e) => {
+    openDrivePicker(false, (files) => filesIntoInput($("#development-photo"), files), e.currentTarget);
   });
 
-  $("#development-gallery-drive").addEventListener("click", () => {
-    openDrivePicker(true, (files) => filesIntoInput($("#development-gallery-input"), files));
+  $("#development-gallery-drive").addEventListener("click", (e) => {
+    openDrivePicker(true, (files) => filesIntoInput($("#development-gallery-input"), files), e.currentTarget);
   });
 
   // Map location — type an address, geocode it, drop a draggable pin.
@@ -2143,10 +2160,17 @@ async function init(supabase) {
     err.textContent = "";
     const btn = $("#listing-save");
     btn.textContent = "Saving…";
+    busy(btn, true);
     try {
       const photoFile = $("#listing-photo").files[0];
       const photoUrl = $("#listing-photo-url").value.trim();
-      if (photoFile) form.elements.hero_image_url.value = await uploadPhoto(photoFile, "listings");
+      if (photoFile) {
+        btn.textContent = "Uploading photo…";
+        setUploading($("#listing-photo").closest(".dash-upload"), true, "Uploading main photo…");
+        try { form.elements.hero_image_url.value = await uploadPhoto(photoFile, "listings"); }
+        finally { setUploading($("#listing-photo").closest(".dash-upload"), false); }
+        btn.textContent = "Saving…";
+      }
       else if (photoUrl) form.elements.hero_image_url.value = photoUrl;
       const statusValues = $$('input[name="status"]:checked', form).map((c) => c.value);
       if (!statusValues.length) throw new Error("Select at least one availability option.");
@@ -2183,6 +2207,7 @@ async function init(supabase) {
     } catch (ex) {
       err.textContent = ex.message || String(ex);
     } finally {
+      busy(btn, false);
       btn.textContent = "Save listing";
     }
   });
@@ -2216,6 +2241,7 @@ async function init(supabase) {
     err.textContent = "";
     const btn = $("#development-save");
     btn.textContent = "Saving…";
+    busy(btn, true);
     try {
       const photoFile = $("#development-photo").files[0];
       const photoUrl = $("#development-photo-url").value.trim();
@@ -2254,6 +2280,7 @@ async function init(supabase) {
     } catch (ex) {
       err.textContent = ex.message || String(ex);
     } finally {
+      busy(btn, false);
       btn.textContent = "Save development";
     }
   });
