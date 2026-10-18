@@ -777,17 +777,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .dash-spotlight strong { color: var(--ink); font-weight: 500; }
 
 /* Room-grouped gallery (listings/developments whose photos carry a room name) */
-.room-groups { display: grid; gap: var(--space-16); }
+.room-groups { display: grid; gap: var(--space-24); }
 .room-group__title { font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-soft); margin-bottom: var(--space-6); }
-.room-grid { display: grid; gap: var(--space-6); grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.room-grid figure { cursor: pointer; }
-.room-grid .frame { aspect-ratio: 4/3; }
-.room-grid--1 { grid-template-columns: minmax(0, 1fr); }
-.room-grid--1 .frame { aspect-ratio: 16/9; }
-@media (min-width: 48rem) {
-  .room-grid--3, .room-grid--4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .room-grid--1 { max-width: 44rem; }
-}
 .room-more .frame img { filter: brightness(.45); }
 .room-more__count { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: var(--text-sm); letter-spacing: var(--track-caps); text-transform: uppercase; }
 .dash-room-input { width: 100%; margin-top: var(--space-2); font-size: var(--text-sm); }

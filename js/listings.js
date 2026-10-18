@@ -151,7 +151,7 @@
             '<img src="' + esc(items[shown].url) + '" alt="" loading="lazy"><span class="room-more__count">+' + more + " more</span></div></figure>");
         }
         return '<section class="room-group">' + (r ? '<h3 class="room-group__title">' + esc(r) + "</h3>" : "") +
-          '<div class="room-grid room-grid--' + Math.min(shown + (more > 0 ? 1 : 0), 4) + '">' + figs.join("") + "</div></section>";
+          '<div class="photo-grid">' + figs.join("") + "</div></section>";
       }).join("");
       grid.classList.remove("photo-grid");
       grid.classList.add("room-groups");
