@@ -852,16 +852,36 @@ fieldset { border: 0; padding: 0; margin: 0; }
 }
 
 
-/* — Share panel (listing page) — */
-.share__panel { margin-top: 1.25rem; max-width: 34rem; }
+/* — Share (listing + development pages) — */
+.share__trigger { display: inline-flex; align-items: center; gap: 0.7rem; padding: 1rem 1.8rem; }
+.share__icon { flex: none; }
+.share__trigger[aria-expanded="true"] { background: var(--paper-2); border-color: var(--ink); }
+.share__panel {
+  margin-top: 1rem; max-width: 34rem; padding: 1.5rem;
+  background: var(--paper-2); border: var(--rule) solid var(--line);
+}
+.share__label { display: block; font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--ink-faint); }
 .share__caption {
-  display: block; width: 100%; margin-top: 0.5rem; padding: 0.9rem 1rem;
-  font: inherit; font-size: 0.95rem; line-height: 1.6; color: var(--ink);
+  display: block; width: 100%; margin-top: 0.6rem; padding: 0.9rem 1rem;
+  font: inherit; font-size: 0.95rem; line-height: 1.65; color: var(--ink);
   background: var(--paper); border: var(--rule) solid var(--line-strong); border-radius: 0; resize: vertical;
 }
 .share__caption:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.share__note { margin-top: 0.5rem; font-size: 0.8rem; color: var(--ink-faint); }
-.share__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
-.share__actions .btn { padding: 0.8rem 1.4rem; text-decoration: none; }
-.share__status { min-height: 1.2em; margin-top: 0.75rem; font-size: 0.85rem; color: var(--brass-deep); }
+.share__note { margin-top: 0.6rem; font-size: 0.8rem; line-height: 1.5; color: var(--ink-faint); }
+.share__tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr)); gap: 0.6rem; margin-top: 1.25rem; }
+.share__tile {
+  display: flex; flex-direction: column; align-items: center; gap: 0.55rem; padding: 1rem 0.5rem;
+  font: inherit; font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase;
+  color: var(--ink); background: var(--paper); border: var(--rule) solid var(--line); text-decoration: none; cursor: pointer;
+  transition: background var(--dur) var(--ease-out), color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+}
+.share__tile[hidden] { display: none; }
+.share__tile:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.share__tile:focus-visible, .share__trigger:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.share__status:empty { display: none; }
+.share__status { margin-top: 1rem; font-size: 0.85rem; color: var(--brass-deep); }
+@media (prefers-reduced-motion: no-preference) {
+  .share__panel:not([hidden]) { animation: share-in 0.3s var(--ease-out); }
+  @keyframes share-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+}
 .share-section { padding-block: clamp(2rem, 5vw, 3.5rem); border-top: var(--rule) solid var(--line); }

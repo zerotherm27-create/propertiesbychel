@@ -9,28 +9,41 @@
  *  - Hand-built pages include <script src="js/share.js" data-auto></script>; the panel is
  *    injected before the footer and filled from the page's og:title / og:description / canonical. */
 (function () {
-  var ROOT_HTML =
-    '<div class="share" data-share-root hidden>' +
-      '<button type="button" class="link-line" data-share-toggle aria-expanded="false" aria-controls="share-panel">Share this <span data-share-noun>development</span> <span class="arr">\u2192</span></button>' +
-      '<div class="share__panel" id="share-panel" hidden>' +
-        '<label class="meta" for="share-caption">Caption</label>' +
-        '<textarea id="share-caption" class="share__caption" rows="8"></textarea>' +
-        '<p class="share__note">Edit it freely. The link is added for you where the platform needs it.</p>' +
-        '<div class="share__actions">' +
-          '<button type="button" class="btn" data-share-action="copy">Copy caption and link</button>' +
-          '<a class="btn" data-share-action="linkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a>' +
-          '<a class="btn" data-share-action="facebook" target="_blank" rel="noopener noreferrer">Facebook</a>' +
-          '<a class="btn" data-share-action="whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
-          '<button type="button" class="btn" data-share-action="native" hidden>More options</button>' +
-        '</div>' +
-        '<p class="share__status" role="status" aria-live="polite" data-share-status></p>' +
+  var ICON = function (paths) {
+    return '<svg class="share__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+  };
+  var ICONS = {
+    share: ICON('<circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M8 11l8-4M8 13l8 4"/>'),
+    copy: ICON('<rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/>'),
+    linkedin: ICON('<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M8 10.5V16M8 7.8v.1M12 16v-5.5M12 13c0-1.6 1-2.5 2.3-2.5S16.5 11.4 16.5 13v3"/>'),
+    facebook: ICON('<path d="M14.5 8H16V5h-2.4C11.3 5 10 6.4 10 8.6V10H8v3h2v6h3v-6h2.3l.4-3H13V8.8c0-.5.3-.8 1.5-.8z"/>'),
+    whatsapp: ICON('<path d="M4 20l1.2-4.2A8 8 0 1 1 8.2 18.8L4 20z"/><path d="M9.2 8.8c-.3 2.5 2.6 5.5 5.6 5.7l1-1.3-1.9-1-.9.8c-1-.4-1.9-1.3-2.3-2.3l.8-.9-.9-2z"/>'),
+    more: ICON('<circle cx="6" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>')
+  };
+  var tile = function (tag, name, label, extra) {
+    return '<' + tag + ' class="share__tile"' + (tag === 'a' ? ' target="_blank" rel="noopener noreferrer"' : ' type="button"') + ' data-share-action="' + name + '"' + (extra || '') + '>' + ICONS[name] + '<span>' + label + '</span></' + tag + '>';
+  };
+  var ROOT_INNER =
+    '<button type="button" class="btn share__trigger" data-share-toggle aria-expanded="false" aria-controls="share-panel">' + ICONS.share + '<span>Share</span></button>' +
+    '<div class="share__panel" id="share-panel" hidden>' +
+      '<label class="share__label" for="share-caption">Your caption</label>' +
+      '<textarea id="share-caption" class="share__caption" rows="7"></textarea>' +
+      '<p class="share__note">Edit it freely. The link is added for you where the platform needs it.</p>' +
+      '<div class="share__tiles">' +
+        tile('button', 'copy', 'Copy') +
+        tile('a', 'linkedin', 'LinkedIn') +
+        tile('a', 'facebook', 'Facebook') +
+        tile('a', 'whatsapp', 'WhatsApp') +
+        tile('button', 'more', 'More', ' hidden') +
       '</div>' +
+      '<p class="share__status" role="status" aria-live="polite" data-share-status></p>' +
     '</div>';
 
   function init(l, pageUrl) {
     var root = document.querySelector("[data-share-root]");
     if (!root || root.dataset.shareReady) return;
     root.dataset.shareReady = "1";
+    if (!root.children.length) root.innerHTML = ROOT_INNER;
     var toggle = root.querySelector("[data-share-toggle]");
     var panel = root.querySelector(".share__panel");
     var box = root.querySelector("#share-caption");
@@ -81,9 +94,12 @@
       });
     });
     act("copy").addEventListener("click", function () {
-      copy(withUrl()).then(function (ok) { say(ok ? "Caption and link copied." : "Select the caption above and copy it."); });
+      copy(withUrl()).then(function (ok) { say(ok ? "Caption and link copied." : "Select the caption above and copy it.");
+        var lab = act("copy").querySelector("span");
+        if (ok && lab) { lab.textContent = "Copied"; setTimeout(function () { lab.textContent = "Copy"; }, 1800); }
+      });
     });
-    var nativeBtn = act("native");
+    var nativeBtn = act("more");
     if (navigator.share) {
       nativeBtn.hidden = false;
       nativeBtn.addEventListener("click", function () {
@@ -110,7 +126,7 @@
       var url = meta('link[rel="canonical"]') || meta('meta[property="og:url"]') || location.href.split("#")[0];
       var sec = document.createElement("section");
       sec.className = "share-section";
-      sec.innerHTML = '<div class="shell">' + ROOT_HTML + '</div>';
+      sec.innerHTML = '<div class="shell"><div class="share" data-share-root hidden></div></div>';
       footer.parentNode.insertBefore(sec, footer);
       init({ title: title, meta_description: meta('meta[property="og:description"]') }, url);
     };
