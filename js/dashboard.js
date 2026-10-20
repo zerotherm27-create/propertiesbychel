@@ -1982,12 +1982,16 @@ async function init(supabase) {
     return mapsSdkReady;
   }
 
-  // Suggest nearby features (transit, shopping, schools, healthcare) from Places, closest of each within 1.5km.
+  // Suggest well-known nearby places only. Each category searches a wider radius and ranks by
+  // prominence (review volume x rating), skipping anything below a minimum review count so minor
+  // stops, clinics and neighbourhood schools don't surface. Distance is shown, not used for ranking.
   const NEARBY_CATEGORIES = [
-    { type: "transit_station", label: "Transit" },
-    { type: "shopping_mall", label: "Shopping" },
-    { type: "school", label: "Schools" },
-    { type: "hospital", label: "Healthcare" }
+    { type: "tourist_attraction", label: "Landmark", radius: 5000, minReviews: 1000 },
+    { type: "shopping_mall", label: "Shopping", radius: 5000, minReviews: 1500 },
+    { type: "hospital", label: "Healthcare", radius: 5000, minReviews: 300 },
+    { type: "university", label: "Education", radius: 5000, minReviews: 300 },
+    { type: "transit_station", label: "Transit", radius: 3000, minReviews: 400 },
+    { type: "park", label: "Park", radius: 4000, minReviews: 1000 }
   ];
 
   function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -2065,16 +2069,22 @@ async function init(supabase) {
         const found = [];
         let pending = NEARBY_CATEGORIES.length;
         NEARBY_CATEGORIES.forEach((cat) => {
-          service.nearbySearch({ location: { lat, lng }, radius: 1500, type: cat.type }, (results, status) => {
+          service.nearbySearch({ location: { lat, lng }, radius: cat.radius, type: cat.type }, (results, status) => {
             pending -= 1;
             if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length) {
-              let best = null, bestDist = Infinity;
+              let best = null, bestScore = 0;
               results.forEach((r) => {
                 if (!r.geometry || !r.geometry.location) return;
-                const d = haversineMeters(lat, lng, r.geometry.location.lat(), r.geometry.location.lng());
-                if (d < bestDist) { bestDist = d; best = r; }
+                if (r.business_status && r.business_status !== "OPERATIONAL") return;
+                const reviews = r.user_ratings_total || 0;
+                if (reviews < cat.minReviews || (r.rating || 0) < 4) return;
+                const score = reviews * r.rating;
+                if (score > bestScore) { bestScore = score; best = r; }
               });
-              if (best) found.push({ label: cat.label, name: best.name, distance: bestDist });
+              if (best) {
+                const d = haversineMeters(lat, lng, best.geometry.location.lat(), best.geometry.location.lng());
+                found.push({ label: cat.label, name: best.name, distance: d });
+              }
             }
             if (pending === 0) renderNearbySuggestions(found);
           });
