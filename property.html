@@ -29,7 +29,7 @@
   .ph-hero { position: relative; min-height: 92vh; display: flex; align-items: flex-end; background: var(--espresso); color: var(--on-espresso); }
   .ph-hero__media { position: absolute; inset: 0; }
   .ph-hero__media img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
-  .ph-hero__veil { position: absolute; inset: 0; background: linear-gradient(to top, color-mix(in oklch, var(--espresso) 88%, transparent), transparent 60%); }
+  .ph-hero__veil { position: absolute; inset: 0; background: linear-gradient(to top, color-mix(in oklch, var(--espresso) 88%, transparent), color-mix(in oklch, var(--espresso) 55%, transparent) 85%); }
   .ph-hero__inner { position: relative; z-index: 1; width: 100%; padding-block: var(--space-20); }
   .ph-strip { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-8); margin-top: var(--space-8); font-size: var(--text-caps); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--on-espresso-soft); }
   .ph-seq { display: grid; gap: var(--space-8); }
@@ -133,7 +133,6 @@
         </table>
         <p class="mt-8" data-l-dev-note hidden><a class="link-line" data-l-dev-link href="">Part of <span data-l-dev-name></span> <span class="arr">→</span></a></p>
         <a class="btn btn--solid mt-12" href="presentation">Arrange a viewing</a>
-        <div class="share mt-12" data-share-root hidden></div>
       </div>
     </div>
   </section>
@@ -179,6 +178,7 @@
         <a class="btn btn--on-dark" href="presentation">Arrange a private viewing</a>
         <a class="link-line link-line--on-dark" href="properties">Back to the collection <span class="arr">→</span></a>
       </div>
+        <div class="share share--band mt-8" data-share-root hidden></div>
       <hr class="rule rule--brass mt-16" style="max-width:2.5rem;margin-inline:auto">
     </div>
   </section>
@@ -243,7 +243,7 @@
 <script src="js/site.js?v=27"></script>
 <script src="js/vendor/motion.js?v=1"></script>
 <script src="js/motion-enhance.js?v=4"></script>
-<script src="js/share.js?v=2"></script>
+<script src="js/share.js?v=3"></script>
 <script src="js/listings.js?v=42"></script>
 </body>
 </html>

@@ -124,6 +124,16 @@
       var meta = function (sel) { var el = document.querySelector(sel); return el ? el.getAttribute("content") || el.getAttribute("href") || "" : ""; };
       var title = meta('meta[property="og:title"]').replace(/\s*\u00b7\s*Properties by Chel\s*$/, "") || document.title;
       var url = meta('link[rel="canonical"]') || meta('meta[property="og:url"]') || location.href.split("#")[0];
+      var back = Array.prototype.filter.call(document.querySelectorAll('a[href="properties"]'), function (a) { return /Back to the collection/.test(a.textContent); })[0];
+      if (back && back.parentNode) {
+        var holder = document.createElement("div");
+        holder.className = "share share--band mt-8";
+        holder.setAttribute("data-share-root", "");
+        holder.hidden = true;
+        back.parentNode.parentNode.insertBefore(holder, back.parentNode.nextSibling);
+        init({ title: title, meta_description: meta('meta[property="og:description"]') }, url);
+        return;
+      }
       var sec = document.createElement("section");
       sec.className = "share-section";
       sec.innerHTML = '<div class="shell"><div class="share" data-share-root hidden></div></div>';

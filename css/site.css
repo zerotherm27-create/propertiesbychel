@@ -549,7 +549,7 @@ fieldset { border: 0; padding: 0; margin: 0; }
    veiled hero image, not light paper -- brass-deep (tuned for paper) reads
    muted and inconsistently visible depending on the photo. Bump to full-
    brightness brass, same fix as .band above. */
-.dh__inner .eyebrow, .ph-hero__inner .eyebrow { color: var(--brass); }
+.dh__inner .eyebrow, .ph-hero__inner .eyebrow { color: color-mix(in oklch, var(--brass) 70%, white); text-shadow: 0 1px 12px color-mix(in oklch, var(--espresso) 85%, transparent), 0 0 2px color-mix(in oklch, var(--espresso) 60%, transparent); }
 .band .meta { color: var(--on-espresso-soft); }
 .band-parchment { background: var(--paper-2); }
 .band-stone { background: var(--stone); }
@@ -884,4 +884,10 @@ fieldset { border: 0; padding: 0; margin: 0; }
   .share__panel:not([hidden]) { animation: share-in 0.3s var(--ease-out); }
   @keyframes share-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 }
+/* Share inside a dark closing band, beneath "Back to the collection" */
+.share--band { display: flex; flex-direction: column; align-items: center; }
+.share--band[hidden] { display: none; }
+.share--band .share__trigger { border-color: var(--line-on-dark); color: var(--on-espresso); background: transparent; }
+.share--band .share__trigger:hover, .share--band .share__trigger[aria-expanded="true"] { background: var(--on-espresso); color: var(--espresso); border-color: var(--on-espresso); }
+.share--band .share__panel { width: 100%; text-align: left; color: var(--ink); }
 .share-section { padding-block: clamp(2rem, 5vw, 3.5rem); border-top: var(--rule) solid var(--line); }
