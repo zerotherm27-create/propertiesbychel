@@ -53,7 +53,7 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
   "price_display": "the price exactly as stated in the notes, formatted like '₱180M' or '₱350K / mo', else the given price, else empty",
   "status": ["every way the listing is offered, chosen only from: ${STATUSES.join(", ")}. 'sale' for for-sale or pre-selling, 'lease' for rent or per-month pricing, 'investment' only if the notes pitch it as an investment. Empty array if the facts do not say"],
   "collections": ["zero or more keys, only when clearly supported by the facts. Keys and meanings: ${Object.entries(COLLECTIONS).map(([k, v]) => `${k} = ${v}`).join("; ")}. Empty array if unsure"],
-  "features": [{"label": "short label such as Landmark, Shopping, Healthcare, Education, Transit or Park", "value": "name, distance away, e.g. 'Greenbelt Mall, 1.2km away'"}]  /* up to 3 nearby features. Prefer the verified nearby places above, choosing the 3 most significant and varied (distance does not matter as much as prominence). Keep any already entered. Never invent a place or distance. Else [] */
+  "features": [{"label": "short label such as Landmark, Shopping, Healthcare, Education, Transit or Park", "value": "name, distance away, e.g. 'Greenbelt Mall, 1.2km away'"}]  /* 4 to 5 nearby features (fewer only if fewer verified places exist). Prefer the verified nearby places above, choosing the most significant and varied across categories. Keep any already entered. Never invent a place or distance. Else [] */
 }`;
 
   const response = await openai.responses.create({
@@ -73,7 +73,7 @@ Return ONLY a single JSON object, no other text, with exactly these keys:
     status: Array.isArray(draft.status) ? draft.status.filter((x) => STATUSES.includes(x)) : [],
     collections: Array.isArray(draft.collections) ? draft.collections.filter((x) => x in COLLECTIONS) : [],
     features: Array.isArray(draft.features)
-      ? draft.features.filter((f) => f && f.label && f.value).slice(0, 3)
+      ? draft.features.filter((f) => f && f.label && f.value).slice(0, 5)
       : []
   });
 }

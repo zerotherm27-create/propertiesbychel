@@ -731,7 +731,7 @@
           <input type="hidden" name="map_lat">
           <input type="hidden" name="map_lng">
         </div>
-        <div class="field"><label>Nearby features (up to 3 rows)</label>
+        <div class="field"><label>Nearby features (up to 5 rows)</label>
           <div id="listing-nearby-suggestions" class="dash-suggest-row" hidden></div>
           <p class="field__note" id="listing-nearby-note"></p>
           <div class="dash-form__row">
@@ -745,6 +745,14 @@
           <div class="dash-form__row">
             <div class="field"><input name="feature_label_2" placeholder="Label"></div>
             <div class="field"><input name="feature_value_2" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_3" placeholder="Label"></div>
+            <div class="field"><input name="feature_value_3" placeholder="Value"></div>
+          </div>
+          <div class="dash-form__row">
+            <div class="field"><input name="feature_label_4" placeholder="Label"></div>
+            <div class="field"><input name="feature_value_4" placeholder="Value"></div>
           </div>
         </div>
         <div class="dash-form__row">
@@ -1152,7 +1160,7 @@
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
 <script type="module" src="js/dashboard-analytics.js?v=2"></script>
-<script type="module" src="js/dashboard.js?v=59"></script>
+<script type="module" src="js/dashboard.js?v=60"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

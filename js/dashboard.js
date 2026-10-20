@@ -1524,7 +1524,7 @@ async function init(supabase) {
       form.elements.featured.checked = l.featured;
       $$('input[name="collections"]', form).forEach((cb) => { cb.checked = (l.collections || []).includes(cb.value); });
       const features = Array.isArray(l.location_features) ? l.location_features : [];
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) {
         form.elements["feature_label_" + i].value = features[i] ? features[i].label : "";
         form.elements["feature_value_" + i].value = features[i] ? features[i].value : "";
       }
@@ -1681,7 +1681,7 @@ async function init(supabase) {
         collBoxes.forEach((b) => { b.checked = data.collections.includes(b.value); });
         filled++;
       }
-      (data.features || []).slice(0, 3).forEach((f, i) => {
+      (data.features || []).slice(0, 5).forEach((f, i) => {
         const lab = form.elements["feature_label_" + i], val = form.elements["feature_value_" + i];
         if (overwrite || (!lab.value.trim() && !val.value.trim())) { lab.value = f.label; val.value = f.value; filled++; }
       });
@@ -1795,7 +1795,7 @@ async function init(supabase) {
       if (data.meta_line) form.elements.meta_line.value = data.meta_line;
       if (data.overview) form.elements.overview.value = data.overview;
       if (Array.isArray(data.nearby_landmarks) && data.nearby_landmarks.length) {
-        data.nearby_landmarks.slice(0, 3).forEach((f, i) => {
+        data.nearby_landmarks.slice(0, 5).forEach((f, i) => {
           form.elements["feature_label_" + i].value = f.label || "";
           form.elements["feature_value_" + i].value = f.value || "";
         });
@@ -1999,13 +1999,15 @@ async function init(supabase) {
   // prominence (review volume x rating), skipping anything below a minimum review count so minor
   // stops, clinics and neighbourhood schools don't surface. Distance is shown, not used for ranking.
   const NEARBY_CATEGORIES = [
-    { type: "tourist_attraction", label: "Landmark", radius: 5000, minReviews: 1000 },
-    { type: "shopping_mall", label: "Shopping", radius: 5000, minReviews: 1500 },
-    { type: "hospital", label: "Healthcare", radius: 5000, minReviews: 300 },
-    { type: "university", label: "Education", radius: 5000, minReviews: 300 },
-    { type: "transit_station", label: "Transit", radius: 3000, minReviews: 400 },
-    { type: "park", label: "Park", radius: 4000, minReviews: 1000 }
+    { type: "tourist_attraction", label: "Landmark", radius: 2000, minReviews: 500 },
+    { type: "shopping_mall", label: "Shopping", radius: 2000, minReviews: 800 },
+    { type: "hospital", label: "Healthcare", radius: 2000, minReviews: 200 },
+    { type: "university", label: "Education", radius: 2000, minReviews: 200 },
+    { type: "transit_station", label: "Transit", radius: 2000, minReviews: 200 },
+    { type: "park", label: "Park", radius: 2000, minReviews: 500 },
+    { type: "supermarket", label: "Groceries", radius: 2000, minReviews: 500 }
   ];
+  const NEARBY_PER_CATEGORY = 2;
 
   function haversineMeters(lat1, lng1, lat2, lng2) {
     const R = 6371000;
@@ -2088,19 +2090,16 @@ async function init(supabase) {
           service.nearbySearch({ location: { lat, lng }, radius: cat.radius, type: cat.type }, (results, status) => {
             pending -= 1;
             if (status === google.maps.places.PlacesServiceStatus.OK && results && results.length) {
-              let best = null, bestScore = 0;
-              results.forEach((r) => {
-                if (!r.geometry || !r.geometry.location) return;
-                if (r.business_status && r.business_status !== "OPERATIONAL") return;
-                const reviews = r.user_ratings_total || 0;
-                if (reviews < cat.minReviews || (r.rating || 0) < 4) return;
-                const score = reviews * r.rating;
-                if (score > bestScore) { bestScore = score; best = r; }
-              });
-              if (best) {
-                const d = haversineMeters(lat, lng, best.geometry.location.lat(), best.geometry.location.lng());
-                found.push({ label: cat.label, name: best.name, distance: d });
-              }
+              results
+                .filter((r) => r.geometry && r.geometry.location
+                  && (!r.business_status || r.business_status === "OPERATIONAL")
+                  && (r.user_ratings_total || 0) >= cat.minReviews && (r.rating || 0) >= 4)
+                .sort((x, y) => y.user_ratings_total * y.rating - x.user_ratings_total * x.rating)
+                .slice(0, NEARBY_PER_CATEGORY)
+                .forEach((r) => {
+                  const d = haversineMeters(lat, lng, r.geometry.location.lat(), r.geometry.location.lng());
+                  if (d <= cat.radius) found.push({ label: cat.label, name: r.name, distance: d });
+                });
             }
             if (pending === 0) renderNearbySuggestions(found);
           });
@@ -2169,7 +2168,7 @@ async function init(supabase) {
     return { reset, featuresFromForm, suggestionsList };
   }
 
-  const listingLocationPicker = createLocationPicker({ formEl: form, prefix: "listing", featureRowCount: 3 });
+  const listingLocationPicker = createLocationPicker({ formEl: form, prefix: "listing", featureRowCount: 5 });
   const devLocationPicker = createLocationPicker({ formEl: devForm, prefix: "dev", featureRowCount: 5 });
 
   async function uploadPhoto(file, prefix) {
