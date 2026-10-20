@@ -864,3 +864,4 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .share__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
 .share__actions .btn { padding: 0.8rem 1.4rem; text-decoration: none; }
 .share__status { min-height: 1.2em; margin-top: 0.75rem; font-size: 0.85rem; color: var(--brass-deep); }
+.share-section { padding-block: clamp(2rem, 5vw, 3.5rem); border-top: var(--rule) solid var(--line); }
