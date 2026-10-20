@@ -850,3 +850,17 @@ fieldset { border: 0; padding: 0; margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .dash-upload.is-uploading::before, .dash-upload.is-uploading input[type="file"]::file-selector-button, .dash-upload__status, .dash-pending__img, .btn.is-busy::before { animation: none; }
 }
+
+
+/* — Share panel (listing page) — */
+.share__panel { margin-top: 1.25rem; max-width: 34rem; }
+.share__caption {
+  display: block; width: 100%; margin-top: 0.5rem; padding: 0.9rem 1rem;
+  font: inherit; font-size: 0.95rem; line-height: 1.6; color: var(--ink);
+  background: var(--paper); border: var(--rule) solid var(--line-strong); border-radius: 0; resize: vertical;
+}
+.share__caption:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.share__note { margin-top: 0.5rem; font-size: 0.8rem; color: var(--ink-faint); }
+.share__actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+.share__actions .btn { padding: 0.8rem 1.4rem; text-decoration: none; }
+.share__status { min-height: 1.2em; margin-top: 0.75rem; font-size: 0.85rem; color: var(--brass-deep); }
