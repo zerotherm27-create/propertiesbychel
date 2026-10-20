@@ -1658,6 +1658,7 @@ async function init(supabase) {
         price_display: form.elements.price_display.value.trim(),
         meta_line: form.elements.meta_line.value.trim(),
         features: listingLocationPicker.featuresFromForm(),
+        nearby_places: listingLocationPicker.suggestionsList(),
         notes
       });
       const r = await fetch(AGENT_URL + "/generate-listing-description", { method: "POST", headers, body });
@@ -1665,15 +1666,27 @@ async function init(supabase) {
       if (!r.ok) throw new Error(data.error || "Draft failed");
       const overwrite = $("#listing-ai-overwrite").checked;
       let filled = 0;
-      ["title", "tag", "location_label", "meta_line", "overview", "meta_description"].forEach((k) => {
+      ["title", "tag", "location_label", "price_display", "meta_line", "overview", "meta_description"].forEach((k) => {
         const el = form.elements[k];
         if (data[k] && (overwrite || !el.value.trim())) { el.value = data[k]; filled++; }
       });
+      const statusBoxes = Array.from(form.querySelectorAll('input[name="status"]'));
+      const onlyDefaultStatus = statusBoxes.filter((b) => b.checked).every((b) => b.value === "sale");
+      if (data.status && data.status.length && (overwrite || onlyDefaultStatus)) {
+        statusBoxes.forEach((b) => { b.checked = data.status.includes(b.value); });
+        filled++;
+      }
+      const collBoxes = Array.from(form.querySelectorAll('input[name="collections"]'));
+      if (data.collections && data.collections.length && (overwrite || !collBoxes.some((b) => b.checked))) {
+        collBoxes.forEach((b) => { b.checked = data.collections.includes(b.value); });
+        filled++;
+      }
       (data.features || []).slice(0, 3).forEach((f, i) => {
         const lab = form.elements["feature_label_" + i], val = form.elements["feature_value_" + i];
         if (overwrite || (!lab.value.trim() && !val.value.trim())) { lab.value = f.label; val.value = f.value; filled++; }
       });
       updateMetaCount();
+      if (filled && (data.features || []).length) $("#listing-more").open = true;
       status.textContent = filled ? "Drafted " + filled + " field" + (filled === 1 ? "" : "s") + ". Review them, then save." : "Nothing new to fill. Tick “Replace fields I have already filled” to redraft.";
     } catch (ex) {
       status.textContent = "Could not draft: " + (ex.message || ex);
@@ -2040,7 +2053,10 @@ async function init(supabase) {
       return false;
     }
 
+    let lastFound = [];
+
     function renderNearbySuggestions(found) {
+      lastFound = found.slice();
       const box = $("#" + prefix + "-nearby-suggestions");
       const note = $("#" + prefix + "-nearby-note");
       if (!found.length) return;
@@ -2148,7 +2164,9 @@ async function init(supabase) {
       }).catch((ex) => { note.textContent = "Could not load Google Maps: " + (ex.message || ex); });
     });
 
-    return { reset, featuresFromForm };
+    const suggestionsList = () => lastFound.map((f) => ({ label: f.label, value: f.name + ", " + formatDistance(f.distance) + " away" }));
+
+    return { reset, featuresFromForm, suggestionsList };
   }
 
   const listingLocationPicker = createLocationPicker({ formEl: form, prefix: "listing", featureRowCount: 3 });

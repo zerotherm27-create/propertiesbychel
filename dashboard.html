@@ -632,7 +632,7 @@
             <div class="field"><label>Notes about this listing (optional)</label><input name="listing_notes" placeholder="e.g. corner unit, 3 bedrooms, 210 sqm, renovated 2024, park view"></div>
             <button class="btn" type="button" id="listing-ai-draft-btn">Draft everything with AI</button>
             <label class="dash-switch"><input type="checkbox" id="listing-ai-overwrite"> Replace fields I have already filled</label>
-            <p class="field__note" id="listing-ai-status">Fills only empty fields by default: title, tag, location, card line, overview, search description and nearby features. Nothing is invented; review before saving.</p>
+            <p class="field__note" id="listing-ai-status">Fills only empty fields by default: title, tag, location, price, availability, collections, card line, overview, search description and nearby features (picked from the well-known places found near the map pin, so locate the address first). Availability and collections come only from your notes. Nothing is invented; review before saving.</p>
           </div>
         </details>
         <div class="dash-essentials">
@@ -1152,7 +1152,7 @@
 <script src="js/vendor/drawflow.min.js?v=1"></script>
 <script type="module" src="js/dashboard-content.js?v=3"></script>
 <script type="module" src="js/dashboard-analytics.js?v=2"></script>
-<script type="module" src="js/dashboard.js?v=58"></script>
+<script type="module" src="js/dashboard.js?v=59"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
