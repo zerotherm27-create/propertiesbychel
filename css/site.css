@@ -606,6 +606,11 @@ fieldset { border: 0; padding: 0; margin: 0; }
   font-size: 0.625rem; letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--on-espresso-soft);
 }
 .footer__legal a:hover { color: var(--on-espresso); }
+.footer__bir { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-6); margin-top: var(--space-12); color: var(--on-espresso-soft); }
+.footer__bir img { width: 24rem; max-width: 100%; height: auto; display: block; background: #fff; border: var(--rule) solid var(--line-on-dark); border-radius: 0; }
+.footer__bir-label { display: grid; gap: var(--space-2); font-size: var(--text-caps); font-weight: 600; letter-spacing: var(--track-caps); text-transform: uppercase; transition: color var(--dur-fast) var(--ease-out); }
+.footer__bir-label small { font-size: 0.625rem; font-weight: 400; letter-spacing: 0.04em; text-transform: none; }
+.footer__bir:hover .footer__bir-label { color: var(--brass); }
 
 /* ————— Page hero (interior pages) ————— */
 .page-hero { padding-top: calc(var(--space-32) + var(--space-16)); padding-bottom: var(--space-16); }
